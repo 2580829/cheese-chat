@@ -96,7 +96,7 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 .msg.media img{border-radius:12px;display:block;cursor:zoom-in}
 .msg-img{max-width:150px;max-height:190px;border-radius:12px;display:block;object-fit:cover}
 .msg.media{padding:0;background:transparent!important;box-shadow:none!important;border:none!important;max-width:76%}
-.msg.sticker img{width:108px;height:108px;object-fit:contain;border-radius:10px;display:block}
+.msg.sticker img{width:96px;height:96px;object-fit:contain;border-radius:10px;display:block}
 .msg.sticker-emoji{background:rgba(255,255,255,.72)!important;border:1px solid rgba(247,200,216,.55);box-shadow:0 6px 18px rgba(232,127,164,.14)!important;padding:7px 11px;border-radius:18px}
 .stk-emoji{font-size:44px;line-height:1.18;display:block}
 .row.them .msg.sticker-emoji{border-radius:6px 18px 18px 18px}
@@ -1074,7 +1074,6 @@ var DEFAULT_LIB = {
   ]
 };
 var PATS = ["被你拍到啦，心动了一下 ♡","嗯？我在呢。","再拍一下，我就当你想我了。","拍拍你，今天也要开心哦。"];
-var BUILTIN_STK = ["🐰","🌸","🍞","🧸","🌙","✨","🍰","☁️","💗","🐾","🫧","🌷"];
 var MOODS = [
   {k:"happy", e:"🌸", n:"开心"},
   {k:"calm",  e:"☁️", n:"平静"},
@@ -1344,7 +1343,7 @@ function paintMsg(m){
     if(rpRefunded) b.classList.add("refunded");
     if(m.who === "them" && !rpOpened && !rpRefunded) b.classList.add("tappable");
     var rpState = rpOpened ? "✔ 已领取" : rpRefunded ? "↩ 已退回" : (m.who === "me" ? "等待对方领取" : "点击拆开");
-    b.innerHTML = '<div class="rp-top"><span>🧧</span><span>' + (m.who === "me" ? "我的红包" : esc(cfg.name) + " 的红包") + '</span></div>' +
+    b.innerHTML = '<div class="rp-top"><span>🧧</span><span>' + (m.who === "me" ? "我的红包" : esc(senderName(m.mid)) + " 的红包") + '</span></div>' +
       '<div class="rp-amount">¥' + esc(m.amount || "0.00") + '</div>' +
       '<div class="rp-note">' + esc(m.note || "一点心意") + '</div>' +
       '<div class="rp-status"><span class="st">' + rpState + '</span><span>' + (rpOpened ? "已收下" : rpRefunded ? "心意到了" : (m.who === "me" ? "❀" : "开")) + '</span></div>';
@@ -1611,7 +1610,11 @@ function reply(){
         var r = Math.random();
         if(r < 0.26){
           var sk = pickStk();
-          if(sk) pushMsg({ who:"them", mid:randMember(), type:"sticker", src:sk.src, emoji:sk.emoji, t:Date.now() });
+          if(sk) pushMsg({ who:"them", mid:randMember(), type:"sticker", src:sk.src, t:Date.now() });
+          else {
+            var tx = pickCard();
+            if(tx) pushMsg({ who:"them", mid:randMember(), type:"text", text:tx, t:Date.now() });
+          }
         }else if(r < 0.38){
           pushMsg({ who:"them", mid:randMember(), type:"voice", dur: 2 + Math.floor(Math.random() * 5), t:Date.now() });
         }else if(r < 0.43){
@@ -1845,7 +1848,7 @@ var lastTap = 0;
 $("avatar").onclick = function(){
   var now = Date.now();
   if(now - lastTap < 400){
-    var s = "你拍了拍「" + cfg.name + "」";
+    var s = "你拍了拍「" + (isGroup() ? senderName(randMember()) : cfg.name) + "」";
     pushMsg({ sys:true, text:s, t:Date.now() });
     clearReplies();
     showTyping();
@@ -1871,7 +1874,11 @@ function pingThem(){
         var r = Math.random();
         if(r < 0.2){
           var sk = pickStk();
-          if(sk) pushMsg({ who:"them", mid:randMember(), type:"sticker", src:sk.src, emoji:sk.emoji, t:Date.now() });
+          if(sk) pushMsg({ who:"them", mid:randMember(), type:"sticker", src:sk.src, t:Date.now() });
+          else {
+            var tx = pickCard();
+            if(tx) pushMsg({ who:"them", mid:randMember(), type:"text", text:tx, t:Date.now() });
+          }
         }else if(r < 0.32){
           pushMsg({ who:"them", mid:randMember(), type:"voice", dur:2 + Math.floor(Math.random() * 5), t:Date.now() });
         }else if(i === 0 && r < 0.46){
@@ -1952,8 +1959,7 @@ $("plusBtn").onclick = function(e){
 };
 
 function pickStk(){
-  var pool = cfg.stickers.map(function(src){ return { src:src }; })
-    .concat(BUILTIN_STK.map(function(e){ return { emoji:e }; }));
+  var pool = cfg.stickers.map(function(src){ return { src:src }; });
   if(!pool.length) return null;
   return pool[Math.floor(Math.random() * pool.length)];
 }
@@ -1967,7 +1973,7 @@ function continueTalk(){
     var stk = pickStk();
     var r = Math.random();
     if(stk && r < 0.3){
-      pushMsg({ who:"them", mid:randMember(), type:"sticker", src:stk.src, emoji:stk.emoji, t:Date.now() });
+      pushMsg({ who:"them", mid:randMember(), type:"sticker", src:stk.src, t:Date.now() });
     }else if(r < 0.4){
       pushMsg({ who:"them", mid:randMember(), type:"voice", dur:2 + Math.floor(Math.random() * 5), t:Date.now() });
     }else{
@@ -1986,7 +1992,7 @@ function pickRnd(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
 function openRedPacket(){
   var presets = [5.20, 8.88, 13.14, 52.00];
   var html = '<div class="rp-form">' +
-    '<div class="rf-head"><span class="rf-ic">🧧</span><div><b>给 ' + esc(cfg.name) + ' 发红包</b><i>装一点心意进去</i></div></div>' +
+    '<div class="rf-head"><span class="rf-ic">🧧</span><div><b>给 ' + esc(convName()) + ' 发红包</b><i>装一点心意进去</i></div></div>' +
     '<div class="rf-amt"><span>¥</span><input id="rpAmt" inputmode="decimal" maxlength="7" value="8.88"></div>' +
     '<div class="rp-presets">' + presets.map(function(v){ return '<button type="button" data-amt="' + v.toFixed(2) + '">' + v.toFixed(2) + '</button>'; }).join("") + '</div>' +
     '<input class="rf-note" id="rpNote" maxlength="24" placeholder="写句祝福语…" value="一点心意">' +
@@ -2083,7 +2089,7 @@ $("rpOpenBtn").onclick = function(){
       m.openedAt = Date.now();
       saveChat();
       renderAll();
-      pushMsg({ sys:true, text:"你领取了 " + cfg.name + " 的红包 ¥" + m.amount, t:Date.now() });
+      pushMsg({ sys:true, text:"你领取了 " + senderName(m.mid) + " 的红包 ¥" + m.amount, t:Date.now() });
       setTimeout(function(){ pushMsg({ who:"them", mid:randMember(), type:"text", text:pickRnd(RP_RECEIVE), t:Date.now() }); }, 800);
     }
   }, 780);
@@ -2121,7 +2127,7 @@ function throwItem(it, byMe){
   el.style.setProperty("--dy", (r.top + r.height / 2 - startY) + "px");
   document.body.appendChild(el);
   setTimeout(function(){ el.remove(); }, 950);
-  pushMsg({ sys:true, text:(byMe ? "我 向 " + cfg.name : cfg.name + " 向 我") + " 扔了 " + it.n + " " + it.e, t:Date.now() });
+  pushMsg({ sys:true, text:(byMe ? "我 向 " + convName() : convName() + " 向 我") + " 扔了 " + it.n + " " + it.e, t:Date.now() });
   setTimeout(function(){
     var av = $("avatar");
     av.classList.add("shake");
@@ -2232,16 +2238,17 @@ function callDur(){
   return Math.max(0, Math.floor((Date.now() - callStartAt) / 1000));
 }
 function startCall(isPartner){
+  var cname = convName();
   var w = $("call");
   callActive = true; callLive = false; callSec = 0; callStartAt = 0;
   clearInterval(callTimer); clearTimeout(callConnectT);
   w.classList.remove("live", "immersive");
   w.style.left = ""; w.style.top = ""; w.style.transform = "";
   applyCallSize(cfg.callSize || "mid", true);
-  $("callAv").innerHTML = avatarHtml("them");
-  $("callName").textContent = cfg.name;
-  $("pillName").textContent = cfg.name;
-  $("pillAv").innerHTML = avatarHtml("them");
+  $("callAv").innerHTML = isGroup() ? "🫂" : avatarHtml("them", null);
+  $("callName").textContent = convName();
+  $("pillName").textContent = convName();
+  $("pillAv").innerHTML = isGroup() ? "🫂" : avatarHtml("them", null);
   $("pillTime").textContent = "00:00";
   $("callTime").textContent = "连接中";
   $("callState").textContent = isPartner ? "对方已接通…" : "正在连接…";
@@ -2256,10 +2263,10 @@ function startCall(isPartner){
     callConnectT = setTimeout(function(){
       if(!callActive) return;
       var labels = [
-        cfg.name + " 未接听",
-        cfg.name + " 正在忙，无法接听",
-        cfg.name + " 拒绝了通话",
-        cfg.name + " 暂时无法接听"
+        cname + " 未接听",
+        cname + " 正在忙，无法接听",
+        cname + " 拒绝了通话",
+        cname + " 暂时无法接听"
       ];
       endCall(labels[Math.floor(Math.random() * labels.length)]);
     }, 4000 + Math.random() * 8000);
@@ -2462,9 +2469,10 @@ var inTimer = null, lastIncoming = 0, rpIncoming = false;
 function incomingCall(){
   if(callActive || rpIncoming) return;
   if(Date.now() - lastIncoming < 45000) return;
+  var cname = convName();
   lastIncoming = Date.now(); rpIncoming = true;
-  $("inAv").innerHTML = avatarHtml("them");
-  $("inName").textContent = cfg.name;
+  $("inAv").innerHTML = isGroup() ? "🫂" : avatarHtml("them", null);
+  $("inName").textContent = convName();
   $("callIn").classList.add("show");
   clearTimeout(inTimer);
   if(Math.random() < 0.3){
@@ -2472,9 +2480,9 @@ function incomingCall(){
       if(!$("callIn").classList.contains("show")) return;
       $("callIn").classList.remove("show"); rpIncoming = false;
       var labels = [
-        cfg.name + " 的来电，" + (cfg.myName || "我") + "未接听",
-        (cfg.myName || "我") + "拒绝了 " + cfg.name + " 的通话",
-        "错过了 " + cfg.name + " 的来电"
+        cname + " 的来电，" + (cfg.myName || "我") + "未接听",
+        (cfg.myName || "我") + "拒绝了 " + cname + " 的通话",
+        "错过了 " + cname + " 的来电"
       ];
       pushMsg({ sys:true, text: labels[Math.floor(Math.random() * labels.length)], t: Date.now() });
     }, 4000 + Math.random() * 6000);
@@ -2482,7 +2490,7 @@ function incomingCall(){
     inTimer = setTimeout(function(){
       if(!$("callIn").classList.contains("show")) return;
       $("callIn").classList.remove("show"); rpIncoming = false;
-      pushMsg({ sys:true, text:(cfg.myName || "我") + "未接听 " + cfg.name + " 的来电", t: Date.now() });
+      pushMsg({ sys:true, text:(cfg.myName || "我") + "未接听 " + cname + " 的来电", t: Date.now() });
     }, 22000);
   }
 }
@@ -2507,7 +2515,7 @@ $("inAccept").onclick = function(){
 $("inReject").onclick = function(){
   $("callIn").classList.remove("show");
   clearTimeout(inTimer); rpIncoming = false;
-  pushMsg({ sys:true, text:(cfg.myName || "我") + "拒绝了 " + cfg.name + " 的通话", t: Date.now() });
+  pushMsg({ sys:true, text:(cfg.myName || "我") + "拒绝了 " + convName() + " 的通话", t: Date.now() });
 };
 /* ================= 模态框 ================= */
 var modal = $("modal"), modalMode = "bulk";
@@ -3253,9 +3261,13 @@ function updateStorageInfo(){
   if(!el) return;
   var bytes = 0;
   try{
-    [KEY.lib, KEY.cfg, KEY.chat, KEY.diary].forEach(function(k){
+    [KEY.lib, KEY.cfg, KEY.diary].forEach(function(k){
       bytes += ((localStorage.getItem(k) || "").length) * 2;
     });
+    for(var i = 0; i < localStorage.length; i++){
+      var k = localStorage.key(i);
+      if(k && (k === KEY.chat || k.indexOf("cheese.chat.") === 0)) bytes += ((localStorage.getItem(k) || "").length) * 2;
+    }
   }catch(e){}
   var kb = Math.round(bytes / 1024);
   el.textContent = "已用存储：约 " + (kb >= 1024 ? (kb / 1024).toFixed(1) + " MB" : kb + " KB") + "（多数浏览器上限约 5 MB）";
@@ -3297,6 +3309,7 @@ function openConvSheet(){
   html += '<div style="display:flex;gap:8px;margin-top:12px">' +
     '<button type="button" class="ghost-btn" id="gcCreate" style="flex:1;margin:0">＋ 创建群聊</button>' +
     '<button type="button" class="ghost-btn" id="gcAdd" style="flex:1;margin:0">＋ 添加好友</button></div>' +
+    (isGroup() ? '<button type="button" class="ghost-btn" id="gcSet" style="margin-top:8px">群设置 · 改名 / 成员</button>' : '') +
     '<button type="button" class="ghost-btn" id="gcFriends" style="margin-top:8px">好友管理</button>';
   if(allFriends().length < 2) html += '<p class="hint" style="margin-top:8px">现在只有 1 位好友，先在「好友管理」里添加一位，才能建群</p>';
   showSheet(html);
@@ -3305,7 +3318,45 @@ function openConvSheet(){
   });
   $("gcCreate").onclick = openGroupCreate;
   $("gcAdd").onclick = function(){ openModal("nf", "添加好友", "给新好友取个名字", "比如：阿橘", ""); };
+  if($("gcSet")) $("gcSet").onclick = openGroupSettings;
   $("gcFriends").onclick = openFriendMgmt;
+}
+function openGroupSettings(){
+  var g = activeGroup();
+  if(!g){ toast("当前不是群聊"); return; }
+  var fs = allFriends();
+  var html = '<div class="sheet-title">群设置</div>' +
+    '<input class="gc-name" id="gsName" maxlength="12" value="' + esc(g.name) + '" placeholder="群名字">' +
+    '<p class="hint">群成员（至少 2 位）</p>' +
+    '<div class="gc-list">' + fs.map(function(f){
+      return '<label class="gc-item"><input type="checkbox" value="' + f.id + '"' + (g.members.indexOf(f.id) >= 0 ? " checked" : "") + '>' +
+        '<span class="conv-av" style="width:30px;height:30px;font-size:13px">' + friendAvatarHtml(f) + '</span>' +
+        '<span>' + esc(f.name) + '</span></label>';
+    }).join("") + '</div>' +
+    '<button type="button" class="primary" id="gsSave" style="width:100%;margin-top:6px">保存群设置</button>' +
+    '<button type="button" class="ghost-btn" id="gsLeave" style="margin-top:8px;color:#E8698F">解散这个群</button>';
+  showSheet(html);
+  $("gsSave").onclick = function(){
+    var name = ($("gsName").value || "").trim().slice(0, 12) || g.name;
+    var ms = [];
+    document.querySelectorAll("#sheetBody .gc-item input").forEach(function(cb){ if(cb.checked) ms.push(cb.value); });
+    if(ms.length < 2){ toast("群聊至少需要 2 位好友"); return; }
+    g.name = name;
+    g.members = ms;
+    saveCfg(); applyCfg(); renderAll(); renderStats();
+    openConvSheet();
+    toast("群设置已保存");
+  };
+  $("gsLeave").onclick = function(){
+    cfg.groups = cfg.groups.filter(function(x){ return x.id !== g.id; });
+    try{ localStorage.removeItem("cheese.chat." + g.id + ".v1"); }catch(e){}
+    cfg.conv = { t:"friend", id:"main" };
+    saveCfg();
+    chat = load(chatKey(), []);
+    applyCfg(); renderAll(); renderStats();
+    hideSheet();
+    toast("群已解散");
+  };
 }
 function openFriendMgmt(){
   var html = '<div class="sheet-title">好友</div><p class="hint">主好友在「人物设置」里改名字和头像；这里管理后加的好友</p>';
@@ -3337,7 +3388,9 @@ function openFriendMgmt(){
       cfg.friends = cfg.friends.filter(function(f){ return f.id !== id; });
       cfg.groups = cfg.groups.filter(function(g){
         g.members = g.members.filter(function(m){ return m !== id; });
-        return g.members.length >= 2;
+        if(g.members.length >= 2) return true;
+        try{ localStorage.removeItem("cheese.chat." + g.id + ".v1"); }catch(e){}
+        return false;
       });
       if(cfg.conv.t === "friend" && cfg.conv.id === id) cfg.conv = { t:"friend", id:"main" };
       if(cfg.conv.t === "group" && !cfg.groups.some(function(g){ return g.id === cfg.conv.id; })) cfg.conv = { t:"friend", id:"main" };
@@ -3501,7 +3554,14 @@ $("clearChat").onclick = function(){
   }
 };
 $("exportBtn").onclick = function(){
-  var data = { lib:lib, cfg:cfg, chat:chat, diary:diary, v:2, exportedAt:new Date().toISOString() };
+  var convs = {};
+  try{
+    for(var i = 0; i < localStorage.length; i++){
+      var k = localStorage.key(i);
+      if(k && k.indexOf("cheese.chat.") === 0) convs[k] = JSON.parse(localStorage.getItem(k));
+    }
+  }catch(e){}
+  var data = { lib:lib, cfg:cfg, chat:chat, diary:diary, convs:convs, v:3, exportedAt:new Date().toISOString() };
   var blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
   var a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -3530,9 +3590,15 @@ $("importInput").onchange = function(e){
       if(!cfg.startDate) cfg.startDate = new Date().toISOString().slice(0,10);
       if(cfg.taOffset == null) cfg.taOffset = 360;
       if(cfg.bubble == null) cfg.bubble = 0;
+      if(!Array.isArray(cfg.friends)) cfg.friends = [];
+      if(!Array.isArray(cfg.groups)) cfg.groups = [];
+      if(!cfg.conv || !cfg.conv.t || !cfg.conv.id) cfg.conv = { t:"friend", id:"main" };
       if(d.chat) chat = d.chat;
       if(d.diary) diary = d.diary;
-      save(KEY.lib, lib); saveCfg(); save(KEY.chat, chat); save(KEY.diary, diary);
+      if(d.convs && typeof d.convs === "object"){
+        Object.keys(d.convs).forEach(function(k){ save(k, d.convs[k]); });
+      }
+      save(KEY.lib, lib); saveCfg(); save(chatKey(), chat); save(KEY.diary, diary);
       curGroup = Object.keys(lib)[0] || "默认";
       applyCfg(); renderAll(); renderLib(); renderSettings(); renderFavs(); renderStats(); renderDiary();
       renderHome(); renderBubbles(); sayRandom();
