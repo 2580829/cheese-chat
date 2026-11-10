@@ -17,6 +17,7 @@
   --ink-soft:#A07785;
   --card:#FFFDFC;
   --shadow:0 8px 30px rgba(232,127,164,.16);
+  --chatfont:"Quicksand","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   --serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -631,6 +632,14 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
 
 .bs-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .bs-close{width:30px;height:30px;border-radius:50%;border:none;background:rgba(247,200,216,.35);color:var(--ink);font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* ==== 字体面板 ==== */
+.font-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.font-item{border:1px solid rgba(247,200,216,.55);background:rgba(255,255,255,.82);border-radius:14px;padding:10px 8px 8px;display:flex;flex-direction:column;gap:4px;align-items:center}
+.font-item.on{border-color:var(--pink-deep);background:linear-gradient(180deg,#FFF6F9,#FFE9F1);box-shadow:0 6px 18px rgba(232,127,164,.16)}
+.font-item b{font-size:15px;font-weight:600;color:var(--ink);line-height:1.3}
+.font-item span{font-size:10px;color:var(--ink-soft)}
+.msg,.field{font-family:var(--chatfont)}
 </style>
 </head>
 <body>
@@ -866,6 +875,13 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
           <div class="bubble-grid" id="bubbleGrid"></div>
           <button type="button" class="ghost-btn" id="bubbleGalleryBtn" style="margin-top:12px">进入气泡画廊</button>
           <button type="button" class="ghost-btn" id="bubbleStoreBtn" style="margin-top:8px">🎀 气泡商城 · 216 款</button>
+        </div>
+
+        <div class="section-label">字体</div>
+        <div class="panel">
+          <div class="panel-title">换一种字迹</div>
+          <p class="hint" style="margin:-2px 0 10px">只改聊天气泡和输入框里的字形，不影响按钮</p>
+          <div class="font-grid" id="fontGrid"></div>
         </div>
 
         <div class="section-label">收藏</div>
@@ -1125,6 +1141,7 @@ if(!cfg.callSize) cfg.callSize = "mid";
 if(cfg.callBg == null) cfg.callBg = "";
 if(cfg.callBgIdx == null) cfg.callBgIdx = 0;
 if(cfg.skinId == null) cfg.skinId = "";
+if(cfg.fontId == null) cfg.fontId = "";
 if(!cfg.mood) cfg.mood = 0;
 var chat  = load(KEY.chat, []);
 var diary = load(KEY.diary, {});
@@ -2570,6 +2587,42 @@ function renderBubbles(){
     g.appendChild(btn);
   });
 }
+/* ================= 字体 ================= */
+var FONTS = [
+  { id:"", n:"默认", d:"清爽圆润", css:'"Quicksand","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif' },
+  { id:"yuanti", n:"圆体", d:"柔和手作感", css:'"Yuanti SC","YouYuan","PingFang SC","Microsoft YaHei",sans-serif' },
+  { id:"serif", n:"宋体", d:"安静书卷气", css:'"Songti SC","STSong","Noto Serif SC","SimSun",serif' },
+  { id:"kai", n:"楷体", d:"偏手写的温柔", css:'"Kaiti SC","STKaiti","KaiTi","Songti SC",serif' },
+  { id:"mono", n:"等宽", d:"像打字机", css:'"SF Mono",Menlo,Consolas,"Courier New",monospace' },
+  { id:"round", n:"日系圆", d:"轻盈偏可爱", css:'"Hiragino Maru Gothic ProN","Yuanti SC","PingFang SC",sans-serif' }
+];
+function fontCss(id){
+  for(var i=0;i<FONTS.length;i++){ if(FONTS[i].id === (id || "")) return FONTS[i].css; }
+  return FONTS[0].css;
+}
+function applyFont(id){
+  cfg.fontId = id || "";
+  saveCfg();
+  document.documentElement.style.setProperty("--chatfont", fontCss(cfg.fontId));
+  renderFonts();
+}
+function renderFonts(){
+  var g = $("fontGrid");
+  if(!g) return;
+  g.innerHTML = "";
+  FONTS.forEach(function(f){
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "font-item" + ((cfg.fontId || "") === f.id ? " on" : "");
+    b.innerHTML = '<b style="font-family:' + f.css + '">今晚也在一起</b>' +
+      '<span>' + f.n + ' · ' + f.d + '</span>';
+    b.onclick = function(){
+      applyFont(f.id);
+      toast(f.id ? ("字体换成「" + f.n + "」啦") : "恢复默认字体");
+    };
+    g.appendChild(b);
+  });
+}
 function applyBubble(i){
   cfg.bubble = i;
   saveCfg();
@@ -2785,7 +2838,7 @@ function goPage(id){
   if(id === "page-home") renderHome();
   if(id === "page-lib") renderLib();
   if(id === "page-diary") renderDiary();
-  if(id === "page-me"){ renderSettings(); renderFavs(); renderStats(); renderBubbles(); }
+  if(id === "page-me"){ renderSettings(); renderFavs(); renderStats(); renderBubbles(); renderFonts(); }
 }
 document.querySelectorAll(".tab-item").forEach(function(t){
   t.onclick = function(){ goPage(t.dataset.page); };
@@ -3133,6 +3186,7 @@ sayRandom();
 document.body.dataset.bubble = String(cfg.bubble || 0);
 document.body.dataset.bshape = cfg.bubbleShape || "standard";
 document.body.dataset.skin = cfg.skinId || "";
+document.documentElement.style.setProperty("--chatfont", fontCss(cfg.fontId));
 
 /* 存储不可用时给出提示 */
 if(!Store.available){
