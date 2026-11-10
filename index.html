@@ -614,6 +614,20 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
 .p9,.glp.p9{background:repeating-linear-gradient(45deg,rgba(232,127,164,.14) 0 3px,transparent 3px 9px),linear-gradient(135deg,#FFFAF7,#FFE9F1);color:#8A5A6C}
 .p10,.glp.p10{background:repeating-linear-gradient(90deg,rgba(40,30,35,.08) 0 5px,transparent 5px 10px),linear-gradient(135deg,#FBFAF7,#EEEAE3);color:#5C5348}
 .p11,.glp.p11{background:radial-gradient(ellipse at 20% 25%,rgba(255,190,215,.85),transparent 55%),radial-gradient(ellipse at 80% 70%,rgba(190,220,255,.8),transparent 55%),linear-gradient(135deg,#FFEDF5,#EAF3FF);color:#7A5266}
+
+/* ==== 气泡商城 ==== */
+.bs-search{width:100%;padding:10px 14px;border-radius:12px;border:1px solid rgba(247,200,216,.6);background:rgba(255,255,255,.85);font-size:13px;color:var(--ink);margin:10px 0 6px}
+.bs-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0 10px;font-size:11.5px;color:var(--ink-soft)}
+.bs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bs-card{border:1px solid rgba(247,200,216,.5);background:rgba(255,255,255,.8);border-radius:16px;padding:8px;display:flex;flex-direction:column;gap:5px;overflow:hidden}
+.bs-card.on{outline:2px solid var(--pink-deep);outline-offset:1px}
+.bs-prev{height:96px;border-radius:12px;background:linear-gradient(160deg,#FFF8F5,#FDEFF4);padding:8px 6px;display:flex;flex-direction:column;justify-content:center;gap:6px;overflow:hidden;pointer-events:none}
+.bs-prev .row{animation:none;gap:0}
+.bs-prev .msg{font-size:9.5px;line-height:1.35;padding:5px 8px;max-width:88%;box-shadow:none}
+.bs-prev .row.me{justify-content:flex-end}
+.bs-prev .row.them{justify-content:flex-start}
+.bs-name{font-size:11.5px;color:var(--ink);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bs-author{font-size:9.5px;color:var(--ink-soft);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -848,6 +862,7 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
           <div class="panel-title">换一种说话的颜色</div>
           <div class="bubble-grid" id="bubbleGrid"></div>
           <button type="button" class="ghost-btn" id="bubbleGalleryBtn" style="margin-top:12px">进入气泡画廊</button>
+          <button type="button" class="ghost-btn" id="bubbleStoreBtn" style="margin-top:8px">🎀 气泡商城 · 216 款</button>
         </div>
 
         <div class="section-label">收藏</div>
@@ -1106,6 +1121,7 @@ if(!cfg.bubbleShape) cfg.bubbleShape = "standard";
 if(!cfg.callSize) cfg.callSize = "mid";
 if(cfg.callBg == null) cfg.callBg = "";
 if(cfg.callBgIdx == null) cfg.callBgIdx = 0;
+if(cfg.skinId == null) cfg.skinId = "";
 if(!cfg.mood) cfg.mood = 0;
 var chat  = load(KEY.chat, []);
 var diary = load(KEY.diary, {});
@@ -2611,6 +2627,118 @@ function renderGallery(){
   };
 })();
 
+/* ================= 气泡商城（216 款，搬运自花信 / milk-gallery） ================= */
+var skinCache = null, bsList = [], bsShown = 0, BSPAGE = 24;
+function ensureSkins(cb){
+  if(window.MILK_BUBBLES){
+    injectSkinStyle();
+    cb();
+    return;
+  }
+  toast("正在加载气泡包…");
+  var sc = document.createElement("script");
+  sc.src = "bubbles.js";
+  sc.onload = function(){ injectSkinStyle(); cb(); };
+  sc.onerror = function(){ toast("气泡包加载失败，请检查网络后重试"); };
+  document.head.appendChild(sc);
+}
+function injectSkinStyle(){
+  if(document.getElementById("milkSkinStyle")) return;
+  var st = document.createElement("style");
+  st.id = "milkSkinStyle";
+  st.textContent = window.MILK_BUBBLES.map(function(b){ return b.css; }).join("\n");
+  document.head.appendChild(st);
+}
+function applySkin(id){
+  cfg.skinId = id || "";
+  saveCfg();
+  document.body.dataset.skin = cfg.skinId;
+}
+function skinName(id){
+  if(!id || !window.MILK_BUBBLES) return "默认";
+  for(var i = 0; i < window.MILK_BUBBLES.length; i++){
+    if(window.MILK_BUBBLES[i].id === id) return window.MILK_BUBBLES[i].name;
+  }
+  return "自定义";
+}
+function bsCard(b){
+  var pv = b.previews || [];
+  var me = pv.filter(function(x){ return x.t === "sent"; })[0] || { v: "你好呀" };
+  var ta = pv.filter(function(x){ return x.t === "received"; })[0] || { v: "在想你" };
+  return '<button type="button" class="bs-card' + (cfg.skinId === b.id ? ' on' : '') + '" data-id="' + b.id + '">' +
+    '<div class="bs-prev" data-skin="' + b.id + '">' +
+      '<div class="row me"><div class="msg">' + esc(me.v) + '</div></div>' +
+      '<div class="row them"><div class="msg">' + esc(ta.v) + '</div></div>' +
+    '</div>' +
+    '<span class="bs-name">' + esc(b.name) + '</span>' +
+    '<span class="bs-author">@' + esc(b.author || "佚名") + '</span>' +
+  '</button>';
+}
+function bsRender(reset){
+  var g = $("bsGrid");
+  if(!g) return;
+  var kw = ($("bsSearch").value || "").trim().toLowerCase();
+  var list = window.MILK_BUBBLES.filter(function(b){
+    if(!kw) return true;
+    return (b.name + " " + (b.author || "")).toLowerCase().indexOf(kw) >= 0;
+  });
+  bsList = list; bsShown = 0; g.innerHTML = "";
+  bsMore();
+  var cur = $("bsCur");
+  if(cur) cur.textContent = "当前：" + skinName(cfg.skinId);
+  $("bsMore").style.display = bsShown < list.length ? "" : "none";
+}
+function bsMore(){
+  var g = $("bsGrid");
+  if(!g) return;
+  var end = Math.min(bsList.length, bsShown + BSPAGE);
+  var html = "";
+  for(var i = bsShown; i < end; i++) html += bsCard(bsList[i]);
+  g.insertAdjacentHTML("beforeend", html);
+  bsShown = end;
+  var m = $("bsMore");
+  if(m) m.style.display = bsShown < bsList.length ? "" : "none";
+  var cards = g.querySelectorAll(".bs-card");
+  for(var j = 0; j < cards.length; j++){
+    if(cards[j]._b) continue;
+    cards[j]._b = true;
+    cards[j].onclick = function(){
+      var id = this.getAttribute("data-id");
+      applySkin(id);
+      var all = $("bsGrid").querySelectorAll(".bs-card");
+      for(var k = 0; k < all.length; k++) all[k].classList.remove("on");
+      this.classList.add("on");
+      $("bsCur").textContent = "当前：" + skinName(id);
+      toast("已换上「" + skinName(id) + "」");
+    };
+  }
+}
+function openBubbleStore(){
+  showSheet(
+    '<div class="sheet-title">气泡商城</div>' +
+    '<p class="hint">共 216 款社区气泡，样式原样保留，作者署名一并搬运</p>' +
+    '<input class="bs-search" id="bsSearch" placeholder="搜索气泡名或作者…">' +
+    '<div class="bs-meta"><span id="bsCur">当前：' + esc(skinName(cfg.skinId)) + '</span>' +
+      '<button type="button" class="mini-btn" id="bsReset">恢复默认</button></div>' +
+    '<div class="bs-grid" id="bsGrid"></div>' +
+    '<button type="button" class="ghost-btn" id="bsMore" style="margin-top:12px">加载更多</button>'
+  );
+  $("bsReset").onclick = function(){
+    applySkin("");
+    var all = $("bsGrid").querySelectorAll(".bs-card");
+    for(var k = 0; k < all.length; k++) all[k].classList.remove("on");
+    $("bsCur").textContent = "当前：默认";
+    toast("已恢复默认气泡");
+  };
+  $("bsSearch").oninput = function(){ bsRender(); };
+  $("bsMore").onclick = function(){ bsMore(); };
+  ensureSkins(function(){ bsRender(true); });
+}
+(function(){
+  var btn = $("bubbleStoreBtn");
+  if(btn) btn.onclick = openBubbleStore;
+})();
+
 /* ================= 聊天人物设置 ================= */
 function openCharSheet(){
   showSheet(
@@ -2999,6 +3127,7 @@ renderBubbles();
 sayRandom();
 document.body.dataset.bubble = String(cfg.bubble || 0);
 document.body.dataset.bshape = cfg.bubbleShape || "standard";
+document.body.dataset.skin = cfg.skinId || "";
 
 /* 存储不可用时给出提示 */
 if(!Store.available){
