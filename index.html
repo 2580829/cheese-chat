@@ -476,7 +476,92 @@ body[data-bubble="5"] .row.me .msg{background:linear-gradient(135deg,#FF3D6E,#FF
 .me-hero .big-av{width:62px;height:62px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:26px;background:linear-gradient(135deg,#F9B8D0,#FFE9D6);box-shadow:0 8px 22px rgba(232,127,164,.26),inset 0 0 0 3px rgba(255,255,255,.95)}
 .me-hero .big-av img{width:100%;height:100%;object-fit:cover}
 .me-hero .nm{font-size:17px;font-weight:700;letter-spacing:.04em}
-.me-hero .sub{font-size:11px;color:#A07785;margin-top:5px;letter-spacing:.05em}
+.me-hero .sub{font-size:11px;color:#A07785;margin-top:5px;letter-spacing:.05em}/* ================= 通话浮窗（参考 milk 重做） ================= */
+.callwin{position:fixed;z-index:95;left:50%;top:11%;transform:translateX(-50%);width:min(88vw,332px);height:min(68vh,500px);border-radius:26px;display:none;flex-direction:column;overflow:hidden;background:#2E1F27;box-shadow:0 26px 70px rgba(80,36,52,.46),0 0 0 1px rgba(255,255,255,.13);touch-action:none}
+.callwin.open{display:flex;animation:cwIn .34s cubic-bezier(.22,1,.36,1)}
+@keyframes cwIn{from{opacity:0;transform:translateX(-50%) scale(.92)}to{opacity:1;transform:translateX(-50%) scale(1)}}
+.cw-bg{position:absolute;inset:0;z-index:0;background:linear-gradient(155deg,#3A2530,#4A2F3A 45%,#6B4A56);transition:background .5s}
+.cw-orb{position:absolute;border-radius:50%;filter:blur(38px);opacity:.4;pointer-events:none}
+.cw-orb.a{width:130px;height:130px;background:#EE9EBB;top:-30px;left:-30px}
+.cw-orb.b{width:96px;height:96px;background:#FFD9C5;bottom:24px;right:-18px}
+.cw-orb.c{width:76px;height:76px;background:#C9B8FF;top:44%;left:48%}
+.cw-shade{position:absolute;inset:0;z-index:0;background:linear-gradient(to bottom,rgba(0,0,0,.4),rgba(0,0,0,.03) 36%,rgba(0,0,0,.52))}
+.cw-head{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;padding:12px 12px 4px;cursor:grab;flex-shrink:0}
+.cw-head:active{cursor:grabbing}
+.cw-badge{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.3);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:4px 10px;color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;font-variant-numeric:tabular-nums}
+.cw-dot{width:6px;height:6px;border-radius:50%;background:#7BD88F;box-shadow:0 0 6px #7BD88F;animation:cwBlink 1.6s ease-in-out infinite}
+@keyframes cwBlink{0%,100%{opacity:1}50%{opacity:.35}}
+.cw-tools{display:flex;gap:6px}
+.cw-tools button{width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.14);backdrop-filter:blur(6px);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center}
+.cw-tools button:active{transform:scale(.9)}
+.cw-body{position:relative;z-index:3;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:0 14px}
+.cw-av{position:relative;width:84px;height:84px;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+.cw-av::before,.cw-av::after{content:"";position:absolute;inset:-10px;border-radius:50%;border:1.5px solid rgba(255,255,255,.22);animation:cwRing 2.4s ease-in-out infinite;pointer-events:none}
+.cw-av::after{inset:-20px;border-color:rgba(255,255,255,.09);animation-delay:.7s}
+@keyframes cwRing{0%,100%{transform:scale(.97);opacity:.85}50%{transform:scale(1.05);opacity:.3}}
+.cw-img{width:84px;height:84px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:34px;background:linear-gradient(135deg,#F9B8D0,#FFE9D6);border:2px solid rgba(255,255,255,.32);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.cw-img img{width:100%;height:100%;object-fit:cover}
+.cw-name{color:#fff;font-size:18px;font-weight:700;letter-spacing:.06em}
+.cw-state{color:rgba(255,255,255,.55);font-size:11.5px;letter-spacing:.1em}
+.cw-dots{display:flex;gap:6px;margin-top:2px}
+.cw-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.5);animation:cwDots .9s ease-in-out infinite}
+.cw-dots span:nth-child(2){animation-delay:.15s}
+.cw-dots span:nth-child(3){animation-delay:.3s}
+@keyframes cwDots{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-4px);opacity:1}}
+.callwin.live .cw-dots{display:none}
+.cw-ctrl{position:relative;z-index:3;display:flex;justify-content:center;gap:22px;padding:12px 0 18px;flex-shrink:0}
+.cw-btn{width:54px;border:none;background:none;color:#fff;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0}
+.cw-btn i{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.16);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-size:20px;font-style:normal;transition:transform .18s,background .18s}
+.cw-btn em{font-size:10px;font-style:normal;color:rgba(255,255,255,.6);letter-spacing:.08em}
+.cw-btn:active i{transform:scale(.9)}
+.cw-btn.on i{background:rgba(255,255,255,.9);color:#6B4A56}
+.cw-btn.end i{background:linear-gradient(135deg,#FF6B8A,#D84368);box-shadow:0 8px 22px rgba(232,80,110,.45)}
+.cw-resize{position:absolute;right:5px;bottom:5px;width:18px;height:18px;z-index:4;cursor:nwse-resize;touch-action:none;opacity:.5}
+.cw-resize::before{content:"";position:absolute;right:3px;bottom:3px;width:9px;height:9px;border-right:2px solid #fff;border-bottom:2px solid #fff;border-radius:0 0 3px 0}
+.callpill{position:fixed;z-index:96;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);width:64px;height:64px;border-radius:50%;display:none;align-items:center;justify-content:center;background:linear-gradient(135deg,#4A2F3A,#2E1F27);box-shadow:0 12px 30px rgba(80,40,55,.42);border:2px solid rgba(255,255,255,.34);touch-action:none;overflow:hidden;cursor:pointer}
+.callpill.show{display:flex;animation:cwIn .22s ease}
+.callpill .p-av{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:26px;overflow:hidden;pointer-events:none}
+.callpill .p-av img{width:100%;height:100%;object-fit:cover}
+.callpill .p-time{position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:9px;color:#fff;background:rgba(0,0,0,.42);padding:1px 0;letter-spacing:.06em;pointer-events:none}
+.callpill .p-badge{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:#7BD88F;box-shadow:0 0 6px #7BD88F;pointer-events:none}
+.callin{position:fixed;inset:0;z-index:120;display:none;align-items:center;justify-content:center;background:rgba(40,20,30,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);padding:0 28px}
+.callin.show{display:flex;animation:fadeIn .25s ease}
+.callin-card{width:100%;max-width:278px;border-radius:30px;padding:34px 24px 26px;display:flex;flex-direction:column;align-items:center;gap:6px;color:#fff;background:linear-gradient(160deg,rgba(255,255,255,.14),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.2);box-shadow:0 30px 70px rgba(0,0,0,.42)}
+.callin-av{width:82px;height:82px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:32px;background:linear-gradient(135deg,#F9B8D0,#FFE9D6);border:2px solid rgba(255,255,255,.35)}
+.callin-av img{width:100%;height:100%;object-fit:cover}
+.callin-name{font-size:19px;font-weight:700;margin-top:8px}
+.callin-sub{font-size:12px;color:rgba(255,255,255,.55);letter-spacing:.08em}
+.callin-btns{display:flex;gap:46px;margin-top:24px}
+.callin-btns button{border:none;background:none;color:#fff;display:flex;flex-direction:column;align-items:center;gap:7px;font-size:10.5px;letter-spacing:.08em;padding:0}
+.callin-btns i{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-style:normal}
+.callin-no i{background:linear-gradient(135deg,#FF6B8A,#D84368);box-shadow:0 8px 22px rgba(232,80,110,.45)}
+.callin-yes i{background:linear-gradient(135deg,#7BD88F,#4CAF70);box-shadow:0 8px 22px rgba(90,200,130,.4);animation:yesBreath 1.6s ease-in-out infinite}
+@keyframes yesBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+/* ================= 花纹气泡 ================= */
+.bv.p0{background:linear-gradient(135deg,#F8C2D4,#ED97B7);color:#fff}
+.bv.p1{background:linear-gradient(135deg,#FFD9C5,#FFB79C);color:#7A4A38}
+.bv.p2{background:linear-gradient(135deg,#D6F3E4,#AEE3C6);color:#2F6B52}
+.bv.p3{background:linear-gradient(135deg,#DED9FF,#B9C3FF);color:#3F3D71}
+.bv.p4{background:linear-gradient(135deg,#F3DFC9,#E0BE9E);color:#6B4527}
+.bv.p5{background:linear-gradient(135deg,#FF3D6E,#FF8FAE);color:#fff}
+body[data-bubble="6"] .row.me .msg,.bv.p6{background-color:#F4A7C3;background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.5) 0 7px,transparent 7px 14px),repeating-linear-gradient(0deg,rgba(255,255,255,.5) 0 7px,transparent 7px 14px);color:#7A2F49}
+body[data-bubble="6"] .row.them .msg{background-image:repeating-linear-gradient(90deg,rgba(244,167,195,.28) 0 7px,transparent 7px 14px),repeating-linear-gradient(0deg,rgba(244,167,195,.28) 0 7px,transparent 7px 14px);border-color:rgba(244,167,195,.5)}
+body[data-bubble="7"] .row.me .msg,.bv.p7{background-color:#F7B7CF;background-image:radial-gradient(circle,rgba(255,255,255,.85) 1.7px,transparent 1.8px);background-size:11px 11px;color:#7A324E}
+body[data-bubble="7"] .row.them .msg{background-image:radial-gradient(circle,rgba(238,158,187,.5) 1.7px,transparent 1.8px);background-size:11px 11px;border-color:rgba(247,183,207,.6)}
+body[data-bubble="8"] .row.me .msg,.bv.p8{background-color:#33305A;background-image:radial-gradient(circle,rgba(255,255,255,.9) 1px,transparent 1.2px),radial-gradient(circle,rgba(255,214,236,.75) 1.4px,transparent 1.6px);background-size:26px 26px,44px 44px;background-position:0 0,12px 16px;color:#fff}
+body[data-bubble="8"] .row.them .msg{background-color:#F4F2FF;background-image:radial-gradient(circle,rgba(150,140,230,.35) 1px,transparent 1.2px);background-size:24px 24px;color:#4A4470;border-color:rgba(190,185,240,.6)}
+body[data-bubble="9"] .row.me .msg,.bv.p9{background-color:#FFF9FC;background-image:none;color:#9A5A73;border:1.5px dashed #EE9EBB;box-shadow:0 6px 20px rgba(232,127,164,.18)}
+body[data-bubble="9"] .row.them .msg{background-color:#FFFDFE;border:1.5px dashed rgba(238,158,187,.55);color:#7A5A66}
+body[data-bubble="10"] .row.me .msg,.bv.p10{background-color:#2F2B33;background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.14) 0 3px,transparent 3px 9px);color:#fff;border:2px solid #2F2B33;box-shadow:0 6px 20px rgba(0,0,0,.22)}
+body[data-bubble="10"] .row.them .msg{background-color:#FAF7F2;background-image:repeating-linear-gradient(90deg,rgba(47,43,51,.08) 0 3px,transparent 3px 9px);border-color:#D8CFC4;color:#4E463F}
+body[data-bubble="11"] .row.me .msg,.bv.p11{background-color:#F9CFE0;background-image:radial-gradient(circle at 20% 20%,rgba(255,255,255,.85),transparent 45%),radial-gradient(circle at 80% 70%,rgba(255,222,196,.9),transparent 50%),radial-gradient(circle at 60% 15%,rgba(206,196,255,.75),transparent 45%);color:#6B4A56}
+body[data-bubble="11"] .row.them .msg{background-color:#FFFDFB;background-image:radial-gradient(circle at 15% 30%,rgba(249,207,224,.55),transparent 50%),radial-gradient(circle at 85% 20%,rgba(255,232,208,.6),transparent 45%);border-color:rgba(249,207,224,.6)}
+/* 气泡画廊 */
+.gl-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 4px}
+.gl-item{border:none;background:rgba(255,255,255,.7);border-radius:16px;padding:10px 8px 8px;display:flex;flex-direction:column;gap:6px;align-items:center;box-shadow:0 4px 14px rgba(232,127,164,.1)}
+.gl-item.on{outline:2px solid var(--pink-deep);outline-offset:1px}
+.gl-item .glp{width:100%;border-radius:12px;height:40px;display:flex;align-items:center;justify-content:center;font-size:10.5px;letter-spacing:.05em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.85)}
+.gl-item span{font-size:10.5px;color:#A07785}
 </style>
 </head>
 <body>
@@ -710,6 +795,7 @@ body[data-bubble="5"] .row.me .msg{background:linear-gradient(135deg,#FF3D6E,#FF
         <div class="panel">
           <div class="panel-title">换一种说话的颜色</div>
           <div class="bubble-grid" id="bubbleGrid"></div>
+          <button type="button" class="ghost-btn" id="bubbleGalleryBtn" style="margin-top:12px">进入气泡画廊</button>
         </div>
 
         <div class="section-label">收藏</div>
@@ -763,19 +849,47 @@ body[data-bubble="5"] .row.me .msg{background:linear-gradient(135deg,#FF3D6E,#FF
 
 <div class="viewer" id="viewer"><img id="viewerImg" alt=""></div>
 
-<div class="call" id="call">
-  <div class="call-bg" id="callBg"></div>
-  <button type="button" class="c-min" id="minBtn" aria-label="收起">▾</button>
-  <button type="button" class="mini-hang" id="miniHang" aria-label="挂断">✕</button>
-  <div class="c-av" id="callAv">🌷</div>
-  <div class="c-name" id="callName">念念</div>
-  <div class="c-time" id="callTime">正在呼叫…</div>
-  <div class="call-ctrl">
-    <button type="button" class="c-btn" id="muteBtn" aria-label="静音">🎙️</button>
-    <button type="button" class="c-btn" id="bgBtn" aria-label="换背景">🎨</button>
-    <button class="hang" id="hangBtn" type="button" aria-label="挂断">✕</button>
+<div class="callwin" id="call">
+  <div class="cw-bg" id="callBg"></div>
+  <span class="cw-orb a"></span><span class="cw-orb b"></span><span class="cw-orb c"></span>
+  <div class="cw-shade"></div>
+  <div class="cw-head" id="callHead">
+    <span class="cw-badge"><i class="cw-dot"></i><span id="callTime">00:00</span></span>
+    <div class="cw-tools">
+      <button type="button" id="minBtn" aria-label="收起">▾</button>
+      <button type="button" id="closeBtn" aria-label="挂断">✕</button>
+    </div>
   </div>
-  <div class="call-pip" id="callPip">🧀</div>
+  <div class="cw-body">
+    <div class="cw-av"><div class="cw-img" id="callAv">🌷</div></div>
+    <div class="cw-name" id="callName">念念</div>
+    <div class="cw-state" id="callState">正在连接…</div>
+    <div class="cw-dots"><span></span><span></span><span></span></div>
+  </div>
+  <div class="cw-ctrl">
+    <button type="button" class="cw-btn" id="muteBtn"><i>🎙️</i><em>静音</em></button>
+    <button type="button" class="cw-btn" id="bgBtn"><i>🎨</i><em>背景</em></button>
+    <button type="button" class="cw-btn end" id="hangBtn"><i>✕</i><em>挂断</em></button>
+  </div>
+  <div class="cw-resize" id="callResize"></div>
+</div>
+
+<div class="callpill" id="callPill">
+  <div class="p-av" id="pillAv">🌷</div>
+  <span class="p-badge"></span>
+  <span class="p-time" id="pillTime">00:00</span>
+</div>
+
+<div class="callin" id="callIn">
+  <div class="callin-card">
+    <div class="callin-av" id="inAv">🌷</div>
+    <div class="callin-name" id="inName">念念</div>
+    <div class="callin-sub">邀请你视频通话…</div>
+    <div class="callin-btns">
+      <button type="button" class="callin-no" id="inReject"><i>✕</i>拒绝</button>
+      <button type="button" class="callin-yes" id="inAccept"><i>📹</i>接听</button>
+    </div>
+  </div>
 </div>
 
 <div class="newmsg" id="newMsgBar">
@@ -1327,6 +1441,7 @@ function send(){
   clearQuote();
   renderStats();
   reply();
+  maybeIncomingCall();
 }
 $("sendBtn").onclick = function(e){
   e.stopPropagation();
@@ -1900,61 +2015,77 @@ function openVoice(){
     $("recOverlay").classList.remove("show");
   });
 }
-/* 视频通话 */
-var callSec = 0, callTimer = null, callRinging = null, callAnswered = false, callBgIdx = 0;
+/* 视频通话（浮窗 · 参考 milk 重做） */
+var callSec = 0, callTimer = null, callConnectT = null, callLive = false, callActive = false, callBgIdx = 0;
 var CALL_BGS = [
-  "linear-gradient(170deg,#5A3A47,#2E1F27)",
-  "linear-gradient(160deg,#3E4B63,#1E2733)",
-  "linear-gradient(150deg,#6B4A56,#33202A)",
-  "linear-gradient(165deg,#4A3B56,#241E2E)"
+  "linear-gradient(155deg,#3A2530,#4A2F3A 45%,#6B4A56)",
+  "linear-gradient(155deg,#233247,#31465E 48%,#4C6A86)",
+  "linear-gradient(155deg,#3B2C4A,#4E3A63 48%,#7A5C8E)",
+  "linear-gradient(155deg,#2B3A35,#3D534A 48%,#5E7D6E)"
 ];
 var CALL_LINES = ["刚刚听到你的声音啦，好开心 ♡", "下次还想和你打很久很久。", "挂掉之前差一点舍不得。"];
 function fmtSec(s){ return pad(Math.floor(s / 60)) + ":" + pad(s % 60); }
 function startCall(){
-  var cEl = $("call");
-  cEl.classList.remove("min");
-  cEl.style.left = cEl.style.top = cEl.style.right = cEl.style.bottom = "";
+  var w = $("call");
+  callActive = true; callLive = false; callSec = 0;
+  clearInterval(callTimer); clearTimeout(callConnectT);
+  w.classList.remove("live");
+  w.style.left = ""; w.style.top = ""; w.style.width = ""; w.style.height = ""; w.style.transform = "";
   $("callAv").innerHTML = avatarHtml("them");
   $("callName").textContent = cfg.name;
-  $("callTime").textContent = "正在呼叫…";
-  $("callBg").style.background = CALL_BGS[callBgIdx];
+  $("callState").textContent = "正在连接…";
+  $("callTime").textContent = "00:00";
+  $("pillTime").textContent = "00:00";
+  $("pillAv").innerHTML = avatarHtml("them");
+  $("callBg").style.background = CALL_BGS[callBgIdx % CALL_BGS.length];
   $("muteBtn").classList.remove("on");
-  $("callPip").textContent = "🧀";
-  $("callPip").style.left = "auto";
-  $("callPip").style.right = "16px";
-  $("callPip").style.top = "calc(env(safe-area-inset-top,0px) + 18px)";
-  $("call").classList.add("open");
-  callSec = 0;
-  callAnswered = false;
-  clearInterval(callTimer);
-  clearTimeout(callRinging);
-  callRinging = setTimeout(function(){
-    if(Math.random() < 0.1){
-      $("callTime").textContent = "对方无应答";
-      setTimeout(function(){ endCall(false); }, 1400);
+  $("callPill").classList.remove("show");
+  w.classList.add("open");
+  callConnectT = setTimeout(function(){
+    if(!callActive) return;
+    if(Math.random() < 0.08){
+      $("callState").textContent = "对方无应答";
+      setTimeout(function(){ if(callActive) endCall(false); }, 1200);
       return;
     }
-    callAnswered = true;
-    $("callTime").textContent = "00:00";
+    callLive = true;
+    w.classList.add("live");
+    $("callState").textContent = "通话中 · 视频";
     callTimer = setInterval(function(){
       callSec++;
       $("callTime").textContent = fmtSec(callSec);
+      $("pillTime").textContent = fmtSec(callSec);
     }, 1000);
-  }, 2300);
+  }, 2200);
 }
 function endCall(manual){
-  clearInterval(callTimer);
-  clearTimeout(callRinging);
-  var wasConnected = callSec > 0 || callAnswered;
+  if(!callActive && !$("callIn").classList.contains("show")) return;
+  var wasLive = callLive, sec = callSec;
+  callActive = false; callLive = false;
+  clearInterval(callTimer); clearTimeout(callConnectT);
   $("call").classList.remove("open");
-  $("call").classList.remove("min");
-  $("call").style.left = $("call").style.top = $("call").style.right = $("call").style.bottom = "";
-  pushMsg({ sys:true, text:"视频通话 · " + (callSec ? fmtSec(callSec) : "未接通"), t:Date.now() });
-  if(wasConnected && callSec > 0){
+  $("call").classList.remove("live");
+  $("call").style.width = ""; $("call").style.height = "";
+  $("callPill").classList.remove("show");
+  $("callIn").classList.remove("show");
+  pushMsg({ sys:true, text:"视频通话 · " + (sec ? fmtSec(sec) : "未接通"), t:Date.now() });
+  if(wasLive && sec > 0){
     setTimeout(function(){ pushMsg({ who:"them", type:"text", text:pickRnd(CALL_LINES), t:Date.now() }); }, 700);
   }
 }
+function minimizeCall(){
+  if(!callActive) return;
+  $("call").classList.remove("open");
+  $("callPill").classList.add("show");
+}
+function expandCall(){
+  if(!callActive) return;
+  $("callPill").classList.remove("show");
+  $("call").classList.add("open");
+}
 $("hangBtn").onclick = function(){ endCall(true); };
+$("closeBtn").onclick = function(){ endCall(true); };
+$("minBtn").onclick = function(e){ e.stopPropagation(); minimizeCall(); };
 $("muteBtn").onclick = function(){
   this.classList.toggle("on");
   toast(this.classList.contains("on") ? "已静音" : "已取消静音");
@@ -1963,52 +2094,106 @@ $("bgBtn").onclick = function(){
   callBgIdx = (callBgIdx + 1) % CALL_BGS.length;
   $("callBg").style.background = CALL_BGS[callBgIdx];
 };
-/* 通话小窗可拖动 */
-/* 通话小窗：缩小 / 拖动 / 点一下放大 */
-$("minBtn").onclick = function(e){ e.stopPropagation(); $("call").classList.add("min"); };
-$("miniHang").onclick = function(e){ e.stopPropagation(); endCall(true); };
+/* 浮窗拖动 */
 (function(){
-  var callEl = $("call"), drag = null, moved = false, sx = 0, sy = 0, suppress = 0;
-  callEl.addEventListener("pointerdown", function(e){
-    if(!callEl.classList.contains("min")) return;
-    if(e.target.closest(".mini-hang")) return;
-    var r = callEl.getBoundingClientRect();
+  var w = $("call"), head = $("callHead"), drag = null;
+  head.addEventListener("pointerdown", function(e){
+    if(e.target.closest("button")) return;
+    var r = w.getBoundingClientRect();
+    drag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+    w.style.transform = "none";
+    w.style.left = r.left + "px";
+    w.style.top = r.top + "px";
+    try{ head.setPointerCapture(e.pointerId); }catch(err){}
+  });
+  head.addEventListener("pointermove", function(e){
+    if(!drag) return;
+    var x = Math.max(6, Math.min(innerWidth - w.offsetWidth - 6, e.clientX - drag.dx));
+    var y = Math.max(6, Math.min(innerHeight - w.offsetHeight - 6, e.clientY - drag.dy));
+    w.style.left = x + "px";
+    w.style.top = y + "px";
+  });
+  head.addEventListener("pointerup", function(){ drag = null; });
+  head.addEventListener("pointercancel", function(){ drag = null; });
+})();
+/* 浮窗缩放 */
+(function(){
+  var w = $("call"), h = $("callResize"), rs = null;
+  h.addEventListener("pointerdown", function(e){
+    e.stopPropagation();
+    rs = { x: e.clientX, y: e.clientY, w: w.offsetWidth, h: w.offsetHeight };
+    try{ h.setPointerCapture(e.pointerId); }catch(err){}
+  });
+  h.addEventListener("pointermove", function(e){
+    if(!rs) return;
+    w.style.width = Math.max(220, Math.min(innerWidth - 20, rs.w + e.clientX - rs.x)) + "px";
+    w.style.height = Math.max(300, Math.min(innerHeight - 40, rs.h + e.clientY - rs.y)) + "px";
+  });
+  h.addEventListener("pointerup", function(){ rs = null; });
+  h.addEventListener("pointercancel", function(){ rs = null; });
+})();
+/* 小窗胶囊：拖动 + 点击放大 */
+(function(){
+  var p = $("callPill"), drag = null, moved = false, sx = 0, sy = 0, sup = 0;
+  p.addEventListener("pointerdown", function(e){
+    var r = p.getBoundingClientRect();
     drag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
     moved = false; sx = e.clientX; sy = e.clientY;
-    try{ callEl.setPointerCapture(e.pointerId); }catch(err){}
+    try{ p.setPointerCapture(e.pointerId); }catch(err){}
   });
-  callEl.addEventListener("pointermove", function(e){
+  p.addEventListener("pointermove", function(e){
     if(!drag) return;
-    if(!moved && Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 7) moved = true;
+    if(!moved && Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 6) moved = true;
     if(!moved) return;
-    var x = Math.max(8, Math.min(innerWidth - callEl.offsetWidth - 8, e.clientX - drag.dx));
-    var y = Math.max(8, Math.min(innerHeight - callEl.offsetHeight - 8, e.clientY - drag.dy));
-    callEl.style.left = x + "px";
-    callEl.style.top = y + "px";
-    callEl.style.right = "auto";
-    callEl.style.bottom = "auto";
+    p.style.left = Math.max(6, Math.min(innerWidth - p.offsetWidth - 6, e.clientX - drag.dx)) + "px";
+    p.style.top = Math.max(6, Math.min(innerHeight - p.offsetHeight - 6, e.clientY - drag.dy)) + "px";
+    p.style.right = "auto"; p.style.bottom = "auto";
   });
-  function up(){
+  p.addEventListener("pointerup", function(){
     if(!drag) return;
-    var wasMoved = moved;
+    if(moved){ sup = Date.now(); }
     drag = null;
-    if(wasMoved){ suppress = Date.now(); return; }
-    expand();
-  }
-  function expand(){
-    if(!callEl.classList.contains("min")) return;
-    callEl.classList.remove("min");
-    callEl.style.left = callEl.style.top = callEl.style.right = callEl.style.bottom = "";
-  }
-  callEl.addEventListener("pointerup", up);
-  callEl.addEventListener("pointercancel", up);
-  /* 兜底：直接点击小窗也能放大 */
-  callEl.addEventListener("click", function(e){
-    if(e.target.closest(".mini-hang") || e.target.closest(".c-min")) return;
-    if(Date.now() - suppress < 350) return;
-    expand();
+  });
+  p.addEventListener("pointercancel", function(){ drag = null; });
+  p.addEventListener("click", function(){
+    if(Date.now() - sup < 320) return;
+    expandCall();
   });
 })();
+/* 对方来电 */
+var inTimer = null, lastIncoming = 0, rpIncoming = false;
+function incomingCall(){
+  if(callActive || rpIncoming) return;
+  if(Date.now() - lastIncoming < 60000) return;
+  lastIncoming = Date.now(); rpIncoming = true;
+  $("inAv").innerHTML = avatarHtml("them");
+  $("inName").textContent = cfg.name;
+  $("callIn").classList.add("show");
+  clearTimeout(inTimer);
+  inTimer = setTimeout(function(){
+    if($("callIn").classList.contains("show")){
+      $("callIn").classList.remove("show");
+      rpIncoming = false;
+      pushMsg({ sys:true, text:"未接来电 · " + cfg.name, t:Date.now() });
+    }
+  }, 22000);
+}
+function maybeIncomingCall(){
+  if(callActive || rpIncoming) return;
+  if(Math.random() > 0.07) return;
+  setTimeout(function(){ if(!callActive) incomingCall(); }, 4000 + Math.random() * 8000);
+}
+$("inAccept").onclick = function(){
+  $("callIn").classList.remove("show");
+  clearTimeout(inTimer); rpIncoming = false;
+  callBgIdx = 0;
+  startCall();
+};
+$("inReject").onclick = function(){
+  $("callIn").classList.remove("show");
+  clearTimeout(inTimer); rpIncoming = false;
+  pushMsg({ sys:true, text:"已拒绝 " + cfg.name + " 的通话", t:Date.now() });
+};
 
 /* ================= 模态框 ================= */
 var modal = $("modal"), modalMode = "bulk";
@@ -2148,12 +2333,8 @@ document.querySelectorAll(".hm-app").forEach(function(b){
 
 /* ================= 聊天气泡主题 ================= */
 var BUBBLES = [
-  { n:"奶莓", c:"linear-gradient(135deg,#F8C2D4,#ED97B7)" },
-  { n:"蜜桃", c:"linear-gradient(135deg,#FFD9C5,#FFB79C)" },
-  { n:"薄荷", c:"linear-gradient(135deg,#D6F3E4,#AEE3C6)" },
-  { n:"星夜", c:"linear-gradient(135deg,#DED9FF,#B9C3FF)" },
-  { n:"焦糖", c:"linear-gradient(135deg,#F3DFC9,#E0BE9E)" },
-  { n:"玫瑰", c:"linear-gradient(135deg,#FF3D6E,#FF8FAE)" }
+  { n:"奶莓" }, { n:"蜜桃" }, { n:"薄荷" }, { n:"星夜" }, { n:"焦糖" }, { n:"玫瑰" },
+  { n:"格纹" }, { n:"奶油点" }, { n:"星空" }, { n:"蕾丝" }, { n:"胶片" }, { n:"水彩" }
 ];
 function renderBubbles(){
   var g = $("bubbleGrid");
@@ -2163,7 +2344,7 @@ function renderBubbles(){
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "bubble-item" + ((cfg.bubble || 0) === i ? " on" : "");
-    btn.innerHTML = '<span class="bv" style="background:' + b.c + '">Aa</span>' + b.n;
+    btn.innerHTML = '<span class="bv p' + i + '">Aa</span>' + b.n;
     btn.onclick = function(){
       cfg.bubble = i;
       saveCfg();
@@ -2174,6 +2355,38 @@ function renderBubbles(){
     g.appendChild(btn);
   });
 }
+function applyBubble(i){
+  cfg.bubble = i;
+  saveCfg();
+  document.body.dataset.bubble = String(i);
+  renderBubbles();
+}
+/* 气泡画廊 */
+(function(){
+  var btn = $("bubbleGalleryBtn");
+  if(!btn) return;
+  btn.onclick = function(){
+    var html = '<div class="sheet-title">气泡画廊</div><p class="hint">挑一款换上，整站聊天气泡都会变</p><div class="gl-grid">';
+    BUBBLES.forEach(function(b, i){
+      html += '<button type="button" class="gl-item' + ((cfg.bubble || 0) === i ? ' on' : '') + '" data-i="' + i + '">' +
+        '<span class="glp p' + i + '">Aa 你好呀</span><span>' + b.n + '</span></button>';
+    });
+    html += '</div>';
+    showSheet(html);
+    var box = $("sheetBody");
+    var items = box.querySelectorAll(".gl-item");
+    for(var i = 0; i < items.length; i++){
+      (function(el){
+        el.onclick = function(){
+          var idx = +el.getAttribute("data-i");
+          applyBubble(idx);
+          hideSheet();
+          toast("气泡换成「" + BUBBLES[idx].n + "」啦");
+        };
+      })(items[i]);
+    }
+  };
+})();
 
 /* ================= 聊天人物设置 ================= */
 function openCharSheet(){
