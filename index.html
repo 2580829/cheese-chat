@@ -2705,10 +2705,16 @@ function injectSkinStyle(){
   st.textContent = window.MILK_BUBBLES.map(function(b){ return b.css; }).join("\n");
   document.head.appendChild(st);
 }
+function setSkin(id){
+  document.body.removeAttribute("data-skin");
+  var c = $("chat");
+  if(!c) return;
+  if(id) c.dataset.skin = id; else c.removeAttribute("data-skin");
+}
 function applySkin(id){
   cfg.skinId = id || "";
   saveCfg();
-  document.body.dataset.skin = cfg.skinId;
+  setSkin(cfg.skinId);
 }
 function skinName(id){
   if(!id || !window.MILK_BUBBLES) return "默认";
@@ -3185,7 +3191,7 @@ renderBubbles();
 sayRandom();
 document.body.dataset.bubble = String(cfg.bubble || 0);
 document.body.dataset.bshape = cfg.bubbleShape || "standard";
-document.body.dataset.skin = cfg.skinId || "";
+setSkin(cfg.skinId || "");
 document.documentElement.style.setProperty("--chatfont", fontCss(cfg.fontId));
 
 /* 存储不可用时给出提示 */
