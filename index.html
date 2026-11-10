@@ -640,6 +640,24 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
 .font-item b{font-size:15px;font-weight:600;color:var(--ink);line-height:1.3}
 .font-item span{font-size:10px;color:var(--ink-soft)}
 .msg,.field{font-family:var(--chatfont)}
+
+/* ==== 首页挂件 ==== */
+#page-home{position:relative}
+.hm-widgets{display:flex;flex-direction:column;gap:12px;margin-top:18px}
+.hm-widgets .hm-contract,.hm-widgets .hm-duo,.hm-widgets .hm-say{margin-top:0}
+.hm-edit{position:absolute;right:18px;top:calc(env(safe-area-inset-top,0px) + 24px);border:none;background:rgba(255,255,255,.88);color:#B77C92;border-radius:999px;padding:6px 13px;font-size:10.5px;letter-spacing:.08em;box-shadow:0 4px 14px rgba(232,127,164,.16),inset 0 0 0 1px rgba(255,255,255,.95)}
+.hm-mini{background:rgba(255,255,255,.88);border-radius:20px;padding:15px 16px;box-shadow:0 8px 24px rgba(232,127,164,.12),inset 0 0 0 1px rgba(255,255,255,.95)}
+.hm-cd{display:flex;align-items:baseline;gap:6px;margin-top:6px}
+.hm-cd b{font-size:33px;line-height:1;font-weight:700;background:linear-gradient(135deg,#E8698F,#F5A9C2);-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
+.hm-cd span{font-size:12px;color:#A07785}
+.hm-cd-from{font-size:10.5px;color:#C0A2AC;margin-top:7px;letter-spacing:.05em}
+.hm-memo{margin-top:8px;font-size:13px;line-height:1.8;color:#7A5160;white-space:pre-wrap;word-break:break-word}
+.hm-stamp{background:linear-gradient(135deg,rgba(255,254,250,.96),rgba(255,240,246,.92));border-radius:20px;padding:15px 16px;box-shadow:0 8px 24px rgba(232,127,164,.12),inset 0 0 0 1px rgba(255,255,255,.95);border-left:3px solid rgba(238,158,187,.55)}
+.hm-stamp-t{font-family:var(--chatfont);font-size:13.5px;line-height:1.9;color:#7A5160;margin-top:8px}
+.wg-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:13px;background:rgba(255,255,255,.85);box-shadow:inset 0 0 0 1px rgba(247,200,216,.5);margin-bottom:8px;font-size:13px;color:var(--ink)}
+.wg-ops{display:flex;gap:6px}
+.wg-ops button{width:29px;height:29px;border-radius:9px;border:none;background:rgba(247,200,216,.35);color:var(--ink);font-size:13px;display:flex;align-items:center;justify-content:center}
+.wg-ops button:active{background:rgba(238,158,187,.5)}
 </style>
 </head>
 <body>
@@ -663,32 +681,8 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
     <section class="page active" id="page-home">
       <div class="hm-hi" id="hmHi">下午好，念念在想你</div>
       <div class="hm-date" id="hmDate">11月10日 星期二</div>
-      <div class="hm-contract" id="hmContract" title="点击修改起始日期">
-        <div class="hm-cav" id="hmCAv">🌷</div>
-        <div>
-          <div class="hm-clabel">💜 签订契约的</div>
-          <div class="hm-cnum"><b id="hmDays">1</b><span>天</span></div>
-          <div class="hm-cfrom" id="hmFrom">从 今天 起 · 点击编辑</div>
-        </div>
-      </div>
-      <div class="hm-duo">
-        <div class="hm-card" id="hmMoodCard">
-          <div class="hm-t">TA 今日心情</div>
-          <div class="hm-mood-e" id="hmMoodE">🌸</div>
-          <div class="hm-mood-v" id="hmMoodV">开心</div>
-        </div>
-        <div class="hm-card">
-          <div class="hm-t">时间</div>
-          <div class="hm-clocks">
-            <div><span>TA 那边</span><b id="hmTaTime">--:--</b></div>
-            <div><span>我这边</span><b id="hmMyTime">--:--</b></div>
-          </div>
-        </div>
-      </div>
-      <div class="hm-say">
-        <div class="hm-t">💌 TA 今天想对你说</div>
-        <div class="hm-say-t" id="hmSay">…</div>
-      </div>
+      <button type="button" class="hm-edit" id="hmEditBtn">挂件</button>
+      <div class="hm-widgets" id="hmWidgets"></div>
       <div class="hm-apps">
         <button class="hm-app" data-go="page-chat"><i>💬</i>传讯</button>
         <button class="hm-app" data-go="page-lib"><i>🗂️</i>字卡库</button>
@@ -2476,6 +2470,11 @@ $("modalOk").onclick = function(){
     renderLib();
     closeModal();
   }
+  if(modalMode === "memo"){
+    cfg.memo = v.trim().slice(0,80);
+    saveCfg(); renderHome(); closeModal();
+    toast("小纸条换好啦");
+  }
   if(modalMode === "rp"){
     var amt = parseFloat($("modalNum").value);
     if(!isFinite(amt) || amt <= 0){ toast("金额要大于 0 哦"); return; }
@@ -2508,6 +2507,7 @@ function hmGreet(){
 }
 function sayRandom(){
   var el = $("hmSay");
+  lastSay = "";
   if(!el) return;
   var arr = allCards();
   el.textContent = arr.length ? arr[Math.floor(Math.random() * arr.length)] : "去字卡库写几句话，我就会每天说给你听 ♡";
@@ -2518,28 +2518,100 @@ function tickClock(){
   if($("hmMyTime")) $("hmMyTime").textContent = p(d.getHours()) + ":" + p(d.getMinutes());
   if($("hmTaTime")) $("hmTaTime").textContent = p(tk.getHours()) + ":" + p(tk.getMinutes());
 }
+var HM_WIDGETS = {
+  contract:{ n:"契约天数" },
+  cards:{ n:"心情与时间" },
+  note:{ n:"今日想对你说" },
+  countdown:{ n:"纪念日倒计时" },
+  memo:{ n:"小纸条" },
+  stamp:{ n:"随机字卡贴" }
+};
+if(!Array.isArray(cfg.widgets)) cfg.widgets = ["contract","cards","note"];
+cfg.widgets = cfg.widgets.filter(function(k){ return HM_WIDGETS[k]; });
+if(!cfg.widgets.length) cfg.widgets = ["contract"];
+if(!cfg.countdown || !cfg.countdown.date) cfg.countdown = { title:"在一起的第", date:cfg.startDate || "2026-03-26" };
+if(typeof cfg.memo !== "string") cfg.memo = "今天也要好好吃饭呀";
+var lastSay = "", stampCard = "";
+
+function hmWidgetHTML(k){
+  if(k === "contract"){
+    return '<div class="hm-contract" data-w="contract" title="点击修改起始日期">' +
+      '<div class="hm-cav" id="hmCAv">🌷</div><div>' +
+      '<div class="hm-clabel">💜 签订契约的</div>' +
+      '<div class="hm-cnum"><b id="hmDays">1</b><span>天</span></div>' +
+      '<div class="hm-cfrom" id="hmFrom">从 今天 起 · 点击编辑</div></div></div>';
+  }
+  if(k === "cards"){
+    return '<div class="hm-duo" data-w="cards">' +
+      '<div class="hm-card" id="hmMoodCard"><div class="hm-t">TA 今日心情</div>' +
+      '<div class="hm-mood-e" id="hmMoodE">🌸</div><div class="hm-mood-v" id="hmMoodV">开心</div></div>' +
+      '<div class="hm-card"><div class="hm-t">时间</div><div class="hm-clocks">' +
+      '<div><span>TA 那边</span><b id="hmTaTime">--:--</b></div>' +
+      '<div><span>我这边</span><b id="hmMyTime">--:--</b></div></div></div></div>';
+  }
+  if(k === "note"){
+    return '<div class="hm-say" data-w="note"><div class="hm-t">💌 TA 今天想对你说</div>' +
+      '<div class="hm-say-t" id="hmSay">…</div></div>';
+  }
+  if(k === "countdown"){
+    return '<div class="hm-mini" data-w="countdown"><div class="hm-t">🎗 ' + esc(cfg.countdown.title || "纪念日") + '</div>' +
+      '<div class="hm-cd"><b id="hmCdNum">--</b><span>天</span></div>' +
+      '<div class="hm-cd-from" id="hmCdFrom">点击修改日期与标题</div></div>';
+  }
+  if(k === "memo"){
+    return '<div class="hm-mini" data-w="memo"><div class="hm-t">📝 小纸条</div>' +
+      '<div class="hm-memo">' + esc(cfg.memo) + '</div>' +
+      '<div class="hm-cd-from">点一下可以改</div></div>';
+  }
+  if(k === "stamp"){
+    return '<div class="hm-stamp" data-w="stamp"><div class="hm-t">✨ 随机字卡</div>' +
+      '<div class="hm-stamp-t" id="hmStamp">…</div>' +
+      '<div class="hm-cd-from">点一下换一张</div></div>';
+  }
+  return "";
+}
+function hmCountdown(){
+  var d = new Date(); d.setHours(0,0,0,0);
+  var t = new Date(cfg.countdown.date + "T00:00:00");
+  if(isNaN(t.getTime())) return null;
+  return Math.round((t - d) / 864e5);
+}
+function fillWidgets(){
+  var d = new Date();
+  var m = HM_MOODS[dayIndex() % HM_MOODS.length];
+  if($("hmMoodE")) $("hmMoodE").textContent = m.e;
+  if($("hmMoodV")) $("hmMoodV").textContent = m.t;
+  var from = new Date(cfg.startDate + "T00:00:00");
+  var days = Math.floor((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - new Date(from.getFullYear(), from.getMonth(), from.getDate())) / 864e5) + 1;
+  if($("hmDays")) $("hmDays").textContent = Math.max(1, days);
+  if($("hmFrom")) $("hmFrom").textContent = "从 " + cfg.startDate.replace(/-/g, "/") + " 起 · 点击编辑";
+  if($("hmCAv")) paintAvatar($("hmCAv"), "them");
+  var left = hmCountdown();
+  if($("hmCdNum") && left !== null){
+    $("hmCdNum").textContent = Math.abs(left);
+    $("hmCdFrom").textContent = left === 0
+      ? "就是今天呀 · 点击修改"
+      : (left > 0 ? "距离 " + cfg.countdown.date.replace(/-/g, "/") + " 还有 · 点击修改"
+                  : cfg.countdown.date.replace(/-/g, "/") + " 起，已过 · 点击修改");
+  }
+  if($("hmSay")) $("hmSay").textContent = lastSay || "…";
+  if($("hmStamp")){
+    if(!stampCard) stampCard = pickCard() || "";
+    $("hmStamp").textContent = stampCard || "字卡库还是空的，先去写几张吧";
+  }
+  tickClock();
+  document.body.dataset.bubble = String(cfg.bubble || 0);
+}
 function renderHome(){
   if(!$("page-home")) return;
   var d = new Date();
   $("hmHi").textContent = hmGreet();
   $("hmDate").textContent = (d.getMonth() + 1) + "月" + d.getDate() + "日 星期" + "日一二三四五六".charAt(d.getDay());
-  var m = HM_MOODS[dayIndex() % HM_MOODS.length];
-  $("hmMoodE").textContent = m.e;
-  $("hmMoodV").textContent = m.t;
-  var from = new Date(cfg.startDate + "T00:00:00");
-  var days = Math.floor((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - new Date(from.getFullYear(), from.getMonth(), from.getDate())) / 864e5) + 1;
-  $("hmDays").textContent = Math.max(1, days);
-  $("hmFrom").textContent = "从 " + cfg.startDate.replace(/-/g, "/") + " 起 · 点击编辑";
-  paintAvatar($("hmCAv"), "them");
-  tickClock();
-  document.body.dataset.bubble = String(cfg.bubble || 0);
+  var wrap = $("hmWidgets");
+  if(wrap) wrap.innerHTML = cfg.widgets.map(hmWidgetHTML).join("");
+  fillWidgets();
 }
-if($("hmSay")) $("hmSay").textContent = "";
-setInterval(function(){
-  var p = $("page-home");
-  if(p && p.classList.contains("active")) tickClock();
-}, 15000);
-$("hmContract").onclick = function(){
+function editStartDate(){
   var inp = document.createElement("input");
   inp.type = "date";
   inp.value = cfg.startDate;
@@ -2550,6 +2622,72 @@ $("hmContract").onclick = function(){
     inp.remove();
   });
   inp.click();
+}
+function editCountdown(){
+  var inp = document.createElement("input");
+  inp.type = "date";
+  inp.value = cfg.countdown.date;
+  inp.style.cssText = "position:fixed;left:-999px;top:0;opacity:0";
+  document.body.appendChild(inp);
+  inp.addEventListener("change", function(){
+    if(inp.value){ cfg.countdown.date = inp.value; saveCfg(); renderHome(); toast("日期改好啦 ♡"); }
+    inp.remove();
+  });
+  inp.click();
+}
+function openHomeEdit(){
+  var rows = cfg.widgets.map(function(k, i){
+    return '<div class="wg-row"><span>' + HM_WIDGETS[k].n + '</span><div class="wg-ops">' +
+      '<button type="button" data-up="' + i + '">↑</button>' +
+      '<button type="button" data-dn="' + i + '">↓</button>' +
+      '<button type="button" data-del="' + i + '">✕</button></div></div>';
+  }).join("");
+  var rest = Object.keys(HM_WIDGETS).filter(function(k){ return cfg.widgets.indexOf(k) < 0; });
+  var addHtml = rest.length ? '<div class="section-label" style="padding-left:0;margin-top:14px">可以加回来</div>' +
+    rest.map(function(k){ return '<button type="button" class="ghost-btn" data-add="' + k + '">+ ' + HM_WIDGETS[k].n + '</button>'; }).join("") : "";
+  showSheet('<div class="sheet-title">桌面挂件</div>' +
+    '<p class="hint">用 ↑ ↓ 调整顺序，✕ 先收起来（不会删数据）</p>' + rows + addHtml);
+  var body = $("sheetBody");
+  body.querySelectorAll("[data-up]").forEach(function(b){
+    b.onclick = function(){
+      var i = +b.getAttribute("data-up");
+      if(i > 0){ var t = cfg.widgets[i - 1]; cfg.widgets[i - 1] = cfg.widgets[i]; cfg.widgets[i] = t; saveCfg(); renderHome(); openHomeEdit(); }
+    };
+  });
+  body.querySelectorAll("[data-dn]").forEach(function(b){
+    b.onclick = function(){
+      var i = +b.getAttribute("data-dn");
+      if(i < cfg.widgets.length - 1){ var t = cfg.widgets[i + 1]; cfg.widgets[i + 1] = cfg.widgets[i]; cfg.widgets[i] = t; saveCfg(); renderHome(); openHomeEdit(); }
+    };
+  });
+  body.querySelectorAll("[data-del]").forEach(function(b){
+    b.onclick = function(){
+      var i = +b.getAttribute("data-del");
+      if(cfg.widgets.length <= 1){ toast("至少留一个挂件呀"); return; }
+      cfg.widgets.splice(i, 1); saveCfg(); renderHome(); openHomeEdit();
+    };
+  });
+  body.querySelectorAll("[data-add]").forEach(function(b){
+    b.onclick = function(){
+      cfg.widgets.push(b.getAttribute("data-add")); saveCfg(); renderHome(); openHomeEdit();
+    };
+  });
+}
+if($("hmSay")) $("hmSay").textContent = "";
+setInterval(function(){
+  var p = $("page-home");
+  if(p && p.classList.contains("active")) tickClock();
+}, 15000);
+if($("hmEditBtn")) $("hmEditBtn").onclick = openHomeEdit;
+var hmWrap = $("hmWidgets");
+if(hmWrap) hmWrap.onclick = function(e){
+  var w = e.target.closest ? e.target.closest("[data-w]") : null;
+  if(!w) return;
+  var k = w.getAttribute("data-w");
+  if(k === "contract") editStartDate();
+  else if(k === "countdown") editCountdown();
+  else if(k === "memo") openModal("memo", "小纸条", "写一句放在小手机桌面上", "今天也要好好吃饭呀", cfg.memo);
+  else if(k === "stamp"){ stampCard = pickCard() || ""; if($("hmStamp")){ $("hmStamp").textContent = stampCard || "字卡库还是空的，先去写几张吧"; toast("换了一张 ♡"); } }
 };
 document.querySelectorAll(".hm-app").forEach(function(b){
   b.onclick = function(){
