@@ -21,7 +21,7 @@
   --serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden}
+html,body{height:100%;overflow:hidden;position:fixed;inset:0;width:100%}
 body{font-family:"Quicksand","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;color:var(--ink);background:var(--cream)}
 button,input,textarea{font-family:inherit}
 /* ---------- 背景 ---------- */
@@ -658,6 +658,34 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
 .wg-ops{display:flex;gap:6px}
 .wg-ops button{width:29px;height:29px;border-radius:9px;border:none;background:rgba(247,200,216,.35);color:var(--ink);font-size:13px;display:flex;align-items:center;justify-content:center}
 .wg-ops button:active{background:rgba(238,158,187,.5)}
+
+/* 表情包：无气泡、统一尺寸 */
+#chat .msg.sticker{background:transparent!important;border:none!important;box-shadow:none!important;padding:0!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;max-width:76%}
+#chat .msg.sticker::before,#chat .msg.sticker::after{display:none!important;content:none!important}
+#chat .msg.sticker .stk-img{width:96px;height:96px;object-fit:contain;border-radius:10px;background:transparent}
+#chat .msg.media{background:transparent!important;border:none!important;box-shadow:none!important;padding:0!important}
+
+/* ==== 群聊 / 会话 ==== */
+.m-body{display:flex;flex-direction:column;align-items:flex-start;gap:3px;max-width:70%;min-width:0}
+.m-body .msg{max-width:100%}
+.m-name{font-size:10.5px;color:#B08A97;padding-left:4px;letter-spacing:.03em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row.me .m-name{display:none}
+.conv-row{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:14px;border:none;background:rgba(255,255,255,.85);box-shadow:inset 0 0 0 1px rgba(247,200,216,.45);margin-bottom:8px;text-align:left}
+.conv-row.on{box-shadow:inset 0 0 0 1.5px var(--pink-deep)}
+.conv-av{width:38px;height:38px;border-radius:50%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#F9B8D0,#FCE4EC 60%,#FFE9D6);font-size:16px;position:relative}
+.conv-av img{width:100%;height:100%;object-fit:cover}
+.conv-av.stack{padding:0}
+.conv-av.stack img{position:absolute;width:26px;height:26px;border-radius:50%;box-shadow:0 0 0 2px #fff}
+.conv-av.stack img:first-child{left:1px;top:2px}
+.conv-av.stack img:last-child{right:1px;bottom:2px}
+.conv-meta{flex:1;min-width:0}
+.conv-meta b{display:block;font-size:13.5px;color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.conv-meta i{display:block;font-style:normal;font-size:10.5px;color:var(--ink-soft);margin-top:2px}
+.conv-tag{font-size:9.5px;color:#B77C92;background:rgba(247,200,216,.4);border-radius:999px;padding:2px 8px;flex-shrink:0}
+.gc-list{max-height:38vh;overflow-y:auto;margin:8px 0 4px}
+.gc-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.8);margin-bottom:7px;font-size:13px;color:var(--ink)}
+.gc-item input{width:17px;height:17px;accent-color:#E87FA4}
+.gc-name{width:100%;padding:10px 13px;border-radius:12px;border:1px solid rgba(247,200,216,.6);background:rgba(255,255,255,.9);font-size:13px;margin:6px 0 10px}
 </style>
 </head>
 <body>
@@ -704,6 +732,9 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
           <div class="name" id="nameEl">念念</div>
           <div class="status" id="statusEl">在你身边，一直都在</div>
         </div>
+        <button class="icon-btn" id="convBtn" title="会话与群聊">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3"/><path d="M3.6 19a5.4 5.4 0 0 1 10.8 0"/><path d="M16 7.2a3 3 0 0 1 0 5.6"/><path d="M17.4 14.4A5 5 0 0 1 21 19"/></svg>
+        </button>
         <button class="icon-btn" id="charBtn" title="聊天人物设置">
           <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.4" r="3.4"/><path d="M5.4 19.4a6.6 6.6 0 0 1 13.2 0"/></svg>
         </button>
@@ -924,7 +955,8 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
 
 <input type="file" id="imgInput" accept="image/*" hidden>
 <input type="file" id="avatarInput" accept="image/*" hidden>
-<input type="file" id="stickerInput" accept="image/*" hidden>
+<input type="file" id="friendAvatarInput" accept="image/*" hidden>
+    <input type="file" id="stickerInput" accept="image/*" hidden>
 <input type="file" id="importInput" accept="application/json,.json" hidden>
 
 <div class="viewer" id="viewer"><img id="viewerImg" alt=""></div>
@@ -1137,7 +1169,60 @@ if(cfg.callBgIdx == null) cfg.callBgIdx = 0;
 if(cfg.skinId == null) cfg.skinId = "";
 if(cfg.fontId == null) cfg.fontId = "";
 if(!cfg.mood) cfg.mood = 0;
-var chat  = load(KEY.chat, []);
+/* ---- 好友与群聊 ---- */
+if(!Array.isArray(cfg.friends)) cfg.friends = [];
+if(!Array.isArray(cfg.groups)) cfg.groups = [];
+cfg.friends = cfg.friends.filter(function(f){ return f && f.id && f.name; });
+cfg.groups = cfg.groups.filter(function(g){ return g && g.id && g.name && Array.isArray(g.members) && g.members.length; });
+if(!cfg.conv || !cfg.conv.t || !cfg.conv.id) cfg.conv = { t:"friend", id:"main" };
+function mainFriend(){ return { id:"main", name:cfg.name, avatar:cfg.taAvatar || "", status:cfg.status || "" }; }
+function allFriends(){ return [mainFriend()].concat(cfg.friends); }
+function friendById(id){
+  if(id === "main" || !id) return mainFriend();
+  for(var i = 0; i < cfg.friends.length; i++){ if(cfg.friends[i].id === id) return cfg.friends[i]; }
+  return null;
+}
+function activeGroup(){
+  if(cfg.conv.t !== "group") return null;
+  for(var i = 0; i < cfg.groups.length; i++){ if(cfg.groups[i].id === cfg.conv.id) return cfg.groups[i]; }
+  return null;
+}
+function isGroup(){ return cfg.conv.t === "group" && !!activeGroup(); }
+(function(){
+  var ok = cfg.conv.t === "group" ? !!activeGroup() : !!friendById(cfg.conv.id);
+  if(!ok) cfg.conv = { t:"friend", id:"main" };
+})();
+function convKey(c){
+  if(c.t === "friend" && c.id === "main") return KEY.chat;
+  return "cheese.chat." + c.id + ".v1";
+}
+function chatKey(){ return convKey(cfg.conv); }
+function convName(){ var g = activeGroup(); return g ? g.name : (friendById(cfg.conv.id) || mainFriend()).name; }
+function senderFriend(mid){
+  if(!isGroup()) return mainFriend();
+  return friendById(mid) || friendById(activeGroup().members[0]) || mainFriend();
+}
+function senderName(mid){ return senderFriend(mid).name; }
+function randMember(){
+  var g = activeGroup();
+  if(!g) return null;
+  return g.members[Math.floor(Math.random() * g.members.length)];
+}
+function friendAvatarHtml(f){
+  if(!f) return "🌷";
+  if(f.avatar) return '<img src="' + f.avatar + '" alt="">';
+  return f.id === "main" ? "🌷" : "🫧";
+}
+function convAvatarHtml(){
+  var g = activeGroup();
+  if(!g) return friendAvatarHtml(mainFriend());
+  var a = friendById(g.members[0]), b = friendById(g.members[1]);
+  if(a && b && a.avatar && b.avatar){
+    return '<span class="stack"><img src="' + a.avatar + '" alt=""><img src="' + b.avatar + '" alt=""></span>';
+  }
+  return "🫂";
+}
+var chat = load(chatKey(), []);
 var diary = load(KEY.diary, {});
 
 var $ = function(id){ return document.getElementById(id); };
@@ -1189,7 +1274,7 @@ function paintEmpty(){
   el.className = "empty";
   el.innerHTML =
     '<div class="art">💌</div>' +
-    "<h2>写给 " + esc(cfg.name) + " 的第一句话</h2>" +
+    "<h2>写给 " + esc(convName()) + " 的第一句话</h2>" +
     "<p>ta 的回复，来自你亲手写的字卡<br>说什么、怎么说，都由你决定</p>" +
     '<div class="acts"><button class="primary" data-go="lib">去写字卡</button><button data-go="ping">让 ta 先开口</button></div>';
   chatEl.appendChild(el);
@@ -1225,14 +1310,14 @@ function paintMsg(m){
 
   var av = document.createElement("div");
   av.className = "m-avatar " + (m.who === "me" ? "me" : "them");
-  av.innerHTML = avatarHtml(m.who);
+  av.innerHTML = avatarHtml(m.who, m.mid);
 
   var isMedia = m.type === "img" || (m.type === "sticker" && !m.emoji);
   var b = document.createElement("div");
   b.className = "msg" + (m.recalled ? " recalled" : "") + (isMedia ? " media" : "") + (m.type === "sticker" ? " sticker" : "");
 
   if(m.recalled){
-    b.textContent = m.who === "me" ? "你撤回了一条消息" : "对方撤回了一条消息";
+    b.textContent = m.who === "me" ? "你撤回了一条消息" : (isGroup() ? senderName(m.mid) + " 撤回了一条消息" : "对方撤回了一条消息");
   }else if(m.type === "img"){
     if(m.lost || !m.src){
       b.classList.remove("media");
@@ -1283,12 +1368,22 @@ function paintMsg(m){
   }
 
   row.appendChild(av);
-  row.appendChild(b);
+  if(isGroup() && m.who === "them" && !m.recalled){
+    var mb = document.createElement("div");
+    mb.className = "m-body";
+    var nm = document.createElement("div");
+    nm.className = "m-name";
+    nm.textContent = senderName(m.mid);
+    mb.appendChild(nm); mb.appendChild(b);
+    row.appendChild(mb);
+  }else{
+    row.appendChild(b);
+  }
   chatEl.appendChild(row);
   bindLongPress(row);
 }
 function saveChat(){
-  if(save(KEY.chat, chat)) return false;
+  if(save(chatKey(), chat)) return false;
   /* 空间不够时：先清理最旧的图片/表情图，保住字卡与设置不丢 */
   var pruned = false;
   for(var pass = 0; pass < 10; pass++){
@@ -1306,7 +1401,7 @@ function saveChat(){
       chat = chat.slice(-Math.max(20, Math.floor(chat.length * 0.7)));
       pruned = true;
     }
-    if(save(KEY.chat, chat)) break;
+    if(save(chatKey(), chat)) break;
   }
   if(pruned) toast("聊天里的旧图片已自动清理，给字卡和设置腾出空间");
   return pruned;
@@ -1358,7 +1453,7 @@ function openMsgActions(id){
 }
 function startQuote(m){
   quoting = m;
-  $("quoteText").textContent = (m.who === "me" ? "你：" : cfg.name + "：") + msgLabel(m);
+  $("quoteText").textContent = (m.who === "me" ? "你：" : senderName(m.mid) + "：") + msgLabel(m);
   $("quoteBar").classList.add("show");
   field.focus();
 }
@@ -1429,7 +1524,9 @@ function showTyping(){
   markLastMeRead();
   typingRow = document.createElement("div");
   typingRow.className = "row them";
-  typingRow.innerHTML = '<div class="m-avatar them">' + avatarHtml("them") + '</div><div class="msg typing"><i></i><i></i><i></i></div>';
+  var tmid = isGroup() ? randMember() : null;
+  typingRow.dataset.mid = tmid || "";
+  typingRow.innerHTML = '<div class="m-avatar them">' + avatarHtml("them", tmid) + '</div><div class="msg typing"><i></i><i></i><i></i></div>';
   chatEl.appendChild(typingRow);
   scrollBottom();
   $("statusEl").textContent = "正在输入…";
@@ -1437,7 +1534,10 @@ function showTyping(){
 function hideTyping(){
   if(typingRow && typingRow.parentNode) typingRow.parentNode.removeChild(typingRow);
   typingRow = null;
-  if($("statusEl")) $("statusEl").textContent = cfg.status || "在你身边";
+  if($("statusEl")){
+    var hg = activeGroup();
+    $("statusEl").textContent = hg ? (hg.members.length + " 位好友 · 群聊") : (cfg.status || "在你身边");
+  }
 }
 /* 新消息横条 */
 /* 已读回执：ta 开始输入时，把我最后一条文字消息标为已读 */
@@ -1468,9 +1568,9 @@ function isChatVisible(){
 }
 function notifyNewMsg(m){
   if(isChatVisible()) return;
-  $("newMsgAv").innerHTML = avatarHtml("them");
+  $("newMsgAv").innerHTML = avatarHtml("them", m.mid);
   var txt = m.type === "text" ? m.text : m.type === "sticker" ? "[表情包]" : m.type === "img" ? "[图片]" : m.type === "voice" ? "[语音] " + (m.dur || 1) + "″" : m.type === "redpacket" ? "[红包] ¥" + (m.amount || "") : "新消息";
-  $("newMsgText").textContent = (cfg.name || "ta") + "：" + txt;
+  $("newMsgText").textContent = senderName(m.mid) + "：" + txt;
   $("newMsgBar").classList.add("show");
   clearTimeout(notifyNewMsg._t);
   notifyNewMsg._t = setTimeout(function(){ $("newMsgBar").classList.remove("show"); }, 5200);
@@ -1511,14 +1611,14 @@ function reply(){
         var r = Math.random();
         if(r < 0.26){
           var sk = pickStk();
-          if(sk) pushMsg({ who:"them", type:"sticker", src:sk.src, emoji:sk.emoji, t:Date.now() });
+          if(sk) pushMsg({ who:"them", mid:randMember(), type:"sticker", src:sk.src, emoji:sk.emoji, t:Date.now() });
         }else if(r < 0.38){
-          pushMsg({ who:"them", type:"voice", dur: 2 + Math.floor(Math.random() * 5), t:Date.now() });
+          pushMsg({ who:"them", mid:randMember(), type:"voice", dur: 2 + Math.floor(Math.random() * 5), t:Date.now() });
         }else if(r < 0.43){
           taSendRedPacket();
         }else{
           var text = pickCard();
-          if(text) pushMsg({ who:"them", type:"text", text:text, t:Date.now() });
+          if(text) pushMsg({ who:"them", mid:randMember(), type:"text", text:text, t:Date.now() });
         }
         if(i < total - 1) showTyping();
       }, delay * (i + 1)));
@@ -1625,14 +1725,6 @@ function renderStkPage(){
   var g = $("stkGridPage");
   if(!g) return;
   g.innerHTML = "";
-  BUILTIN_STK.forEach(function(e){
-    var b = document.createElement("button");
-    b.type = "button";
-    b.className = "stk emoji";
-    b.textContent = e;
-    b.onclick = function(){ sendBuiltin(e); };
-    g.appendChild(b);
-  });
   cfg.stickers.forEach(function(src, i){ g.appendChild(stkCell(src, i)); });
   var add = document.createElement("button");
   add.type = "button";
@@ -1676,11 +1768,7 @@ function sendBuiltin(e){
 }
 function openSticker(){
   var html = '<div class="sheet-title">表情包 · 你和 ta 通用</div>' +
-    '<div class="stk-sub">内置表情</div><div class="stk-grid">';
-  BUILTIN_STK.forEach(function(e){
-    html += '<button type="button" class="stk emoji" data-e="' + e + '">' + e + '</button>';
-  });
-  html += '</div><div class="stk-sub">我的表情</div><div class="stk-grid">';
+    '<div class="stk-sub">我的表情</div><div class="stk-grid">';
   cfg.stickers.forEach(function(src, i){
     html += '<button type="button" class="stk" data-i="' + i + '"><img src="' + src + '" alt="表情"></button>';
   });
@@ -1763,7 +1851,7 @@ $("avatar").onclick = function(){
     showTyping();
     replyTimers.push(setTimeout(function(){
       hideTyping();
-      pushMsg({ who:"them", type:"text", text: PATS[Math.floor(Math.random()*PATS.length)], t:Date.now() });
+      pushMsg({ who:"them", mid:randMember(), type:"text", text: PATS[Math.floor(Math.random()*PATS.length)], t:Date.now() });
     }, replyDelayMs()));
   }
   lastTap = now;
@@ -1783,14 +1871,14 @@ function pingThem(){
         var r = Math.random();
         if(r < 0.2){
           var sk = pickStk();
-          if(sk) pushMsg({ who:"them", type:"sticker", src:sk.src, emoji:sk.emoji, t:Date.now() });
+          if(sk) pushMsg({ who:"them", mid:randMember(), type:"sticker", src:sk.src, emoji:sk.emoji, t:Date.now() });
         }else if(r < 0.32){
-          pushMsg({ who:"them", type:"voice", dur:2 + Math.floor(Math.random() * 5), t:Date.now() });
+          pushMsg({ who:"them", mid:randMember(), type:"voice", dur:2 + Math.floor(Math.random() * 5), t:Date.now() });
         }else if(i === 0 && r < 0.46){
           taSendRedPacket();
         }else{
           var t = pickCard();
-          if(t) pushMsg({ who:"them", type:"text", text:t, t:Date.now() });
+          if(t) pushMsg({ who:"them", mid:randMember(), type:"text", text:t, t:Date.now() });
         }
         if(i < total - 1) showTyping();
       }, delay * (i + 1)));
@@ -1879,12 +1967,12 @@ function continueTalk(){
     var stk = pickStk();
     var r = Math.random();
     if(stk && r < 0.3){
-      pushMsg({ who:"them", type:"sticker", src:stk.src, emoji:stk.emoji, t:Date.now() });
+      pushMsg({ who:"them", mid:randMember(), type:"sticker", src:stk.src, emoji:stk.emoji, t:Date.now() });
     }else if(r < 0.4){
-      pushMsg({ who:"them", type:"voice", dur:2 + Math.floor(Math.random() * 5), t:Date.now() });
+      pushMsg({ who:"them", mid:randMember(), type:"voice", dur:2 + Math.floor(Math.random() * 5), t:Date.now() });
     }else{
       var t = pickCard();
-      if(t) pushMsg({ who:"them", type:"text", text:t, t:Date.now() });
+      if(t) pushMsg({ who:"them", mid:randMember(), type:"text", text:t, t:Date.now() });
     }
   }, Math.min(2400, Math.max(600, replyDelayMs()))));
 }
@@ -1935,21 +2023,21 @@ function scheduleRpReaction(m){
     var r = Math.random();
     if(r < 0.68){
       setRpStatus(m, "opened");
-      pushMsg({ sys:true, text:cfg.name + " 领取了你的红包 ¥" + m.amount, t:Date.now() });
-      setTimeout(function(){ pushMsg({ who:"them", type:"text", text:pickRnd(RP_THANKS), t:Date.now() }); }, 900);
+      pushMsg({ sys:true, text:senderName(m.mid) + " 领取了你的红包 ¥" + m.amount, t:Date.now() });
+      setTimeout(function(){ pushMsg({ who:"them", mid:m.mid, type:"text", text:pickRnd(RP_THANKS), t:Date.now() }); }, 900);
     }else if(r < 0.9){
       setRpStatus(m, "refunded");
-      pushMsg({ sys:true, text:cfg.name + " 退回了你的红包", t:Date.now() });
-      setTimeout(function(){ pushMsg({ who:"them", type:"text", text:pickRnd(RP_REFUNDS), t:Date.now() }); }, 900);
+      pushMsg({ sys:true, text:senderName(m.mid) + " 退回了你的红包", t:Date.now() });
+      setTimeout(function(){ pushMsg({ who:"them", mid:m.mid, type:"text", text:pickRnd(RP_REFUNDS), t:Date.now() }); }, 900);
     }else{
       setRpStatus(m, "opened");
-      pushMsg({ sys:true, text:cfg.name + " 领取了你的红包 ¥" + m.amount, t:Date.now() });
-      setTimeout(taSendRedPacket, 1400);
+      pushMsg({ sys:true, text:senderName(m.mid) + " 领取了你的红包 ¥" + m.amount, t:Date.now() });
+      setTimeout(function(){ taSendRedPacket(m.mid); }, 1400);
     }
   }, 1600 + Math.random() * 2200);
 }
-function taSendRedPacket(){
-  pushMsg({ who:"them", type:"redpacket", amount:pickRnd(["1.11","2.22","5.20","6.66","8.88","9.99","13.14"]),
+function taSendRedPacket(mid){
+  pushMsg({ who:"them", mid:mid === undefined ? randMember() : mid, type:"redpacket", amount:pickRnd(["1.11","2.22","5.20","6.66","8.88","9.99","13.14"]),
     note:pickRnd(["买点甜的","给你零花","今天也要开心","收下我的小心意"]), status:"pending", t:Date.now() });
   toast("收到一个红包，点开看看 🧧");
 }
@@ -1962,7 +2050,7 @@ function onRedPacketTap(m){
   pendingRp = m;
   $("rpOpenAmt").textContent = "¥" + m.amount;
   $("rpOpenNote").textContent = m.note || "一点心意";
-  $("rpOpenFrom").textContent = "来自 " + cfg.name;
+  $("rpOpenFrom").textContent = "来自 " + senderName(m.mid);
   $("rpOpenBtn").disabled = false;
   $("rpOpen").classList.add("open");
 }
@@ -1996,7 +2084,7 @@ $("rpOpenBtn").onclick = function(){
       saveChat();
       renderAll();
       pushMsg({ sys:true, text:"你领取了 " + cfg.name + " 的红包 ¥" + m.amount, t:Date.now() });
-      setTimeout(function(){ pushMsg({ who:"them", type:"text", text:pickRnd(RP_RECEIVE), t:Date.now() }); }, 800);
+      setTimeout(function(){ pushMsg({ who:"them", mid:randMember(), type:"text", text:pickRnd(RP_RECEIVE), t:Date.now() }); }, 800);
     }
   }, 780);
 };
@@ -2041,7 +2129,7 @@ function throwItem(it, byMe){
   }, 760);
   if(byMe && Math.random() < 0.5){
     setTimeout(function(){
-      pushMsg({ who:"them", type:"text", text:pickRnd(THROW_LINES), t:Date.now() });
+      pushMsg({ who:"them", mid:randMember(), type:"text", text:pickRnd(THROW_LINES), t:Date.now() });
     }, 950);
   }
   if(byMe && Math.random() < 0.45){
@@ -2211,7 +2299,7 @@ function endCall(label){
   if(dur >= 2){
     pushMsg({ sys:true, text:"视频通话已结束 · " + fmtSec(dur), t: Date.now() });
     setTimeout(function(){
-      pushMsg({ who:"them", type:"text", text:pickRnd(CALL_LINES), t:Date.now() });
+      pushMsg({ who:"them", mid:randMember(), type:"text", text:pickRnd(CALL_LINES), t:Date.now() });
     }, 700);
   }else if(dur > 0){
     pushMsg({ sys:true, text:"通话已挂断 · " + fmtSec(dur), t: Date.now() });
@@ -2469,6 +2557,26 @@ $("modalOk").onclick = function(){
     save(KEY.lib, lib);
     renderLib();
     closeModal();
+  }
+  if(modalMode === "nf"){
+    var nn = v.trim().slice(0, 10);
+    if(!nn) return closeModal();
+    cfg.friends.push({ id:"f" + uid(), name:nn, avatar:"" });
+    saveCfg();
+    closeModal();
+    openConvSheet();
+    toast("新好友「" + nn + "」来了");
+  }
+  if(modalMode === "rf"){
+    var rn = v.trim().slice(0, 10);
+    if(!rn) return closeModal();
+    for(var fi = 0; fi < cfg.friends.length; fi++){
+      if(cfg.friends[fi].id === pendingFriendId) cfg.friends[fi].name = rn;
+    }
+    saveCfg();
+    closeModal();
+    applyCfg();
+    openFriendMgmt();
   }
   if(modalMode === "memo"){
     cfg.memo = v.trim().slice(0,80);
@@ -3117,10 +3225,13 @@ $("prevMonth").onclick = function(){ viewMonth.setMonth(viewMonth.getMonth()-1);
 $("nextMonth").onclick = function(){ viewMonth.setMonth(viewMonth.getMonth()+1); renderDiary(); };
 
 /* ================= 头像与设置 ================= */
-function avatarHtml(who){
-  var src = who === "me" ? cfg.myAvatar : cfg.taAvatar;
-  if(src) return '<img src="' + src + '" alt="">';
-  return who === "me" ? "🧀" : "🌷";
+function avatarHtml(who, mid){
+  if(who === "me"){
+    return cfg.myAvatar ? '<img src="' + cfg.myAvatar + '" alt="">' : "🧀";
+  }
+  var f = senderFriend(mid);
+  if(f && f.avatar) return '<img src="' + f.avatar + '" alt="">';
+  return "🌷";
 }
 function paintAvatar(el, who){
   if(el) el.innerHTML = avatarHtml(who);
@@ -3132,7 +3243,7 @@ function renderSettings(){
   $("setDelay").value = cfg.replyDelay;
   $("setMin").value = cfg.minReplies;
   $("setMax").value = cfg.maxReplies;
-  paintAvatar($("taAvPreview"), "them");
+  if($("taAvPreview")) $("taAvPreview").innerHTML = friendAvatarHtml(mainFriend());
   paintAvatar($("myAvPreview"), "me");
   if($("stkCount")) $("stkCount").textContent = cfg.stickers.length;
   updateStorageInfo();
@@ -3150,12 +3261,159 @@ function updateStorageInfo(){
   el.textContent = "已用存储：约 " + (kb >= 1024 ? (kb / 1024).toFixed(1) + " MB" : kb + " KB") + "（多数浏览器上限约 5 MB）";
   el.style.color = bytes > 3.6 * 1024 * 1024 ? "#E8698F" : "";
 }
+/* ================= 会话 / 好友 / 群聊 ================= */
+var pendingFriendId = null;
+function openConv(conv){
+  if(conv.t === "group" && !cfg.groups.some(function(g){ return g.id === conv.id; })) return;
+  if(conv.t === "friend" && !friendById(conv.id)) return;
+  clearReplies(); clearQuote();
+  cfg.conv = conv;
+  saveCfg();
+  chat = load(chatKey(), []);
+  applyCfg();
+  renderAll();
+  renderStats();
+  hideSheet();
+  toast("已切换到「" + convName() + "」");
+}
+function convRow(t, id, name, sub, avatar, tag){
+  var on = cfg.conv.t === t && cfg.conv.id === id;
+  return '<button type="button" class="conv-row' + (on ? ' on' : '') + '" data-t="' + t + '" data-id="' + id + '">' +
+    '<span class="conv-av">' + avatar + '</span>' +
+    '<span class="conv-meta"><b>' + esc(name) + '</b><i>' + esc(sub) + '</i></span>' +
+    (tag ? '<span class="conv-tag">' + tag + '</span>' : '') + '</button>';
+}
+function openConvSheet(){
+  var html = '<div class="sheet-title">会话</div><p class="hint">单聊随时切换，群聊至少需要 2 位好友</p>';
+  allFriends().forEach(function(f){
+    html += convRow("friend", f.id, f.name, f.id === "main" ? "主好友 · 一对一" : "好友 · 一对一", friendAvatarHtml(f), f.id === "main" ? "单聊" : "");
+  });
+  cfg.groups.forEach(function(g){
+    var av = (friendById(g.members[0]) && friendById(g.members[0]).avatar && friendById(g.members[1]) && friendById(g.members[1]).avatar)
+      ? '<span class="stack"><img src="' + friendById(g.members[0]).avatar + '" alt=""><img src="' + friendById(g.members[1]).avatar + '" alt=""></span>'
+      : "🫂";
+    html += convRow("group", g.id, g.name, g.members.length + " 人 · " + g.members.map(function(m){ var f = friendById(m); return f ? f.name : ""; }).join("、"), av, "群聊");
+  });
+  html += '<div style="display:flex;gap:8px;margin-top:12px">' +
+    '<button type="button" class="ghost-btn" id="gcCreate" style="flex:1;margin:0">＋ 创建群聊</button>' +
+    '<button type="button" class="ghost-btn" id="gcAdd" style="flex:1;margin:0">＋ 添加好友</button></div>' +
+    '<button type="button" class="ghost-btn" id="gcFriends" style="margin-top:8px">好友管理</button>';
+  if(allFriends().length < 2) html += '<p class="hint" style="margin-top:8px">现在只有 1 位好友，先在「好友管理」里添加一位，才能建群</p>';
+  showSheet(html);
+  document.querySelectorAll("#sheetBody .conv-row").forEach(function(b){
+    b.onclick = function(){ openConv({ t:b.getAttribute("data-t"), id:b.getAttribute("data-id") }); };
+  });
+  $("gcCreate").onclick = openGroupCreate;
+  $("gcAdd").onclick = function(){ openModal("nf", "添加好友", "给新好友取个名字", "比如：阿橘", ""); };
+  $("gcFriends").onclick = openFriendMgmt;
+}
+function openFriendMgmt(){
+  var html = '<div class="sheet-title">好友</div><p class="hint">主好友在「人物设置」里改名字和头像；这里管理后加的好友</p>';
+  var fs = allFriends();
+  fs.forEach(function(f){
+    html += '<div class="conv-row"><span class="conv-av">' + friendAvatarHtml(f) + '</span>' +
+      '<span class="conv-meta"><b>' + esc(f.name) + '</b><i>' + (f.id === "main" ? "主好友 · 不可删除" : "好友") + '</i></span>' +
+      (f.id === "main" ? "" :
+        '<span class="wg-ops"><button type="button" data-rn="' + f.id + '">改名</button>' +
+        '<button type="button" data-av="' + f.id + '">头像</button>' +
+        '<button type="button" data-rm="' + f.id + '">✕</button></span>') + '</div>';
+  });
+  html += '<button type="button" class="ghost-btn" id="addFriendBtn" style="margin-top:10px">＋ 添加好友</button>';
+  showSheet(html);
+  $("addFriendBtn").onclick = function(){ openModal("nf", "添加好友", "给新好友取个名字", "比如：阿橘", ""); };
+  document.querySelectorAll("#sheetBody [data-rn]").forEach(function(b){
+    b.onclick = function(){
+      pendingFriendId = b.getAttribute("data-rn");
+      var f = friendById(pendingFriendId);
+      openModal("rf", "改名字", "改完立刻生效", f ? f.name : "", f ? f.name : "");
+    };
+  });
+  document.querySelectorAll("#sheetBody [data-av]").forEach(function(b){
+    b.onclick = function(){ pendingFriendId = b.getAttribute("data-av"); $("friendAvatarInput").click(); };
+  });
+  document.querySelectorAll("#sheetBody [data-rm]").forEach(function(b){
+    b.onclick = function(){
+      var id = b.getAttribute("data-rm");
+      cfg.friends = cfg.friends.filter(function(f){ return f.id !== id; });
+      cfg.groups = cfg.groups.filter(function(g){
+        g.members = g.members.filter(function(m){ return m !== id; });
+        return g.members.length >= 2;
+      });
+      if(cfg.conv.t === "friend" && cfg.conv.id === id) cfg.conv = { t:"friend", id:"main" };
+      if(cfg.conv.t === "group" && !cfg.groups.some(function(g){ return g.id === cfg.conv.id; })) cfg.conv = { t:"friend", id:"main" };
+      saveCfg();
+      chat = load(chatKey(), []);
+      applyCfg(); renderAll(); renderStats();
+      openFriendMgmt();
+      toast("已删除好友");
+    };
+  });
+}
+function openGroupCreate(){
+  var fs = allFriends();
+  if(fs.length < 2){ toast("先添加一位好友，才能建群"); openFriendMgmt(); return; }
+  var sel = fs.map(function(f){ return f.id; });
+  var html = '<div class="sheet-title">创建群聊</div><p class="hint">选择至少 2 位好友</p>' +
+    '<input class="gc-name" id="gcName" placeholder="群名字，比如：深夜小食堂" maxlength="12">' +
+    '<div class="gc-list">' + fs.map(function(f){
+      return '<label class="gc-item"><input type="checkbox" value="' + f.id + '" checked>' +
+        '<span class="conv-av" style="width:30px;height:30px;font-size:13px">' + friendAvatarHtml(f) + '</span>' +
+        '<span>' + esc(f.name) + '</span></label>';
+    }).join("") + '</div>' +
+    '<button type="button" class="primary" id="gcGo" style="width:100%;margin-top:6px">创建并进入</button>';
+  showSheet(html);
+  document.querySelectorAll("#sheetBody .gc-item input").forEach(function(cb){
+    cb.onchange = function(){
+      var id = cb.value;
+      if(cb.checked){ if(sel.indexOf(id) < 0) sel.push(id); }
+      else sel = sel.filter(function(x){ return x !== id; });
+    };
+  });
+  $("gcGo").onclick = function(){
+    var name = ($("gcName").value || "").trim().slice(0, 12) || "我们的小窝";
+    if(sel.length < 2){ toast("至少选 2 位好友呀"); return; }
+    var g = { id: "g" + uid(), name: name, members: sel.slice() };
+    cfg.groups.push(g);
+    saveCfg();
+    openConv({ t:"group", id:g.id });
+  };
+}
+$("convBtn").onclick = openConvSheet;
+var whoEl = document.querySelector(".who");
+if(whoEl) whoEl.onclick = openConvSheet;
+$("friendAvatarInput").onchange = function(e){
+  var f = e.target.files && e.target.files[0];
+  if(!f || !pendingFriendId) return;
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    var img = new Image();
+    img.onload = function(){
+      var max = 180, w = img.width, h = img.height;
+      var r = Math.min(max / w, max / h, 1);
+      w = Math.round(w * r); h = Math.round(h * r);
+      var cv = document.createElement("canvas");
+      cv.width = w; cv.height = h;
+      cv.getContext("2d").drawImage(img, 0, 0, w, h);
+      var src = cv.toDataURL("image/jpeg", 0.8);
+      for(var i = 0; i < cfg.friends.length; i++){
+        if(cfg.friends[i].id === pendingFriendId) cfg.friends[i].avatar = src;
+      }
+      saveCfg();
+      applyCfg(); renderAll(); openFriendMgmt();
+      toast("头像换好啦");
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(f);
+  e.target.value = "";
+};
 function applyCfg(){
-  $("nameEl").textContent = cfg.name;
-  $("statusEl").textContent = cfg.status;
+  $("nameEl").textContent = convName();
+  var g = activeGroup();
+  $("statusEl").textContent = g ? (g.members.length + " 位好友 · 群聊") : cfg.status;
   $("profileName").textContent = cfg.name;
-  paintAvatar($("avatar"), "them");
-  paintAvatar($("bigAvatar"), "them");
+  if($("avatar")) $("avatar").innerHTML = convAvatarHtml();
+  if($("bigAvatar")) $("bigAvatar").innerHTML = friendAvatarHtml(mainFriend());
 }
 $("setName").addEventListener("input", function(e){
   cfg.name = e.target.value.trim() || "念念";
@@ -3237,7 +3495,7 @@ $("clearChat").onclick = function(){
   if(confirm("确定清空所有聊天记录吗？")){
     clearReplies();
     chat = [];
-    save(KEY.chat, chat);
+    save(chatKey(), chat);
     renderAll(); renderStats();
     toast("已清空");
   }
@@ -3331,6 +3589,10 @@ document.body.dataset.bubble = String(cfg.bubble || 0);
 document.body.dataset.bshape = cfg.bubbleShape || "standard";
 setSkin(cfg.skinId || "");
 document.documentElement.style.setProperty("--chatfont", fontCss(cfg.fontId));
+
+/* 输入法/弹层退出后，避免整页被顶出可视区 */
+document.addEventListener("focusout", function(){ setTimeout(function(){ window.scrollTo(0,0); }, 80); });
+document.addEventListener("focusin", function(){ setTimeout(function(){ window.scrollTo(0,0); }, 260); });
 
 /* 存储不可用时给出提示 */
 if(!Store.available){
