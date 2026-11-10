@@ -562,6 +562,58 @@ body[data-bubble="11"] .row.them .msg{background-color:#FFFDFB;background-image:
 .gl-item.on{outline:2px solid var(--pink-deep);outline-offset:1px}
 .gl-item .glp{width:100%;border-radius:12px;height:40px;display:flex;align-items:center;justify-content:center;font-size:10.5px;letter-spacing:.05em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.85)}
 .gl-item span{font-size:10.5px;color:#A07785}
+
+/* ==== 通话：大小预设 / 沉浸 / 胶囊 ==== */
+.cw-presets{position:absolute;right:8px;top:44px;z-index:9;display:none;flex-direction:column;gap:4px;padding:6px;border-radius:14px;background:rgba(38,24,30,.88);backdrop-filter:blur(10px);box-shadow:0 10px 24px rgba(0,0,0,.35)}
+.cw-presets.open{display:flex}
+.cw-presets button{border:none;background:rgba(255,255,255,.12);color:#fff;font-size:11.5px;padding:7px 12px;border-radius:9px;white-space:nowrap}
+.cw-presets button:active{background:rgba(255,255,255,.26)}
+.cw-imm{position:absolute;right:8px;top:44%;z-index:6;width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.16);backdrop-filter:blur(6px);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center}
+.cw-imm.on{background:rgba(255,255,255,.34)}
+.callwin.immersive .cw-head,.callwin.immersive .cw-ctrl,.callwin.immersive .cw-body,.callwin.immersive .cw-resize{opacity:0;pointer-events:none}
+.callwin .cw-shade{transition:opacity .3s}
+.callwin.immersive .cw-shade{opacity:0}
+.cw-ctrl{flex-wrap:wrap;gap:14px 22px}
+.callpill{width:auto;min-width:138px;height:52px;border-radius:99px;padding:6px 8px 6px 6px;gap:8px;justify-content:flex-start}
+.callpill .p-av{width:40px;height:40px;border-radius:50%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.14)}
+.callpill .p-av img{width:100%;height:100%;object-fit:cover}
+.callpill .p-badge{position:absolute;left:38px;top:6px;width:9px;height:9px;border-radius:50%;background:#7FE0A0;border:2px solid #2E1F27;animation:pillPulse 1.8s infinite}
+@keyframes pillPulse{0%,100%{opacity:1}50%{opacity:.35}}
+.callpill .p-meta{display:flex;flex-direction:column;gap:1px;min-width:0}
+.callpill .p-name{font-size:11px;color:#fff;letter-spacing:.03em;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.callpill .p-time{position:static;background:none;padding:0;font-size:10.5px;text-align:left;color:#F7C8D8;letter-spacing:.08em}
+.callpill .p-hang{width:30px;height:30px;border-radius:50%;border:none;background:#F2607C;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bg-grads{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 14px}
+.bg-grad{height:56px;border-radius:12px;border:1px solid rgba(255,255,255,.6);box-shadow:0 4px 12px rgba(120,60,80,.18)}
+/* ==== milk 官方气泡形状 ==== */
+body[data-bshape="standard"] .row.them .msg{border-radius:4px 18px 18px 18px}
+body[data-bshape="standard"] .row.me .msg{border-radius:18px 4px 18px 18px}
+body[data-bshape="rounded"] .row.them .msg{border-radius:18px 18px 18px 6px}
+body[data-bshape="rounded"] .row.me .msg{border-radius:18px 18px 6px 18px}
+body[data-bshape="rounded-large"] .row.them .msg{border-radius:26px 26px 26px 8px}
+body[data-bshape="rounded-large"] .row.me .msg{border-radius:26px 26px 8px 26px}
+body[data-bshape="square"] .row.them .msg{border-radius:8px 8px 8px 2px}
+body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
+/* ==== 气泡图库 ==== */
+.gl-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gl-item{border:1px solid rgba(247,200,216,.55);background:rgba(255,255,255,.72);border-radius:16px;padding:10px 8px 8px;display:flex;flex-direction:column;gap:8px;align-items:center;font-size:11.5px;color:var(--ink-soft)}
+.gl-item.on{border-color:var(--pink-deep);box-shadow:0 6px 18px rgba(232,127,164,.22)}
+.glp{display:block;width:100%;padding:10px;border-radius:14px;font-size:11px;line-height:1.4;color:#7A4A5C;box-shadow:0 3px 12px rgba(150,80,110,.12);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gl-shapes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.gl-shapes button{border:1px solid rgba(247,200,216,.55);background:rgba(255,255,255,.7);border-radius:12px;padding:8px 4px;font-size:11px;color:var(--ink-soft)}
+.gl-shapes button.on{border-color:var(--pink-deep);color:var(--pink-rose);box-shadow:0 4px 14px rgba(232,127,164,.2)}
+.p0,.glp.p0{background:linear-gradient(135deg,#F8C2D4,#ED97B7);color:#fff}
+.p1,.glp.p1{background:linear-gradient(135deg,#FFD9C5,#FFB79C);color:#7A4433}
+.p2,.glp.p2{background:linear-gradient(135deg,#D6F3E4,#AEE3C6);color:#3F6B55}
+.p3,.glp.p3{background:linear-gradient(135deg,#DED9FF,#B9C3FF);color:#4A4380}
+.p4,.glp.p4{background:linear-gradient(135deg,#F3DFC9,#E0BE9E);color:#6B4A34}
+.p5,.glp.p5{background:linear-gradient(135deg,#FF3D6E,#FF8FAE);color:#fff}
+.p6,.glp.p6{background:repeating-linear-gradient(0deg,rgba(255,255,255,.55) 0 6px,transparent 6px 12px),repeating-linear-gradient(90deg,rgba(232,127,164,.35) 0 6px,transparent 6px 12px),linear-gradient(135deg,#FFF1F5,#FFDCE8);color:#8A5A6C}
+.p7,.glp.p7{background:radial-gradient(circle at 6px 6px,rgba(255,255,255,.95) 2px,transparent 2.5px) 0 0/12px 12px,linear-gradient(135deg,#FFE7EF,#FFC9DA);color:#8A4F63}
+.p8,.glp.p8{background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.9) 1px,transparent 1.6px) 0 0/14px 14px,radial-gradient(circle at 70% 75%,rgba(255,255,255,.6) 1px,transparent 1.6px) 0 0/22px 22px,linear-gradient(160deg,#3B2C4A,#6A4E82);color:#F4E9FF}
+.p9,.glp.p9{background:repeating-linear-gradient(45deg,rgba(232,127,164,.14) 0 3px,transparent 3px 9px),linear-gradient(135deg,#FFFAF7,#FFE9F1);color:#8A5A6C}
+.p10,.glp.p10{background:repeating-linear-gradient(90deg,rgba(40,30,35,.08) 0 5px,transparent 5px 10px),linear-gradient(135deg,#FBFAF7,#EEEAE3);color:#5C5348}
+.p11,.glp.p11{background:radial-gradient(ellipse at 20% 25%,rgba(255,190,215,.85),transparent 55%),radial-gradient(ellipse at 80% 70%,rgba(190,220,255,.8),transparent 55%),linear-gradient(135deg,#FFEDF5,#EAF3FF);color:#7A5266}
 </style>
 </head>
 <body>
@@ -856,8 +908,8 @@ body[data-bubble="11"] .row.them .msg{background-color:#FFFDFB;background-image:
   <div class="cw-head" id="callHead">
     <span class="cw-badge"><i class="cw-dot"></i><span id="callTime">00:00</span></span>
     <div class="cw-tools">
+      <button type="button" id="sizeBtn" aria-label="调整大小">⤢</button>
       <button type="button" id="minBtn" aria-label="收起">▾</button>
-      <button type="button" id="closeBtn" aria-label="挂断">✕</button>
     </div>
   </div>
   <div class="cw-body">
@@ -868,16 +920,27 @@ body[data-bubble="11"] .row.them .msg{background-color:#FFFDFB;background-image:
   </div>
   <div class="cw-ctrl">
     <button type="button" class="cw-btn" id="muteBtn"><i>🎙️</i><em>静音</em></button>
-    <button type="button" class="cw-btn" id="bgBtn"><i>🎨</i><em>背景</em></button>
+    <button type="button" class="cw-btn" id="bgBtn"><i>🖼️</i><em>背景</em></button>
     <button type="button" class="cw-btn end" id="hangBtn"><i>✕</i><em>挂断</em></button>
   </div>
+  <button type="button" class="cw-imm" id="immBtn" aria-label="沉浸模式">👁️</button>
   <div class="cw-resize" id="callResize"></div>
+  <div class="cw-presets" id="callPresets">
+    <button type="button" data-sz="small">小窗 260×360</button>
+    <button type="button" data-sz="mid">中窗 320×450</button>
+    <button type="button" data-sz="big">大窗 92%×72%</button>
+  </div>
+  <input type="file" id="callBgInput" accept="image/*" hidden>
 </div>
 
 <div class="callpill" id="callPill">
   <div class="p-av" id="pillAv">🌷</div>
   <span class="p-badge"></span>
-  <span class="p-time" id="pillTime">00:00</span>
+  <div class="p-meta">
+    <span class="p-name" id="pillName">念念</span>
+    <span class="p-time" id="pillTime">00:00</span>
+  </div>
+  <button type="button" class="p-hang" id="pillHang" aria-label="挂断">✕</button>
 </div>
 
 <div class="callin" id="callIn">
@@ -1039,6 +1102,10 @@ if(cfg.maxReplies == null) cfg.maxReplies = Math.max(2, cfg.minReplies);
 if(!cfg.startDate) cfg.startDate = new Date().toISOString().slice(0,10);
 if(cfg.taOffset == null) cfg.taOffset = 360;
 if(cfg.bubble == null) cfg.bubble = 0;
+if(!cfg.bubbleShape) cfg.bubbleShape = "standard";
+if(!cfg.callSize) cfg.callSize = "mid";
+if(cfg.callBg == null) cfg.callBg = "";
+if(cfg.callBgIdx == null) cfg.callBgIdx = 0;
 if(!cfg.mood) cfg.mood = 0;
 var chat  = load(KEY.chat, []);
 var diary = load(KEY.diary, {});
@@ -2015,8 +2082,8 @@ function openVoice(){
     $("recOverlay").classList.remove("show");
   });
 }
-/* 视频通话（浮窗 · 参考 milk 重做） */
-var callSec = 0, callTimer = null, callConnectT = null, callLive = false, callActive = false, callBgIdx = 0;
+/* 视频通话（对齐 milk：大小预设 / 沉浸 / 自定义背景 / 来电） */
+var callSec = 0, callTimer = null, callConnectT = null, callLive = false, callActive = false, callStartAt = 0;
 var CALL_BGS = [
   "linear-gradient(155deg,#3A2530,#4A2F3A 45%,#6B4A56)",
   "linear-gradient(155deg,#233247,#31465E 48%,#4C6A86)",
@@ -2024,53 +2091,102 @@ var CALL_BGS = [
   "linear-gradient(155deg,#2B3A35,#3D534A 48%,#5E7D6E)"
 ];
 var CALL_LINES = ["刚刚听到你的声音啦，好开心 ♡", "下次还想和你打很久很久。", "挂掉之前差一点舍不得。"];
+var CALL_SIZES = { small: [260, 360], mid: [320, 450], big: [0.92, 0.72] };
 function fmtSec(s){ return pad(Math.floor(s / 60)) + ":" + pad(s % 60); }
-function startCall(){
+function applyCallBg(){
+  var bg = $("callBg");
+  if(cfg.callBg){
+    bg.style.background = "url(" + cfg.callBg + ") center/cover no-repeat";
+  }else{
+    bg.style.background = CALL_BGS[(cfg.callBgIdx || 0) % CALL_BGS.length];
+  }
+}
+function applyCallSize(name, silent){
+  var w = $("call"), sz = CALL_SIZES[name] || CALL_SIZES.mid;
+  var W = sz[0] < 1 ? Math.round(innerWidth * sz[0]) : sz[0];
+  var H = sz[1] < 1 ? Math.round(innerHeight * sz[1]) : sz[1];
+  w.style.width = W + "px";
+  w.style.height = H + "px";
+  if(!silent){ cfg.callSize = name; saveCfg(); }
+}
+function callDur(){
+  if(!callStartAt) return 0;
+  return Math.max(0, Math.floor((Date.now() - callStartAt) / 1000));
+}
+function startCall(isPartner){
   var w = $("call");
-  callActive = true; callLive = false; callSec = 0;
+  callActive = true; callLive = false; callSec = 0; callStartAt = 0;
   clearInterval(callTimer); clearTimeout(callConnectT);
-  w.classList.remove("live");
-  w.style.left = ""; w.style.top = ""; w.style.width = ""; w.style.height = ""; w.style.transform = "";
+  w.classList.remove("live", "immersive");
+  w.style.left = ""; w.style.top = ""; w.style.transform = "";
+  applyCallSize(cfg.callSize || "mid", true);
   $("callAv").innerHTML = avatarHtml("them");
   $("callName").textContent = cfg.name;
-  $("callState").textContent = "正在连接…";
-  $("callTime").textContent = "00:00";
-  $("pillTime").textContent = "00:00";
+  $("pillName").textContent = cfg.name;
   $("pillAv").innerHTML = avatarHtml("them");
-  $("callBg").style.background = CALL_BGS[callBgIdx % CALL_BGS.length];
-  $("muteBtn").classList.remove("on");
+  $("pillTime").textContent = "00:00";
+  $("callTime").textContent = "连接中";
+  $("callState").textContent = isPartner ? "对方已接通…" : "正在连接…";
+  $("callPresets").classList.remove("open");
   $("callPill").classList.remove("show");
+  $("muteBtn").classList.remove("on");
+  $("immBtn").classList.remove("on");
+  $("immBtn").textContent = "👁️";
+  applyCallBg();
   w.classList.add("open");
+  if(!isPartner && Math.random() < 0.35){
+    callConnectT = setTimeout(function(){
+      if(!callActive) return;
+      var labels = [
+        cfg.name + " 未接听",
+        cfg.name + " 正在忙，无法接听",
+        cfg.name + " 拒绝了通话",
+        cfg.name + " 暂时无法接听"
+      ];
+      endCall(labels[Math.floor(Math.random() * labels.length)]);
+    }, 4000 + Math.random() * 8000);
+    return;
+  }
   callConnectT = setTimeout(function(){
     if(!callActive) return;
-    if(Math.random() < 0.08){
-      $("callState").textContent = "对方无应答";
-      setTimeout(function(){ if(callActive) endCall(false); }, 1200);
-      return;
-    }
-    callLive = true;
+    callLive = true; callStartAt = Date.now();
     w.classList.add("live");
     $("callState").textContent = "通话中 · 视频";
+    $("callTime").textContent = "00:00";
     callTimer = setInterval(function(){
-      callSec++;
+      callSec = callDur();
       $("callTime").textContent = fmtSec(callSec);
       $("pillTime").textContent = fmtSec(callSec);
     }, 1000);
-  }, 2200);
+  }, 1400 + Math.random() * 1400);
 }
-function endCall(manual){
-  if(!callActive && !$("callIn").classList.contains("show")) return;
-  var wasLive = callLive, sec = callSec;
-  callActive = false; callLive = false;
+function endCall(label){
+  if(!callActive) return;
+  var dur = callDur();
+  callActive = false; callLive = false; callStartAt = 0;
   clearInterval(callTimer); clearTimeout(callConnectT);
   $("call").classList.remove("open");
   $("call").classList.remove("live");
+  $("call").classList.remove("immersive");
   $("call").style.width = ""; $("call").style.height = "";
+  $("callPresets").classList.remove("open");
   $("callPill").classList.remove("show");
   $("callIn").classList.remove("show");
-  pushMsg({ sys:true, text:"视频通话 · " + (sec ? fmtSec(sec) : "未接通"), t:Date.now() });
-  if(wasLive && sec > 0){
-    setTimeout(function(){ pushMsg({ who:"them", type:"text", text:pickRnd(CALL_LINES), t:Date.now() }); }, 700);
+  $("immBtn").classList.remove("on");
+  $("immBtn").textContent = "👁️";
+  if(label){
+    pushMsg({ sys:true, text: label, t: Date.now() });
+    return;
+  }
+  if(dur >= 2){
+    pushMsg({ sys:true, text:"视频通话已结束 · " + fmtSec(dur), t: Date.now() });
+    setTimeout(function(){
+      pushMsg({ who:"them", type:"text", text:pickRnd(CALL_LINES), t:Date.now() });
+    }, 700);
+  }else if(dur > 0){
+    pushMsg({ sys:true, text:"通话已挂断 · " + fmtSec(dur), t: Date.now() });
+  }else{
+    pushMsg({ sys:true, text:"未接通", t: Date.now() });
   }
 }
 function minimizeCall(){
@@ -2083,16 +2199,77 @@ function expandCall(){
   $("callPill").classList.remove("show");
   $("call").classList.add("open");
 }
-$("hangBtn").onclick = function(){ endCall(true); };
-$("closeBtn").onclick = function(){ endCall(true); };
+$("hangBtn").onclick = function(){ endCall(); };
 $("minBtn").onclick = function(e){ e.stopPropagation(); minimizeCall(); };
+$("pillHang").onclick = function(e){ e.stopPropagation(); endCall(); };
 $("muteBtn").onclick = function(){
   this.classList.toggle("on");
   toast(this.classList.contains("on") ? "已静音" : "已取消静音");
 };
-$("bgBtn").onclick = function(){
-  callBgIdx = (callBgIdx + 1) % CALL_BGS.length;
-  $("callBg").style.background = CALL_BGS[callBgIdx];
+$("immBtn").onclick = function(e){
+  e.stopPropagation();
+  var w = $("call");
+  w.classList.toggle("immersive");
+  var on = w.classList.contains("immersive");
+  this.classList.toggle("on", on);
+  this.textContent = on ? "🙈" : "👁️";
+};
+$("sizeBtn").onclick = function(e){
+  e.stopPropagation();
+  $("callPresets").classList.toggle("open");
+};
+(function(){
+  var btns = $("callPresets").querySelectorAll("button");
+  for(var i = 0; i < btns.length; i++){
+    btns[i].onclick = function(e){
+      e.stopPropagation();
+      applyCallSize(this.getAttribute("data-sz"));
+      $("callPresets").classList.remove("open");
+      toast("窗口大小已调整");
+    };
+  }
+})();
+$("bgBtn").onclick = function(e){
+  e.stopPropagation();
+  var html = '<div class="sheet-title">通话背景</div><p class="hint">选一个渐变色，或上传一张自己的图</p><div class="bg-grads">';
+  for(var i = 0; i < CALL_BGS.length; i++){
+    html += '<button type="button" class="bg-grad" data-bg="' + i + '" style="background:' + CALL_BGS[i] + '"></button>';
+  }
+  html += '</div><button type="button" class="ghost-btn" id="callBgPick">上传图片</button>' +
+          '<button type="button" class="ghost-btn" id="callBgClear">恢复默认</button>';
+  showSheet(html);
+  var box = $("sheetBody");
+  var gs = box.querySelectorAll(".bg-grad");
+  for(var j = 0; j < gs.length; j++){
+    gs[j].onclick = function(){
+      cfg.callBg = ""; cfg.callBgIdx = +this.getAttribute("data-bg"); saveCfg();
+      applyCallBg(); hideSheet();
+    };
+  }
+  $("callBgPick").onclick = function(){ $("callBgInput").click(); };
+  $("callBgClear").onclick = function(){ cfg.callBg = ""; saveCfg(); applyCallBg(); hideSheet(); };
+};
+$("callBgInput").onchange = function(e){
+  var f = e.target.files && e.target.files[0];
+  if(!f) return;
+  var reader = new FileReader();
+  reader.onload = function(){
+    var im = new Image();
+    im.onload = function(){
+      var cv = document.createElement("canvas");
+      var scale = Math.min(1, 900 / Math.max(im.width, im.height));
+      cv.width = Math.round(im.width * scale);
+      cv.height = Math.round(im.height * scale);
+      cv.getContext("2d").drawImage(im, 0, 0, cv.width, cv.height);
+      cfg.callBg = cv.toDataURL("image/jpeg", 0.72);
+      saveCfg(); applyCallBg();
+      hideSheet();
+      toast("通话背景已更新");
+    };
+    im.src = reader.result;
+  };
+  reader.readAsDataURL(f);
+  e.target.value = "";
 };
 /* 浮窗拖动 */
 (function(){
@@ -2132,10 +2309,11 @@ $("bgBtn").onclick = function(){
   h.addEventListener("pointerup", function(){ rs = null; });
   h.addEventListener("pointercancel", function(){ rs = null; });
 })();
-/* 小窗胶囊：拖动 + 点击放大 */
+/* 胶囊：拖动 / 点击放大 */
 (function(){
   var p = $("callPill"), drag = null, moved = false, sx = 0, sy = 0, sup = 0;
   p.addEventListener("pointerdown", function(e){
+    if(e.target.closest(".p-hang")) return;
     var r = p.getBoundingClientRect();
     drag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
     moved = false; sx = e.clientX; sy = e.clientY;
@@ -2151,11 +2329,12 @@ $("bgBtn").onclick = function(){
   });
   p.addEventListener("pointerup", function(){
     if(!drag) return;
-    if(moved){ sup = Date.now(); }
+    if(moved) sup = Date.now();
     drag = null;
   });
   p.addEventListener("pointercancel", function(){ drag = null; });
-  p.addEventListener("click", function(){
+  p.addEventListener("click", function(e){
+    if(e.target.closest(".p-hang")) return;
     if(Date.now() - sup < 320) return;
     expandCall();
   });
@@ -2164,37 +2343,54 @@ $("bgBtn").onclick = function(){
 var inTimer = null, lastIncoming = 0, rpIncoming = false;
 function incomingCall(){
   if(callActive || rpIncoming) return;
-  if(Date.now() - lastIncoming < 60000) return;
+  if(Date.now() - lastIncoming < 45000) return;
   lastIncoming = Date.now(); rpIncoming = true;
   $("inAv").innerHTML = avatarHtml("them");
   $("inName").textContent = cfg.name;
   $("callIn").classList.add("show");
   clearTimeout(inTimer);
-  inTimer = setTimeout(function(){
-    if($("callIn").classList.contains("show")){
-      $("callIn").classList.remove("show");
-      rpIncoming = false;
-      pushMsg({ sys:true, text:"未接来电 · " + cfg.name, t:Date.now() });
-    }
-  }, 22000);
+  if(Math.random() < 0.3){
+    inTimer = setTimeout(function(){
+      if(!$("callIn").classList.contains("show")) return;
+      $("callIn").classList.remove("show"); rpIncoming = false;
+      var labels = [
+        cfg.name + " 的来电，" + (cfg.myName || "我") + "未接听",
+        (cfg.myName || "我") + "拒绝了 " + cfg.name + " 的通话",
+        "错过了 " + cfg.name + " 的来电"
+      ];
+      pushMsg({ sys:true, text: labels[Math.floor(Math.random() * labels.length)], t: Date.now() });
+    }, 4000 + Math.random() * 6000);
+  }else{
+    inTimer = setTimeout(function(){
+      if(!$("callIn").classList.contains("show")) return;
+      $("callIn").classList.remove("show"); rpIncoming = false;
+      pushMsg({ sys:true, text:(cfg.myName || "我") + "未接听 " + cfg.name + " 的来电", t: Date.now() });
+    }, 22000);
+  }
 }
 function maybeIncomingCall(){
   if(callActive || rpIncoming) return;
-  if(Math.random() > 0.07) return;
+  if(Math.random() > 0.12) return;
   setTimeout(function(){ if(!callActive) incomingCall(); }, 4000 + Math.random() * 8000);
 }
+function scheduleRandomCall(){
+  clearTimeout(window._randCallT);
+  window._randCallT = setTimeout(function(){
+    if(!callActive && !rpIncoming && Math.random() < 0.25) incomingCall();
+    scheduleRandomCall();
+  }, (15 + Math.random() * 45) * 60 * 1000);
+}
+scheduleRandomCall();
 $("inAccept").onclick = function(){
   $("callIn").classList.remove("show");
   clearTimeout(inTimer); rpIncoming = false;
-  callBgIdx = 0;
-  startCall();
+  startCall(true);
 };
 $("inReject").onclick = function(){
   $("callIn").classList.remove("show");
   clearTimeout(inTimer); rpIncoming = false;
-  pushMsg({ sys:true, text:"已拒绝 " + cfg.name + " 的通话", t:Date.now() });
+  pushMsg({ sys:true, text:(cfg.myName || "我") + "拒绝了 " + cfg.name + " 的通话", t: Date.now() });
 };
-
 /* ================= 模态框 ================= */
 var modal = $("modal"), modalMode = "bulk";
 function openModal(mode, title, tip, placeholder, value){
@@ -2361,30 +2557,57 @@ function applyBubble(i){
   document.body.dataset.bubble = String(i);
   renderBubbles();
 }
-/* 气泡画廊 */
+/* 气泡图库 */
+var SHAPES = [["standard","标准"],["rounded","圆角"],["rounded-large","大圆角"],["square","方形"]];
+function renderGallery(){
+  var html = '<div class="sheet-title">气泡图库</div>' +
+    '<p class="hint">milk 官方 4 种气泡形状 + 12 款配色，点一下立刻更换</p>' +
+    '<div class="gl-shapes">';
+  SHAPES.forEach(function(sp){
+    html += '<button type="button" class="gl-shape' + ((cfg.bubbleShape || "standard") === sp[0] ? ' on' : '') + '" data-s="' + sp[0] + '">' + sp[1] + '</button>';
+  });
+  html += '</div><div class="gl-grid">';
+  BUBBLES.forEach(function(b, i){
+    html += '<button type="button" class="gl-item' + ((cfg.bubble || 0) === i ? ' on' : '') + '" data-i="' + i + '">' +
+      '<span class="glp p' + i + '">Aa 你好呀</span><span>' + b.n + '</span></button>';
+  });
+  html += '</div>';
+  var box = $("sheetBody");
+  box.innerHTML = html;
+  var sh = box.querySelectorAll(".gl-shape");
+  for(var i = 0; i < sh.length; i++){
+    (function(el){
+      el.onclick = function(){
+        cfg.bubbleShape = el.getAttribute("data-s");
+        saveCfg();
+        document.body.dataset.bshape = cfg.bubbleShape;
+        var all = box.querySelectorAll(".gl-shape");
+        for(var k = 0; k < all.length; k++) all[k].classList.remove("on");
+        el.classList.add("on");
+        toast("气泡形状已切换");
+      };
+    })(sh[i]);
+  }
+  var items = box.querySelectorAll(".gl-item");
+  for(var j = 0; j < items.length; j++){
+    (function(el){
+      el.onclick = function(){
+        var idx = +el.getAttribute("data-i");
+        applyBubble(idx);
+        var all = box.querySelectorAll(".gl-item");
+        for(var k = 0; k < all.length; k++) all[k].classList.remove("on");
+        el.classList.add("on");
+        toast("气泡换成「" + BUBBLES[idx].n + "」啦");
+      };
+    })(items[j]);
+  }
+}
 (function(){
   var btn = $("bubbleGalleryBtn");
   if(!btn) return;
   btn.onclick = function(){
-    var html = '<div class="sheet-title">气泡画廊</div><p class="hint">挑一款换上，整站聊天气泡都会变</p><div class="gl-grid">';
-    BUBBLES.forEach(function(b, i){
-      html += '<button type="button" class="gl-item' + ((cfg.bubble || 0) === i ? ' on' : '') + '" data-i="' + i + '">' +
-        '<span class="glp p' + i + '">Aa 你好呀</span><span>' + b.n + '</span></button>';
-    });
-    html += '</div>';
-    showSheet(html);
-    var box = $("sheetBody");
-    var items = box.querySelectorAll(".gl-item");
-    for(var i = 0; i < items.length; i++){
-      (function(el){
-        el.onclick = function(){
-          var idx = +el.getAttribute("data-i");
-          applyBubble(idx);
-          hideSheet();
-          toast("气泡换成「" + BUBBLES[idx].n + "」啦");
-        };
-      })(items[i]);
-    }
+    showSheet("");
+    renderGallery();
   };
 })();
 
@@ -2775,6 +2998,7 @@ renderHome();
 renderBubbles();
 sayRandom();
 document.body.dataset.bubble = String(cfg.bubble || 0);
+document.body.dataset.bshape = cfg.bubbleShape || "standard";
 
 /* 存储不可用时给出提示 */
 if(!Store.available){
