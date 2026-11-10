@@ -628,6 +628,9 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
 .bs-prev .row.them{justify-content:flex-start}
 .bs-name{font-size:11.5px;color:var(--ink);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bs-author{font-size:9.5px;color:var(--ink-soft);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.bs-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.bs-close{width:30px;height:30px;border-radius:50%;border:none;background:rgba(247,200,216,.35);color:var(--ink);font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -2715,7 +2718,8 @@ function bsMore(){
 }
 function openBubbleStore(){
   showSheet(
-    '<div class="sheet-title">气泡商城</div>' +
+    '<div class="bs-head"><div class="sheet-title" style="margin:0">气泡商城</div>' +
+      '<button type="button" class="bs-close" id="bsClose">✕</button></div>' +
     '<p class="hint">共 216 款社区气泡，样式原样保留，作者署名一并搬运</p>' +
     '<input class="bs-search" id="bsSearch" placeholder="搜索气泡名或作者…">' +
     '<div class="bs-meta"><span id="bsCur">当前：' + esc(skinName(cfg.skinId)) + '</span>' +
@@ -2723,6 +2727,7 @@ function openBubbleStore(){
     '<div class="bs-grid" id="bsGrid"></div>' +
     '<button type="button" class="ghost-btn" id="bsMore" style="margin-top:12px">加载更多</button>'
   );
+  $("bsClose").onclick = function(){ hideSheet(); };
   $("bsReset").onclick = function(){
     applySkin("");
     var all = $("bsGrid").querySelectorAll(".bs-card");
