@@ -365,7 +365,7 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 .c-btn:active{transform:scale(.9)}
 .c-btn.on{background:rgba(255,255,255,.92);color:#7A4A5A}
 .call-ctrl .hang{margin-top:0}
-.call-pip{position:absolute;right:16px;top:calc(env(safe-area-inset-top,0px) + 18px);width:82px;height:112px;border-radius:16px;background:linear-gradient(135deg,#FFE3C2,#F9B8D0);display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 10px 30px rgba(0,0,0,.32);border:1.5px solid rgba(255,255,255,.55);touch-action:none;z-index:3;cursor:grab}
+.call-pip{display:none!important;position:absolute;right:16px;top:calc(env(safe-area-inset-top,0px) + 18px);width:82px;height:112px;border-radius:16px;background:linear-gradient(135deg,#FFE3C2,#F9B8D0);display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 10px 30px rgba(0,0,0,.32);border:1.5px solid rgba(255,255,255,.55);touch-action:none;z-index:3;cursor:grab}
 .call-pip:active{cursor:grabbing}
 /* 抖动 */
 .shake{animation:shakeX .55s ease}
@@ -397,6 +397,86 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
   body{background:#F3E4E8}
   .app{box-shadow:0 0 60px rgba(232,127,164,.18)}
 }
+
+/* ================= 首页 · 小手机桌面 ================= */
+#page-home{overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 26px) 18px 18px;-webkit-overflow-scrolling:touch;background:radial-gradient(circle at 20% 0%,rgba(255,255,255,.5),transparent 55%)}
+#page-home::-webkit-scrollbar{width:0}
+.hm-hi{font-family:var(--serif);font-size:23px;font-weight:600;letter-spacing:.03em;line-height:1.5;color:#6A4552}
+.hm-date{font-size:11.5px;color:#B08D9B;letter-spacing:.12em;margin-top:8px}
+.hm-contract{position:relative;margin-top:18px;border-radius:24px;padding:18px 18px 16px;overflow:hidden;background:linear-gradient(135deg,rgba(255,255,255,.94),rgba(253,231,240,.9));box-shadow:0 12px 34px rgba(232,127,164,.18),inset 0 0 0 1px rgba(255,255,255,.95);display:flex;align-items:center;gap:14px;transition:transform .25s}
+.hm-contract:active{transform:scale(.985)}
+.hm-contract::after{content:"";position:absolute;right:-34px;top:-46px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(249,184,208,.55),transparent 70%);pointer-events:none}
+.hm-cav{width:56px;height:56px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:26px;overflow:hidden;background:linear-gradient(135deg,#F9B8D0,#FFE9D6);box-shadow:inset 0 0 0 2px rgba(255,255,255,.92),0 6px 18px rgba(232,127,164,.26)}
+.hm-cav img{width:100%;height:100%;object-fit:cover}
+.hm-clabel{font-size:10.5px;letter-spacing:.16em;color:#B77C92}
+.hm-cnum{display:flex;align-items:baseline;gap:5px;margin-top:3px}
+.hm-cnum b{font-size:36px;line-height:1;font-weight:700;letter-spacing:-.02em;background:linear-gradient(135deg,#E8698F,#F5A9C2);-webkit-background-clip:text;background-clip:text;color:transparent;font-variant-numeric:tabular-nums}
+.hm-cnum span{font-size:12px;color:#A07785}
+.hm-cfrom{font-size:10.5px;color:#C0A2AC;margin-top:7px;letter-spacing:.05em}
+.hm-duo{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.hm-card{background:rgba(255,255,255,.85);border-radius:20px;padding:14px;box-shadow:0 8px 24px rgba(232,127,164,.12),inset 0 0 0 1px rgba(255,255,255,.95);transition:transform .25s}
+.hm-card:active{transform:scale(.985)}
+.hm-t{font-size:10.5px;letter-spacing:.12em;color:#B77C92}
+.hm-mood-e{font-size:27px;margin-top:9px;line-height:1}
+.hm-mood-v{font-size:14px;font-weight:600;margin-top:5px}
+.hm-clocks{display:flex;gap:10px;margin-top:9px}
+.hm-clocks>div{flex:1;display:flex;flex-direction:column;gap:3px}
+.hm-clocks span{font-size:9.5px;color:#BFA0AB;letter-spacing:.06em}
+.hm-clocks b{font-size:19px;font-weight:600;letter-spacing:.02em;font-variant-numeric:tabular-nums;color:#6B4A56}
+.hm-say{margin-top:12px;background:linear-gradient(135deg,rgba(255,255,255,.94),rgba(255,246,239,.9));border-radius:20px;padding:15px 16px;box-shadow:0 8px 24px rgba(232,127,164,.12),inset 0 0 0 1px rgba(255,255,255,.95)}
+.hm-say .hm-say-t{font-size:13px;line-height:1.8;color:#7A5160;margin-top:8px;letter-spacing:.02em}
+.hm-apps{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 10px;margin-top:20px}
+.hm-app{border:none;background:transparent;display:flex;flex-direction:column;align-items:center;gap:7px;font-size:10.5px;letter-spacing:.04em;color:#8E6675;padding:0}
+.hm-app i{width:56px;height:56px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:26px;font-style:normal;background:rgba(255,255,255,.92);box-shadow:0 8px 20px rgba(232,127,164,.16),inset 0 0 0 1px rgba(255,255,255,.95);transition:transform .22s cubic-bezier(.34,1.5,.64,1)}
+.hm-app:active i{transform:scale(.88)}
+.hm-app.sm i{width:48px;height:48px;border-radius:16px;font-size:22px;box-shadow:0 6px 16px rgba(232,127,164,.12),inset 0 0 0 1px rgba(255,255,255,.95)}
+.hm-foot{margin-top:22px;text-align:center;font-size:10px;color:#CBA9B5;letter-spacing:.16em}
+
+/* ================= 聊天气泡主题 ================= */
+body[data-bubble="1"] .row.me .msg{background:linear-gradient(135deg,#FFD9C5,#FFB79C);color:#7A4A38;box-shadow:0 6px 20px rgba(255,150,120,.3)}
+body[data-bubble="1"] .row.them .msg{background:linear-gradient(180deg,#FFFDFB,#FFF4EE);border-color:rgba(255,183,156,.5)}
+body[data-bubble="2"] .row.me .msg{background:linear-gradient(135deg,#D6F3E4,#AEE3C6);color:#2F6B52;box-shadow:0 6px 20px rgba(120,200,165,.3)}
+body[data-bubble="2"] .row.them .msg{background:linear-gradient(180deg,#FDFFFE,#F1FBF5);border-color:rgba(174,227,198,.6)}
+body[data-bubble="3"] .row.me .msg{background:linear-gradient(135deg,#DED9FF,#B9C3FF);color:#3F3D71;box-shadow:0 6px 20px rgba(150,150,240,.3)}
+body[data-bubble="3"] .row.them .msg{background:linear-gradient(180deg,#FCFCFF,#F3F2FF);border-color:rgba(185,195,255,.6)}
+body[data-bubble="4"] .row.me .msg{background:linear-gradient(135deg,#F3DFC9,#E0BE9E);color:#6B4527;box-shadow:0 6px 20px rgba(200,160,120,.32)}
+body[data-bubble="4"] .row.them .msg{background:linear-gradient(180deg,#FFFCF8,#FAF2E9);border-color:rgba(224,190,158,.55)}
+body[data-bubble="5"] .row.me .msg{background:linear-gradient(135deg,#FF3D6E,#FF8FAE);color:#fff;box-shadow:0 6px 22px rgba(255,61,110,.36)}
+
+/* ================= 人物设置 ================= */
+.cs-avs{display:flex;justify-content:center;gap:34px;padding:6px 0 16px}
+.cs-av-item{display:flex;flex-direction:column;align-items:center;gap:8px;font-size:11px;color:#A07785}
+.cs-av-item .big{width:64px;height:64px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:27px;background:linear-gradient(135deg,#F9B8D0,#FFE9D6);box-shadow:0 8px 22px rgba(232,127,164,.25),inset 0 0 0 2px rgba(255,255,255,.9)}
+.cs-av-item .big img{width:100%;height:100%;object-fit:cover}
+.cs-field{margin-bottom:12px}
+.cs-field label{display:block;font-size:11px;color:#B77C92;letter-spacing:.1em;margin-bottom:6px}
+.cs-field input{width:100%;border:1px solid rgba(247,200,216,.7);background:rgba(255,255,255,.9);border-radius:14px;padding:12px 14px;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s}
+.cs-field input:focus{border-color:var(--pink-deep);box-shadow:0 0 0 3px rgba(247,200,216,.35)}
+.cs-go{width:100%;border:none;border-radius:15px;padding:13px;background:rgba(247,200,216,.35);color:#A65477;font-size:13px;font-weight:600;letter-spacing:.08em;margin-top:4px}
+
+/* ================= 通话小窗 ================= */
+.call .c-min{position:absolute;top:calc(env(safe-area-inset-top,0px) + 16px);right:16px;z-index:4;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.18);color:#fff;font-size:16px;backdrop-filter:blur(8px)}
+.call .mini-hang{display:none;position:absolute;right:8px;top:8px;z-index:5;width:26px;height:26px;border-radius:50%;border:none;background:#E8698F;color:#fff;font-size:12px;box-shadow:0 4px 12px rgba(232,105,143,.5)}
+.call.min{inset:auto;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 96px);width:116px;height:164px;border-radius:22px;opacity:1;pointer-events:auto;gap:4px;justify-content:center;overflow:hidden;border:1.5px solid rgba(255,255,255,.32);box-shadow:0 16px 40px rgba(0,0,0,.38);touch-action:none;transition:width .22s,height .22s,border-radius .22s,box-shadow .22s}
+.call.min .c-av{width:44px;height:44px;font-size:19px;animation:none}
+.call.min .c-name{font-size:11.5px;margin-top:2px}
+.call.min .c-time{font-size:10.5px;letter-spacing:.06em}
+.call.min .call-ctrl,.call.min .c-min{display:none}
+.call.min .mini-hang{display:block}
+.call.min .c-av,.call.min .c-name,.call.min .c-time{pointer-events:none}
+
+/* ================= 我的 · 气泡选择 ================= */
+.bubble-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:12px 0 14px}
+.bubble-item{border:none;background:transparent;display:flex;flex-direction:column;align-items:center;gap:7px;font-size:10.5px;color:#A07785;padding:0}
+.bubble-item .bv{width:100%;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:.06em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.9),0 4px 12px rgba(232,127,164,.14);transition:transform .2s}
+.bubble-item.on .bv{outline:2px solid var(--pink-deep);outline-offset:2px}
+.bubble-item:active .bv{transform:scale(.94)}
+.me-hero{position:relative;border-radius:24px;padding:22px 18px 20px;overflow:hidden;background:linear-gradient(140deg,rgba(255,255,255,.95),rgba(253,230,240,.9));box-shadow:0 12px 32px rgba(232,127,164,.17),inset 0 0 0 1px rgba(255,255,255,.95);display:flex;align-items:center;gap:15px;margin-bottom:14px}
+.me-hero::after{content:"";position:absolute;right:-30px;top:-40px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(249,184,208,.5),transparent 70%)}
+.me-hero .big-av{width:62px;height:62px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:26px;background:linear-gradient(135deg,#F9B8D0,#FFE9D6);box-shadow:0 8px 22px rgba(232,127,164,.26),inset 0 0 0 3px rgba(255,255,255,.95)}
+.me-hero .big-av img{width:100%;height:100%;object-fit:cover}
+.me-hero .nm{font-size:17px;font-weight:700;letter-spacing:.04em}
+.me-hero .sub{font-size:11px;color:#A07785;margin-top:5px;letter-spacing:.05em}
 </style>
 </head>
 <body>
@@ -416,15 +496,60 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 <div class="app">
   <div class="pages">
 
+    <!-- 首页 · 小手机桌面 -->
+    <section class="page active" id="page-home">
+      <div class="hm-hi" id="hmHi">下午好，念念在想你</div>
+      <div class="hm-date" id="hmDate">11月10日 星期二</div>
+      <div class="hm-contract" id="hmContract" title="点击修改起始日期">
+        <div class="hm-cav" id="hmCAv">🌷</div>
+        <div>
+          <div class="hm-clabel">💜 签订契约的</div>
+          <div class="hm-cnum"><b id="hmDays">1</b><span>天</span></div>
+          <div class="hm-cfrom" id="hmFrom">从 今天 起 · 点击编辑</div>
+        </div>
+      </div>
+      <div class="hm-duo">
+        <div class="hm-card" id="hmMoodCard">
+          <div class="hm-t">TA 今日心情</div>
+          <div class="hm-mood-e" id="hmMoodE">🌸</div>
+          <div class="hm-mood-v" id="hmMoodV">开心</div>
+        </div>
+        <div class="hm-card">
+          <div class="hm-t">时间</div>
+          <div class="hm-clocks">
+            <div><span>TA 那边</span><b id="hmTaTime">--:--</b></div>
+            <div><span>我这边</span><b id="hmMyTime">--:--</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="hm-say">
+        <div class="hm-t">💌 TA 今天想对你说</div>
+        <div class="hm-say-t" id="hmSay">…</div>
+      </div>
+      <div class="hm-apps">
+        <button class="hm-app" data-go="page-chat"><i>💬</i>传讯</button>
+        <button class="hm-app" data-go="page-lib"><i>🗂️</i>字卡库</button>
+        <button class="hm-app" data-go="page-diary"><i>📖</i>手账</button>
+        <button class="hm-app" data-go="page-me"><i>👤</i>我的</button>
+        <button class="hm-app sm" data-act="call"><i>🎧</i>陪伴</button>
+        <button class="hm-app sm" data-act="stk"><i>🧸</i>表情</button>
+        <button class="hm-app sm" data-act="rp"><i>🧧</i>红包</button>
+        <button class="hm-app sm" data-act="say"><i>✨</i>换一句</button>
+      </div>
+      <div class="hm-foot">芝士小手机 · 一直陪着你</div>
+    </section>
+
     <!-- 传讯 -->
-    <section class="page active" id="page-chat">
+    <section class="page" id="page-chat">
       <header>
         <div class="avatar" id="avatar" title="双击拍一拍">🌷</div>
         <div class="who">
           <div class="name" id="nameEl">念念</div>
           <div class="status" id="statusEl">在你身边，一直都在</div>
         </div>
-        <button class="icon-btn" id="pingBtn" title="让 ta 主动">✧</button>
+        <button class="icon-btn" id="charBtn" title="聊天人物设置">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.4" r="3.4"/><path d="M5.4 19.4a6.6 6.6 0 0 1 13.2 0"/></svg>
+        </button>
       </header>
       <main class="chat" id="chat"></main>
       <footer class="inputbar">
@@ -512,10 +637,12 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
         <p>把这里调成你喜欢的样子</p>
       </div>
       <div class="scroll">
-        <div class="profile">
+        <div class="me-hero">
           <div class="big-av" id="bigAvatar">🌷</div>
-          <div class="nm" id="profileName">念念</div>
-          <div class="sub">字卡传讯 · 只属于我们的频道</div>
+          <div style="position:relative">
+            <div class="nm" id="profileName">念念</div>
+            <div class="sub">字卡传讯 · 只属于我们的频道</div>
+          </div>
         </div>
 
         <div class="stat-row">
@@ -579,6 +706,12 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
           </div>
         </div>
 
+        <div class="section-label">聊天气泡</div>
+        <div class="panel">
+          <div class="panel-title">换一种说话的颜色</div>
+          <div class="bubble-grid" id="bubbleGrid"></div>
+        </div>
+
         <div class="section-label">收藏</div>
         <div id="favList"></div>
 
@@ -594,7 +727,8 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
   </div>
 
   <nav class="tabbar">
-    <button class="tab-item on" data-page="page-chat"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.5a8.5 8.5 0 0 1-12 7.8L4 21l1.7-4.6A8.5 8.5 0 1 1 20.5 11.5z"/><path d="M8.6 11.6h.01M12 11.6h.01M15.4 11.6h.01"/></svg></span>传讯</button>
+    <button class="tab-item on" data-page="page-home"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.6 12 4l8 6.6"/><path d="M6.2 9.6V20h11.6V9.6"/><path d="M10 20v-5.4h4V20"/></svg></span>首页</button>
+    <button class="tab-item" data-page="page-chat"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.5a8.5 8.5 0 0 1-12 7.8L4 21l1.7-4.6A8.5 8.5 0 1 1 20.5 11.5z"/><path d="M8.6 11.6h.01M12 11.6h.01M15.4 11.6h.01"/></svg></span>传讯</button>
     <button class="tab-item" data-page="page-lib"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3.5" width="12" height="15" rx="3"/><path d="M4.8 7.2v9.6a2.5 2.5 0 0 0 2.5 2.5H15"/><path d="M10.5 8.5h5"/></svg></span>字卡</button>
     <button class="tab-item" data-page="page-diary"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h10.5a2 2 0 0 1 2 2v15H8a2 2 0 0 1-2-2V3.5z"/><path d="M6 3.5a2 2 0 0 0-2 2v12"/><path d="M10 8.5h5M10 12h3.5"/></svg></span>手账</button>
     <button class="tab-item" data-page="page-me"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.4" r="3.5"/><path d="M5.2 20a6.8 6.8 0 0 1 13.6 0"/></svg></span>我的</button>
@@ -631,6 +765,8 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 
 <div class="call" id="call">
   <div class="call-bg" id="callBg"></div>
+  <button type="button" class="c-min" id="minBtn" aria-label="收起">▾</button>
+  <button type="button" class="mini-hang" id="miniHang" aria-label="挂断">✕</button>
   <div class="c-av" id="callAv">🌷</div>
   <div class="c-name" id="callName">念念</div>
   <div class="c-time" id="callTime">正在呼叫…</div>
@@ -786,6 +922,10 @@ if(!cfg.myName) cfg.myName = "我";
 if(cfg.replyDelay == null) cfg.replyDelay = 2;
 if(cfg.minReplies == null) cfg.minReplies = 1;
 if(cfg.maxReplies == null) cfg.maxReplies = Math.max(2, cfg.minReplies);
+if(!cfg.startDate) cfg.startDate = new Date().toISOString().slice(0,10);
+if(cfg.taOffset == null) cfg.taOffset = 360;
+if(cfg.bubble == null) cfg.bubble = 0;
+if(!cfg.mood) cfg.mood = 0;
 var chat  = load(KEY.chat, []);
 var diary = load(KEY.diary, {});
 
@@ -845,7 +985,7 @@ function paintEmpty(){
   el.querySelectorAll("[data-go]").forEach(function(b){
     b.onclick = function(){
       if(b.dataset.go === "lib") goPage("page-lib");
-      else $("pingBtn").click();
+      else pingThem();
     };
   });
 }
@@ -1418,7 +1558,7 @@ $("avatar").onclick = function(){
 };
 
 /* ================= 让 ta 主动 ================= */
-$("pingBtn").onclick = function(){
+function pingThem(){
   if(allCards().length === 0){ toast("字卡库是空的，先写几张吧"); return; }
   clearReplies();
   var delay = Math.max(500, Math.min(2400, replyDelayMs()));
@@ -1444,7 +1584,7 @@ $("pingBtn").onclick = function(){
       }, delay * (i + 1)));
     })(i);
   }
-};
+}
 
 /* ================= 浮层 ================= */
 var mask = $("mask"), sheet = $("sheet"), sheetBody = $("sheetBody");
@@ -1505,7 +1645,7 @@ $("plusBtn").onclick = function(e){
       if(a === "throw") openThrow();
       if(a === "voice") openVoice();
       if(a === "call") startCall();
-      if(a === "ping") $("pingBtn").click();
+      if(a === "ping") pingThem();
       if(a === "bulk") openBulk();
     };
   });
@@ -1771,6 +1911,9 @@ var CALL_BGS = [
 var CALL_LINES = ["刚刚听到你的声音啦，好开心 ♡", "下次还想和你打很久很久。", "挂掉之前差一点舍不得。"];
 function fmtSec(s){ return pad(Math.floor(s / 60)) + ":" + pad(s % 60); }
 function startCall(){
+  var cEl = $("call");
+  cEl.classList.remove("min");
+  cEl.style.left = cEl.style.top = cEl.style.right = cEl.style.bottom = "";
   $("callAv").innerHTML = avatarHtml("them");
   $("callName").textContent = cfg.name;
   $("callTime").textContent = "正在呼叫…";
@@ -1804,6 +1947,8 @@ function endCall(manual){
   clearTimeout(callRinging);
   var wasConnected = callSec > 0 || callAnswered;
   $("call").classList.remove("open");
+  $("call").classList.remove("min");
+  $("call").style.left = $("call").style.top = $("call").style.right = $("call").style.bottom = "";
   pushMsg({ sys:true, text:"视频通话 · " + (callSec ? fmtSec(callSec) : "未接通"), t:Date.now() });
   if(wasConnected && callSec > 0){
     setTimeout(function(){ pushMsg({ who:"them", type:"text", text:pickRnd(CALL_LINES), t:Date.now() }); }, 700);
@@ -1819,27 +1964,50 @@ $("bgBtn").onclick = function(){
   $("callBg").style.background = CALL_BGS[callBgIdx];
 };
 /* 通话小窗可拖动 */
+/* 通话小窗：缩小 / 拖动 / 点一下放大 */
+$("minBtn").onclick = function(e){ e.stopPropagation(); $("call").classList.add("min"); };
+$("miniHang").onclick = function(e){ e.stopPropagation(); endCall(true); };
 (function(){
-  var pip = $("callPip"), drag = null;
-  pip.addEventListener("pointerdown", function(e){
-    e.preventDefault();
-    var r = pip.getBoundingClientRect();
+  var callEl = $("call"), drag = null, moved = false, sx = 0, sy = 0, suppress = 0;
+  callEl.addEventListener("pointerdown", function(e){
+    if(!callEl.classList.contains("min")) return;
+    if(e.target.closest(".mini-hang")) return;
+    var r = callEl.getBoundingClientRect();
     drag = { dx: e.clientX - r.left, dy: e.clientY - r.top };
-    pip.style.left = r.left + "px";
-    pip.style.top = r.top + "px";
-    pip.style.right = "auto";
-    try{ pip.setPointerCapture(e.pointerId); }catch(err){}
+    moved = false; sx = e.clientX; sy = e.clientY;
+    try{ callEl.setPointerCapture(e.pointerId); }catch(err){}
   });
-  pip.addEventListener("pointermove", function(e){
+  callEl.addEventListener("pointermove", function(e){
     if(!drag) return;
-    var x = Math.max(8, Math.min(innerWidth - pip.offsetWidth - 8, e.clientX - drag.dx));
-    var y = Math.max(8, Math.min(innerHeight - pip.offsetHeight - 8, e.clientY - drag.dy));
-    pip.style.left = x + "px";
-    pip.style.top = y + "px";
+    if(!moved && Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 7) moved = true;
+    if(!moved) return;
+    var x = Math.max(8, Math.min(innerWidth - callEl.offsetWidth - 8, e.clientX - drag.dx));
+    var y = Math.max(8, Math.min(innerHeight - callEl.offsetHeight - 8, e.clientY - drag.dy));
+    callEl.style.left = x + "px";
+    callEl.style.top = y + "px";
+    callEl.style.right = "auto";
+    callEl.style.bottom = "auto";
   });
-  function stop(){ drag = null; }
-  pip.addEventListener("pointerup", stop);
-  pip.addEventListener("pointercancel", stop);
+  function up(){
+    if(!drag) return;
+    var wasMoved = moved;
+    drag = null;
+    if(wasMoved){ suppress = Date.now(); return; }
+    expand();
+  }
+  function expand(){
+    if(!callEl.classList.contains("min")) return;
+    callEl.classList.remove("min");
+    callEl.style.left = callEl.style.top = callEl.style.right = callEl.style.bottom = "";
+  }
+  callEl.addEventListener("pointerup", up);
+  callEl.addEventListener("pointercancel", up);
+  /* 兜底：直接点击小窗也能放大 */
+  callEl.addEventListener("click", function(e){
+    if(e.target.closest(".mini-hang") || e.target.closest(".c-min")) return;
+    if(Date.now() - suppress < 350) return;
+    expand();
+  });
 })();
 
 /* ================= 模态框 ================= */
@@ -1907,14 +2075,148 @@ function openBulk(){
   openModal("bulk", "批量发送", "一行一条，会按顺序慢慢发出去。", "早安\n今天也要好好吃饭\n晚上聊");
 }
 
-/* ================= 页面切换 ================= */
+/* ================= 首页 · 小手机桌面 ================= */
+var HM_MOODS = [
+  { e:"😊", t:"开心" }, { e:"🥰", t:"在想你" }, { e:"😌", t:"安心" }, { e:"😴", t:"有点困" },
+  { e:"🥺", t:"想见你" }, { e:"😆", t:"雀跃" }, { e:"🌧️", t:"有点低落" }, { e:"🍰", t:"甜甜的" }
+];
+function dayIndex(){
+  var d = new Date();
+  return Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 864e5);
+}
+function hmGreet(){
+  var h = new Date().getHours();
+  var g = h < 5 ? "夜深了" : h < 9 ? "早安" : h < 12 ? "上午好" : h < 14 ? "中午好" : h < 18 ? "下午好" : h < 22 ? "晚上好" : "晚安";
+  return g + "，" + cfg.name + "在想你";
+}
+function sayRandom(){
+  var el = $("hmSay");
+  if(!el) return;
+  var arr = allCards();
+  el.textContent = arr.length ? arr[Math.floor(Math.random() * arr.length)] : "去字卡库写几句话，我就会每天说给你听 ♡";
+}
+function tickClock(){
+  var d = new Date(), tk = new Date(d.getTime() + (cfg.taOffset || 0) * 60000);
+  var p = function(n){ return (n < 10 ? "0" : "") + n; };
+  if($("hmMyTime")) $("hmMyTime").textContent = p(d.getHours()) + ":" + p(d.getMinutes());
+  if($("hmTaTime")) $("hmTaTime").textContent = p(tk.getHours()) + ":" + p(tk.getMinutes());
+}
+function renderHome(){
+  if(!$("page-home")) return;
+  var d = new Date();
+  $("hmHi").textContent = hmGreet();
+  $("hmDate").textContent = (d.getMonth() + 1) + "月" + d.getDate() + "日 星期" + "日一二三四五六".charAt(d.getDay());
+  var m = HM_MOODS[dayIndex() % HM_MOODS.length];
+  $("hmMoodE").textContent = m.e;
+  $("hmMoodV").textContent = m.t;
+  var from = new Date(cfg.startDate + "T00:00:00");
+  var days = Math.floor((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - new Date(from.getFullYear(), from.getMonth(), from.getDate())) / 864e5) + 1;
+  $("hmDays").textContent = Math.max(1, days);
+  $("hmFrom").textContent = "从 " + cfg.startDate.replace(/-/g, "/") + " 起 · 点击编辑";
+  paintAvatar($("hmCAv"), "them");
+  tickClock();
+  document.body.dataset.bubble = String(cfg.bubble || 0);
+}
+if($("hmSay")) $("hmSay").textContent = "";
+setInterval(function(){
+  var p = $("page-home");
+  if(p && p.classList.contains("active")) tickClock();
+}, 15000);
+$("hmContract").onclick = function(){
+  var inp = document.createElement("input");
+  inp.type = "date";
+  inp.value = cfg.startDate;
+  inp.style.cssText = "position:fixed;left:-999px;top:0;opacity:0";
+  document.body.appendChild(inp);
+  inp.addEventListener("change", function(){
+    if(inp.value){ cfg.startDate = inp.value; saveCfg(); renderHome(); toast("契约日已更新 ♡"); }
+    inp.remove();
+  });
+  inp.click();
+};
+document.querySelectorAll(".hm-app").forEach(function(b){
+  b.onclick = function(){
+    if(b.dataset.go){ goPage(b.dataset.go); return; }
+    var a = b.dataset.act;
+    if(a === "say"){ sayRandom(); toast("换了一句 ♡"); return; }
+    goPage("page-chat");
+    if(a === "call") startCall();
+    if(a === "stk") setTimeout(openSticker, 260);
+    if(a === "rp") setTimeout(openRedPacket, 260);
+  };
+});
+
+/* ================= 聊天气泡主题 ================= */
+var BUBBLES = [
+  { n:"奶莓", c:"linear-gradient(135deg,#F8C2D4,#ED97B7)" },
+  { n:"蜜桃", c:"linear-gradient(135deg,#FFD9C5,#FFB79C)" },
+  { n:"薄荷", c:"linear-gradient(135deg,#D6F3E4,#AEE3C6)" },
+  { n:"星夜", c:"linear-gradient(135deg,#DED9FF,#B9C3FF)" },
+  { n:"焦糖", c:"linear-gradient(135deg,#F3DFC9,#E0BE9E)" },
+  { n:"玫瑰", c:"linear-gradient(135deg,#FF3D6E,#FF8FAE)" }
+];
+function renderBubbles(){
+  var g = $("bubbleGrid");
+  if(!g) return;
+  g.innerHTML = "";
+  BUBBLES.forEach(function(b, i){
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "bubble-item" + ((cfg.bubble || 0) === i ? " on" : "");
+    btn.innerHTML = '<span class="bv" style="background:' + b.c + '">Aa</span>' + b.n;
+    btn.onclick = function(){
+      cfg.bubble = i;
+      saveCfg();
+      document.body.dataset.bubble = String(i);
+      renderBubbles();
+      toast("气泡换成「" + b.n + "」啦");
+    };
+    g.appendChild(btn);
+  });
+}
+
+/* ================= 聊天人物设置 ================= */
+function openCharSheet(){
+  showSheet(
+    '<div class="sheet-title">聊天人物设置</div>' +
+    '<div class="cs-avs">' +
+      '<div class="cs-av-item"><div class="big" id="csTaAv"></div><span>ta 的头像</span></div>' +
+      '<div class="cs-av-item"><div class="big" id="csMyAv"></div><span>我的头像</span></div>' +
+    '</div>' +
+    '<div class="cs-field"><label>ta 的名字</label><input id="csName" maxlength="12" value="' + esc(cfg.name) + '"></div>' +
+    '<div class="cs-field"><label>我的昵称</label><input id="csMyName" maxlength="12" value="' + esc(cfg.myName || "我") + '"></div>' +
+    '<div class="cs-field"><label>状态文案</label><input id="csStatus" maxlength="24" value="' + esc(cfg.status) + '"></div>' +
+    '<button type="button" class="cs-go" id="csMore">更多设置（回复节奏 / 气泡）</button>'
+  );
+  paintAvatar($("csTaAv"), "them");
+  paintAvatar($("csMyAv"), "me");
+  $("csTaAv").onclick = function(){ avatarTarget = "them"; $("avatarInput").click(); };
+  $("csMyAv").onclick = function(){ avatarTarget = "me"; $("avatarInput").click(); };
+  $("csName").oninput = function(){
+    cfg.name = this.value.trim() || "念念";
+    saveCfg(); applyCfg(); renderHome();
+  };
+  $("csMyName").oninput = function(){
+    cfg.myName = this.value.trim() || "我";
+    saveCfg();
+  };
+  $("csStatus").oninput = function(){
+    cfg.status = this.value.trim() || "在你身边";
+    saveCfg(); applyCfg();
+  };
+  $("csMore").onclick = function(){ hideSheet(); goPage("page-me"); };
+}
+$("charBtn").onclick = openCharSheet;
+
+
 function goPage(id){
   document.querySelectorAll(".page").forEach(function(p){ p.classList.toggle("active", p.id === id); });
   document.querySelectorAll(".tab-item").forEach(function(t){ t.classList.toggle("on", t.dataset.page === id); });
   if(id === "page-chat") $("newMsgBar").classList.remove("show");
+  if(id === "page-home") renderHome();
   if(id === "page-lib") renderLib();
   if(id === "page-diary") renderDiary();
-  if(id === "page-me"){ renderSettings(); renderFavs(); renderStats(); }
+  if(id === "page-me"){ renderSettings(); renderFavs(); renderStats(); renderBubbles(); }
 }
 document.querySelectorAll(".tab-item").forEach(function(t){
   t.onclick = function(){ goPage(t.dataset.page); };
@@ -2201,11 +2503,15 @@ $("importInput").onchange = function(e){
       if(cfg.replyDelay == null) cfg.replyDelay = 2;
       if(cfg.minReplies == null) cfg.minReplies = 1;
       if(cfg.maxReplies == null) cfg.maxReplies = Math.max(2, cfg.minReplies);
+      if(!cfg.startDate) cfg.startDate = new Date().toISOString().slice(0,10);
+      if(cfg.taOffset == null) cfg.taOffset = 360;
+      if(cfg.bubble == null) cfg.bubble = 0;
       if(d.chat) chat = d.chat;
       if(d.diary) diary = d.diary;
       save(KEY.lib, lib); saveCfg(); save(KEY.chat, chat); save(KEY.diary, diary);
       curGroup = Object.keys(lib)[0] || "默认";
       applyCfg(); renderAll(); renderLib(); renderSettings(); renderFavs(); renderStats(); renderDiary();
+      renderHome(); renderBubbles(); sayRandom();
       toast("备份已恢复 ♡");
     }catch(err){
       toast("文件读不出来，换一个试试");
@@ -2252,6 +2558,10 @@ renderFavs();
 renderStats();
 renderDiary();
 updateStkCount();
+renderHome();
+renderBubbles();
+sayRandom();
+document.body.dataset.bubble = String(cfg.bubble || 0);
 
 /* 存储不可用时给出提示 */
 if(!Store.available){
