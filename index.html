@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.11-shop2";
+  var V = "2026.11.11-group1";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -585,15 +585,18 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 .hm-app[data-act="call"] .ic{background:linear-gradient(135deg,#B8E5D5,#81C7A8);color:#fff}
 .hm-app[data-act="say"] .ic{background:linear-gradient(135deg,#D7E8B3,#AED581);color:#5C7B3E}
 .hm-app[data-act="bubble"] .ic{background:linear-gradient(135deg,#FCE4EC,#F8BBD0);color:#8B4A5D}
-/* 礼物消息气泡 */
-.msg.gift{background:transparent!important;border:none!important;box-shadow:none!important;padding:0!important;max-width:76%}
-.gift-bubble{background:linear-gradient(135deg,#FFE3F0,#FFF0E4);border-radius:20px;padding:12px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 22px rgba(232,127,164,.22);border:1px solid rgba(255,255,255,.8);min-width:160px;animation:giftPop .45s cubic-bezier(.22,.8,.3,1)}
-@keyframes giftPop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
-.gift-bubble .gb-emoji{font-size:42px;filter:drop-shadow(0 2px 6px rgba(232,127,164,.25))}
-.gift-bubble .gb-info{flex:1;min-width:0}
-.gift-bubble .gb-info b{display:block;font-size:13px;color:#8B4A5D;font-weight:700}
-.gift-bubble .gb-info i{display:block;font-size:11px;color:#A07785;font-style:normal;margin-top:2px}
-.gift-bubble .gb-info span{font-size:11px;color:#E87FA4;background:rgba(247,200,216,.3);padding:1px 7px;border-radius:999px;display:inline-block;margin-top:4px}
+/* 礼物消息：无气泡，居中卡片，不压头像 */
+.row.giftrow{justify-content:center;padding:2px 0}
+.gift-card{display:flex;align-items:center;gap:10px;max-width:80%;padding:10px 15px;border-radius:15px;background:linear-gradient(135deg,rgba(255,240,247,.96),rgba(255,246,236,.96));box-shadow:0 5px 18px rgba(232,127,164,.16);border:1px solid rgba(255,255,255,.9);animation:giftPop .4s cubic-bezier(.22,.8,.3,1)}
+@keyframes giftPop{from{transform:scale(.9);opacity:0}to{transform:none;opacity:1}}
+.gift-card .gc-ico{font-size:34px;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(232,127,164,.22))}
+.gift-card .gc-ico img{width:40px;height:40px;object-fit:contain;border-radius:8px;display:block}
+.gift-card .gc-info{flex:1;min-width:0}
+.gift-card .gc-info b{display:block;font-size:13px;color:#8B4A5D;font-weight:700}
+.gift-card .gc-info i{display:block;font-size:11px;color:#A07785;font-style:normal;margin-top:2px}
+.gift-card .gc-price{font-size:11px;color:#E87FA4;background:rgba(247,200,216,.35);padding:2px 8px;border-radius:999px;flex-shrink:0}
+/* 点一下出菜单：关掉浏览器的长按复制/选择弹窗 */
+.row .msg,.row .m-body{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 /* 烟花特效 */
 .fw-fx{position:fixed;inset:0;z-index:8888;pointer-events:none}
 .fw-fx .pt{position:absolute;border-radius:50%;animation:fwPt 1s ease-out forwards}
@@ -1362,10 +1365,10 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
   </div>
 </div>
 
-<input type="file" id="imgInput" accept="image/*" hidden>
+<input type="file" id="imgInput" accept="image/*" multiple hidden>
 <input type="file" id="avatarInput" accept="image/*" hidden>
 <input type="file" id="friendAvatarInput" accept="image/*" hidden>
-    <input type="file" id="stickerInput" accept="image/*" hidden>
+    <input type="file" id="stickerInput" accept="image/*" multiple hidden>
 <input type="file" id="importInput" accept="application/json,.json" hidden>
 
 <div class="viewer" id="viewer"><img id="viewerImg" alt=""></div>
@@ -1720,6 +1723,15 @@ function activeGroup(){
   return null;
 }
 function isGroup(){ return cfg.conv.t === "group" && !!activeGroup(); }
+/* 每个群的显示偏好：成员头像 / 成员名字（参考 channel-ing/chat 的群聊开关） */
+if(!cfg.groupOpts || typeof cfg.groupOpts !== "object") cfg.groupOpts = {};
+function groupOpts(gid){
+  if(!cfg.groupOpts[gid]) cfg.groupOpts[gid] = { avatar:true, name:true };
+  var o = cfg.groupOpts[gid];
+  if(o.avatar == null) o.avatar = true;
+  if(o.name == null) o.name = true;
+  return o;
+}
 (function(){
   var ok = cfg.conv.t === "group" ? !!activeGroup() : !!friendById(cfg.conv.id);
   if(!ok) cfg.conv = { t:"friend", id:"main" };
@@ -1900,20 +1912,19 @@ function paintMsg(m){
     b.classList.add("share");
     b.innerHTML = quoteHtml(m.quote) + shareCardHtml(m);
   }else if(m.type === "gift"){
-    /* 礼物消息：完整自定义行 */
+    /* 礼物消息：不套气泡、不带头像，居中卡片，避免挡住头像 */
     var gbIcon = m.giftImg
-      ? '<img src="' + esc(m.giftImg) + '" class="gb-emoji" style="width:48px;height:48px;object-fit:contain;border-radius:8px;filter:none">'
-      : '<div class="gb-emoji">' + esc(m.giftEmoji || "🎁") + '</div>';
+      ? '<img src="' + esc(m.giftImg) + '" alt="">'
+      : esc(m.giftEmoji || "🎁");
+    var gbFrom = m.who === "me"
+      ? (isGroup() ? "你送给了 " + esc(convName()) : "送给了 " + esc(convName()))
+      : esc(m.mname || senderName(m.mid)) + " 送了";
     chatEl.insertAdjacentHTML("beforeend",
-      '<div class="row ' + (m.who === "me" ? "me" : "them") + '">' +
-      '<div class="m-avatar ' + (m.who === "me" ? "me" : "them") + '">' + (m.who === "me" ? "我" : friendAvatarHtml(senderFriend(m.mid))) + '</div>' +
-      '<div class="msg gift"><div class="gift-bubble">' +
-      gbIcon +
-      '<div class="gb-info"><b>' + esc(m.giftName || "礼物") + '</b>' +
-      '<i>' + (m.who === "me" ? "送给 " + esc(convName()) : esc(senderName(m.mid)) + " 送了") + '</i>' +
-      '<span>🪙 ' + esc(String(m.giftPrice || "")) + '</span></div>' +
-      '</div></div></div>');
-    chatEl.lastElementChild.setAttribute("data-id", m.id);
+      '<div class="row giftrow" data-id="' + m.id + '">' +
+      '<div class="gift-card"><div class="gc-ico">' + gbIcon + '</div>' +
+      '<div class="gc-info"><b>' + esc(m.giftName || "礼物") + '</b><i>' + gbFrom + '</i></div>' +
+      '<span class="gc-price">🪙' + esc(String(m.giftPrice || "")) + '</span></div></div>');
+    bindMsgTap(chatEl.lastElementChild);
     return chatEl.lastElementChild;
   }else{
     b.innerHTML = quoteHtml(m.quote) + esc(m.text).replace(/\n/g, "<br>");
@@ -1921,18 +1932,23 @@ function paintMsg(m){
 
   row.appendChild(av);
   if(isGroup() && m.who === "them" && !m.recalled){
+    var go = groupOpts(cfg.conv.id);
+    if(!go.avatar) av.style.display = "none";
     var mb = document.createElement("div");
     mb.className = "m-body";
-    var nm = document.createElement("div");
-    nm.className = "m-name";
-    nm.textContent = senderName(m.mid);
-    mb.appendChild(nm); mb.appendChild(b);
+    if(go.name){
+      var nm = document.createElement("div");
+      nm.className = "m-name";
+      nm.textContent = m.mname || senderName(m.mid);
+      mb.appendChild(nm);
+    }
+    mb.appendChild(b);
     row.appendChild(mb);
   }else{
     row.appendChild(b);
   }
   chatEl.appendChild(row);
-  bindLongPress(row);
+  bindMsgTap(row);
 }
 function saveChat(){
   if(save(chatKey(), chat)) return false;
@@ -1963,6 +1979,8 @@ function pushMsg(m){
   if(em && em.parentNode) em.parentNode.removeChild(em);
   m.id = m.id || uid();
   if(!m.mid && m.who === "them" && !isGroup()) m.mid = cfg.conv.id;
+  /* 群聊：把发送时的成员名字一起存下来，成员被删/改名后历史消息也不会串人 */
+  if(isGroup() && m.who === "them" && !m.mname) m.mname = senderName(m.mid);
   chat.push(m);
   if(chat.length > 300) chat = chat.slice(-300);
   var pruned = saveChat();
@@ -1979,23 +1997,16 @@ function pushMsg(m){
   }
 }
 
-/* ================= 长按操作 ================= */
-function bindLongPress(el){
-  var timer = null, sx = 0, sy = 0;
-  el.addEventListener("touchstart", function(e){
-    var t = e.touches[0];
-    if(t){ sx = t.clientX; sy = t.clientY; }
-    timer = setTimeout(function(){ openMsgActions(el.dataset.id); }, 480);
-  }, {passive:true});
-  el.addEventListener("touchend", function(){ clearTimeout(timer); });
-  el.addEventListener("touchcancel", function(){ clearTimeout(timer); });
-  el.addEventListener("touchmove", function(e){
-    var t = e.touches[0];
-    if(!t) return;
-    /* 轻微抖动不算滑动，真正滚动才取消长按 */
-    if(Math.abs(t.clientX - sx) > 12 || Math.abs(t.clientY - sy) > 12) clearTimeout(timer);
-  }, {passive:true});
-  el.addEventListener("contextmenu", function(e){ e.preventDefault(); openMsgActions(el.dataset.id); });
+/* ================= 点击消息出操作菜单（不再依赖长按，避开浏览器复制弹窗） ================= */
+function bindMsgTap(el){
+  el.addEventListener("click", function(e){
+    var t = e.target;
+    if(!t || !el.dataset.id) return;
+    if(t.tagName === "IMG" && t.classList.contains("msg-img")) return;  /* 图片点开查看器，表情点出菜单 */
+    if(t.closest && (t.closest(".redpacket") || t.closest(".voice") || t.closest("a") || t.closest(".msg-pop"))) return;
+    openMsgActions(el.dataset.id);
+  });
+  el.addEventListener("contextmenu", function(e){ e.preventDefault(); });
 }
 /* 当前 popover 关闭标记 */
 var _msgPopEl = null, _popOpenedAt = 0;
@@ -2149,11 +2160,11 @@ function setGlobalTyping(on, mid){
     }
   }
 }
-function showTyping(){
+function showTyping(mid){
   hideTyping();
   typingRow = document.createElement("div");
   typingRow.className = "row them";
-  var tmid = isGroup() ? randMember() : null;
+  var tmid = isGroup() ? (mid || randMember()) : null;
   typingRow.dataset.mid = tmid || "";
   typingRow.innerHTML = '<div class="m-avatar them">' + avatarHtml("them", tmid) + '</div><div class="msg typing"><i></i><i></i><i></i></div>';
   chatEl.appendChild(typingRow);
@@ -2269,6 +2280,21 @@ function randomRpAmount(){
   var v = 0.5 + Math.random() * 87.5;
   return (Math.round(v * 100) / 100).toFixed(2);
 }
+/* 群聊：为一轮回复预先选好发言人，保证「正在输入的人」和真正发消息的人一致 */
+function pickSpeakers(n){
+  var g = activeGroup();
+  if(!g || !g.members || !g.members.length) return [];
+  var out = [];
+  for(var i = 0; i < n; i++){
+    var m = g.members[Math.floor(Math.random() * g.members.length)];
+    if(out.length && g.members.length > 1 && m === out[out.length - 1]){
+      var alt = g.members.filter(function(x){ return x !== m; });
+      m = alt[Math.floor(Math.random() * alt.length)];
+    }
+    out.push(m);
+  }
+  return out;
+}
 /* 按用户设定：间隔精确到毫秒，条数落在 [最少, 最多] 区间 */
 function reply(){
   if(allCards().length === 0){ toast("字卡库是空的，先写几张吧"); return; }
@@ -2277,21 +2303,25 @@ function reply(){
   var min = Math.max(1, Math.min(10, parseInt(cfg.minReplies, 10) || 1));
   var max = Math.max(min, Math.min(10, parseInt(cfg.maxReplies, 10) || min));
   var total = min + Math.floor(Math.random() * (max - min + 1));
+  var inGroup = isGroup();
+  var mids = inGroup ? pickSpeakers(total) : [];
+  function midAt(i){ return inGroup ? mids[i] : null; }
   var jealous = jealousyLine();
-  showTyping();
+  showTyping(midAt(0));
   for(var i = 0; i < total; i++){
     (function(i){
       replyTimers.push(setTimeout(function(){
         hideTyping();
+        var mid = midAt(i);
         /* 第一句：先吃个醋 */
         if(i === 0 && jealous){
-          pushMsg({ who:"them", mid:randMember(), type:"text", text:jealous.text, quote:jealous.quote, t:Date.now() });
-          if(total > 1) showTyping();
+          pushMsg({ who:"them", mid:mid, type:"text", text:jealous.text, quote:jealous.quote, t:Date.now() });
+          if(total > 1) showTyping(midAt(1));
           return;
         }
         /* 回复触发概率 */
         if(Math.random() * 100 >= (cfg.replyChance || 100)){
-          if(i < total - 1) showTyping();
+          if(i < total - 1) showTyping(midAt(i + 1));
           return;
         }
         /* 按概率加权随机决定消息类型 */
@@ -2302,13 +2332,13 @@ function reply(){
         var rpP = Math.max(0, Math.min(40, Number(cfg.partnerRpChance) || 0));
         if(roll < stickerP){
           var sk = pickStk();
-          if(sk) pushMsg({ who:"them", mid:randMember(), type:"sticker", src:sk.src, t:Date.now() });
+          if(sk) pushMsg({ who:"them", mid:mid, type:"sticker", src:sk.src, t:Date.now() });
           else {
             var tx = pickCard();
-            if(tx) pushThemText(tx);
+            if(tx) pushThemText(tx, mid);
           }
         }else if(roll < stickerP + voiceP){
-          pushMsg({ who:"them", mid:randMember(), type:"voice", dur: 2 + Math.floor(Math.random() * 5), quote: maybeQuote(), t:Date.now() });
+          pushMsg({ who:"them", mid:mid, type:"voice", dur: 2 + Math.floor(Math.random() * 5), quote: maybeQuote(), t:Date.now() });
         }else if(roll < stickerP + voiceP + giftP){
           /* 对方主动送礼物给我 */
           var giftList = GIFT_DATA.concat((cfg.gifts || []).map(function(g, i){
@@ -2316,13 +2346,13 @@ function reply(){
           }));
           var gift = giftList[Math.floor(Math.random() * giftList.length)];
           setTimeout(function(){ fireworksFx(); }, 300);
-          pushMsg({ who:"them", mid:randMember(), type:"gift", giftId:gift.id, giftEmoji:gift.emoji || "🎁", giftName:gift.name, giftPrice:gift.price, giftImg:gift.img || "", t:Date.now() });
+          pushMsg({ who:"them", mid:mid, type:"gift", giftId:gift.id, giftEmoji:gift.emoji || "🎁", giftName:gift.name, giftPrice:gift.price, giftImg:gift.img || "", t:Date.now() });
         }else if(roll < stickerP + voiceP + giftP + rpP){
-          taSendRedPacket();
+          taSendRedPacket(mid);
         }else{
-          pushThemText(nightCard() || pickCard());
+          pushThemText(nightCard() || pickCard(), mid);
         }
-        if(i < total - 1) showTyping();
+        if(i < total - 1) showTyping(midAt(i + 1));
       }, delay * (i + 1)));
     })(i);
   }
@@ -2355,34 +2385,48 @@ function autoGrow(){
 }
 field.addEventListener("input", autoGrow);
 
-/* ================= 图片 ================= */
+/* ================= 图片（支持多选） ================= */
 $("imgInput").onchange = function(e){
-  var f = e.target.files && e.target.files[0];
-  if(!f) return;
-  var reader = new FileReader();
-  reader.onload = function(ev){
-    var img = new Image();
-    img.onload = function(){
-      var max = 760;
-      var w = img.width, h = img.height;
-      if(w > max || h > max){
-        var r = Math.min(max/w, max/h);
-        w = Math.round(w*r); h = Math.round(h*r);
-      }
-      var cv = document.createElement("canvas");
-      cv.width = w; cv.height = h;
-      cv.getContext("2d").drawImage(img, 0, 0, w, h);
-      var src = cv.toDataURL("image/jpeg", 0.7);
-      lastSendAt = Date.now();
-      pushMsg({ who:"me", type:"img", src:src, quote: quoting ? {who:quoting.who, text: msgLabel(quoting)} : null, t:Date.now() });
+  var files = Array.prototype.slice.call(e.target.files || []);
+  e.target.value = "";
+  if(!files.length) return;
+  var q = quoting ? {who:quoting.who, text: msgLabel(quoting)} : null;
+  var sent = 0;
+  function readNext(){
+    if(!files.length){
+      if(!sent) return;
       clearQuote();
       renderStats();
       reply();
+      return;
+    }
+    var f = files.shift();
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      var img = new Image();
+      img.onload = function(){
+        var max = 760;
+        var w = img.width, h = img.height;
+        if(w > max || h > max){
+          var r = Math.min(max/w, max/h);
+          w = Math.round(w*r); h = Math.round(h*r);
+        }
+        var cv = document.createElement("canvas");
+        cv.width = w; cv.height = h;
+        cv.getContext("2d").drawImage(img, 0, 0, w, h);
+        var src = cv.toDataURL("image/jpeg", 0.7);
+        lastSendAt = Date.now();
+        pushMsg({ who:"me", type:"img", src:src, quote: sent === 0 ? q : null, t:Date.now() });
+        sent++;
+        readNext();
+      };
+      img.onerror = readNext;
+      img.src = ev.target.result;
     };
-    img.src = ev.target.result;
-  };
-  reader.readAsDataURL(f);
-  e.target.value = "";
+    reader.onerror = readNext;
+    reader.readAsDataURL(f);
+  }
+  readNext();
 };
 
 /* ================= 表情包库（通用） ================= */
@@ -2501,40 +2545,54 @@ function openSticker(){
 if($("stkManage")) $("stkManage").onclick = function(){ goPage("page-lib"); setLibTab("stk"); };
 
 $("stickerInput").onchange = function(e){
-  var f = e.target.files && e.target.files[0];
-  if(!f) return;
-  var reader = new FileReader();
-  reader.onload = function(ev){
-    var img = new Image();
-    img.onload = function(){
-      var max = 200;
-      var r = Math.min(max / img.width, max / img.height, 1);
-      var w = Math.max(1, Math.round(img.width * r));
-      var h = Math.max(1, Math.round(img.height * r));
-      var cv = document.createElement("canvas");
-      cv.width = w; cv.height = h;
-      cv.getContext("2d").drawImage(img, 0, 0, w, h);
-      var src = cv.toDataURL("image/png");
-      if(src.length > 90000) src = cv.toDataURL("image/jpeg", 0.8);
-      cfg.stickers.push(src);
-      while(cfg.stickers.length > 24) cfg.stickers.shift();
+  var files = Array.prototype.slice.call(e.target.files || []);
+  e.target.value = "";
+  if(!files.length) return;
+  if(!Array.isArray(cfg.stickers)) cfg.stickers = [];
+  var added = 0;
+  function readNext(){
+    if(!files.length){
+      if(!added) return;
       trimStickers();
       saveCfg();
       renderStkPage();
       if($("sheet").classList.contains("open")) openSticker();
-      toast("表情已添加 ♡");
+      toast(added > 1 ? "已添加 " + added + " 张表情 ♡" : "表情已添加 ♡");
+      return;
+    }
+    var f = files.shift();
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      var img = new Image();
+      img.onload = function(){
+        var max = 200;
+        var r = Math.min(max / img.width, max / img.height, 1);
+        var w = Math.max(1, Math.round(img.width * r));
+        var h = Math.max(1, Math.round(img.height * r));
+        var cv = document.createElement("canvas");
+        cv.width = w; cv.height = h;
+        cv.getContext("2d").drawImage(img, 0, 0, w, h);
+        var src = cv.toDataURL("image/png");
+        if(src.length > 90000) src = cv.toDataURL("image/jpeg", 0.8);
+        cfg.stickers.push(src);
+        while(cfg.stickers.length > 24) cfg.stickers.shift();
+        added++;
+        readNext();
+      };
+      img.onerror = readNext;
+      img.src = ev.target.result;
     };
-    img.src = ev.target.result;
-  };
-  reader.readAsDataURL(f);
-  e.target.value = "";
+    reader.onerror = readNext;
+    reader.readAsDataURL(f);
+  }
+  readNext();
 };
 
 /* 图片/表情点击放大 */
 var viewer = $("viewer"), viewerImg = $("viewerImg");
 chatEl.addEventListener("click", function(e){
   var t = e.target;
-  if(t && t.tagName === "IMG" && (t.classList.contains("msg-img") || t.classList.contains("stk-img"))){
+  if(t && t.tagName === "IMG" && t.classList.contains("msg-img")){
     viewerImg.src = t.src;
     viewer.classList.add("open");
   }
@@ -2632,27 +2690,31 @@ function pingThem(){
   clearReplies();
   var delay = Math.max(500, Math.min(2400, replyDelayMs()));
   var total = 1 + (Math.random() < 0.35 ? 1 : 0);
-  showTyping();
+  var inGroup = isGroup();
+  var mids = inGroup ? pickSpeakers(total) : [];
+  function midAt(i){ return inGroup ? mids[i] : null; }
+  showTyping(midAt(0));
   for(var i = 0; i < total; i++){
     (function(i){
       replyTimers.push(setTimeout(function(){
         hideTyping();
+        var mid = midAt(i);
         var r = Math.random();
         if(r < 0.2){
           var sk = pickStk();
-          if(sk) pushMsg({ who:"them", mid:randMember(), type:"sticker", src:sk.src, t:Date.now() });
+          if(sk) pushMsg({ who:"them", mid:mid, type:"sticker", src:sk.src, t:Date.now() });
           else {
             var tx = pickCard();
-            if(tx) pushMsg({ who:"them", mid:randMember(), type:"text", text:tx, t:Date.now() });
+            if(tx) pushMsg({ who:"them", mid:mid, type:"text", text:tx, t:Date.now() });
           }
         }else if(r < 0.32){
-          pushMsg({ who:"them", mid:randMember(), type:"voice", dur:2 + Math.floor(Math.random() * 5), quote: maybeQuote(), t:Date.now() });
+          pushMsg({ who:"them", mid:mid, type:"voice", dur:2 + Math.floor(Math.random() * 5), quote: maybeQuote(), t:Date.now() });
         }else if(i === 0 && r < 0.46){
-          taSendRedPacket();
+          taSendRedPacket(mid);
         }else{
-          pushThemText(nightCard() || pickCard());
+          pushThemText(nightCard() || pickCard(), mid);
         }
-        if(i < total - 1) showTyping();
+        if(i < total - 1) showTyping(midAt(i + 1));
       }, delay * (i + 1)));
     })(i);
   }
@@ -3289,23 +3351,28 @@ function proactiveSend(){
   if(roll < callP + pokeP + rpP){ taSendRedPacket(); return; }
   if(allCards().length === 0) return;
   clearReplies();
-  showTyping();
-  var total = 1 + (Math.random() < 0.35 ? 1 : 0);
+  var inGroup = isGroup();
+  var total0 = 1 + (Math.random() < 0.35 ? 1 : 0);
+  var mids = inGroup ? pickSpeakers(total0) : [];
+  function midAt(i){ return inGroup ? mids[i] : null; }
+  showTyping(midAt(0));
+  var total = total0;
   for(var i = 0; i < total; i++){
     (function(i){
       replyTimers.push(setTimeout(function(){
         hideTyping();
+        var mid = midAt(i);
         var r = Math.random() * 100;
         var stkP = (Number(cfg.stickerChance) || 35) * 0.5;
         var voiceP = (Number(cfg.voiceChance) || 15) * 0.6;
         if(r < stkP && cfg.stickers.length){
-          pushMsg({ who:"them", mid:randMember(), type:"sticker", src:pickStk().src, t:Date.now() });
+          pushMsg({ who:"them", mid:mid, type:"sticker", src:pickStk().src, t:Date.now() });
         }else if(r < stkP + voiceP){
-          pushMsg({ who:"them", mid:randMember(), type:"voice", dur:2 + Math.floor(Math.random() * 5), quote: maybeQuote(), t:Date.now() });
+          pushMsg({ who:"them", mid:mid, type:"voice", dur:2 + Math.floor(Math.random() * 5), quote: maybeQuote(), t:Date.now() });
         }else{
-          pushThemText(nightCard() || pickCard());
+          pushThemText(nightCard() || pickCard(), mid);
         }
-        if(i < total - 1) showTyping();
+        if(i < total - 1) showTyping(midAt(i + 1));
       }, 700 + i * Math.max(900, replyDelayMs())));
     })(i);
   }
@@ -5023,6 +5090,11 @@ function openGroupSettings(){
         '<span class="conv-av" style="width:30px;height:30px;font-size:13px">' + friendAvatarHtml(f) + '</span>' +
         '<span>' + esc(f.name) + '</span></label>';
     }).join("") + '</div>' +
+    '<p class="hint" style="margin-top:10px">群内显示</p>' +
+    '<div style="display:flex;gap:18px;margin:2px 2px 10px;font-size:12.5px;color:#8B4A5D">' +
+      '<label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="gsAv"' + (groupOpts(g.id).avatar ? " checked" : "") + '> 成员头像</label>' +
+      '<label style="display:flex;align-items:center;gap:6px"><input type="checkbox" id="gsName2"' + (groupOpts(g.id).name ? " checked" : "") + '> 成员名字</label>' +
+    '</div>' +
     '<button type="button" class="primary" id="gsSave" style="width:100%;margin-top:6px">保存群设置</button>' +
     '<button type="button" class="ghost-btn" id="gsLeave" style="margin-top:8px;color:#E8698F">解散这个群</button>';
   showSheet(html);
@@ -5033,6 +5105,9 @@ function openGroupSettings(){
     if(ms.length < 2){ toast("群聊至少需要 2 位好友"); return; }
     g.name = name;
     g.members = ms;
+    var go = groupOpts(g.id);
+    go.avatar = $("gsAv").checked;
+    go.name = $("gsName2").checked;
     saveCfg(); applyCfg(); renderAll(); renderStats();
     openConvSheet();
     toast("群设置已保存");
