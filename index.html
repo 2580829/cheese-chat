@@ -188,10 +188,11 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 .empty .acts button{border:1px solid rgba(247,200,216,.55);padding:9px 17px;border-radius:999px;font-size:12px;background:rgba(255,255,255,.85);color:var(--pink-rose);box-shadow:0 4px 14px rgba(232,127,164,.14);transition:transform .2s}
 .empty .acts button:active{transform:scale(.94)}
 .empty .acts button.primary{background:linear-gradient(135deg,var(--pink),var(--pink-deep));color:#fff;border-color:transparent;box-shadow:0 6px 18px rgba(232,127,164,.3)}
-.typing{display:inline-flex;gap:4px;padding:14px 16px}
+.typing{display:inline-flex;gap:4px;padding:14px 16px;animation:typingPop .25s cubic-bezier(.34,1.5,.64,1) both}
 .typing i{width:7px;height:7px;border-radius:50%;background:var(--pink-deep);animation:tp 1.2s ease-in-out infinite}
 .typing i:nth-child(2){animation-delay:.18s}
 .typing i:nth-child(3){animation-delay:.36s}
+@keyframes typingPop{from{transform:scale(.6) translateY(8px);opacity:0}to{transform:none;opacity:1}}
 @keyframes tp{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
 /* ---------- 输入区 ---------- */
 .inputbar{padding:8px 9px calc(env(safe-area-inset-bottom,0px) + 8px);display:flex;align-items:flex-end;gap:4px;background:linear-gradient(180deg,rgba(255,250,246,.78),rgba(255,248,244,.96));backdrop-filter:blur(20px) saturate(1.1);border-top:1px solid rgba(247,200,216,.4);box-shadow:0 -8px 24px rgba(232,127,164,.06);flex-shrink:0;position:relative;flex-wrap:wrap}
@@ -440,6 +441,7 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 
 /* ================= 首页 · 小手机桌面 ================= */
 #page-home{overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 26px) 18px 18px;-webkit-overflow-scrolling:touch;background:radial-gradient(circle at 20% 0%,rgba(255,255,255,.5),transparent 55%)}
+#page-home > *{flex-shrink:0} /* flex 子项禁止压缩，才能让 overflow-y:auto 真正滚起来 */
 #page-home::-webkit-scrollbar{width:0}
 .hm-hi{font-family:var(--serif);font-size:23px;font-weight:600;letter-spacing:.03em;line-height:1.5;color:#6A4552}
 .hm-date{font-size:11.5px;color:#B08D9B;letter-spacing:.12em;margin-top:8px}
@@ -1733,6 +1735,21 @@ function allCards(){
   Object.keys(lib).forEach(function(g){ out = out.concat(lib[g]); });
   return out;
 }
+/* 全局"正在输入"提示条（聊天页顶栏 + 非聊天页状态栏） */
+function setGlobalTyping(on, mid){
+  var statusBar = document.getElementById("statusEl");
+  if(on){
+    if(isChatVisible() && statusBar){
+      var hg = activeGroup();
+      statusBar.textContent = senderName(mid) + " 正在输入…";
+    }
+  }else{
+    if(statusBar){
+      var hg2 = activeGroup();
+      statusBar.textContent = hg2 ? (hg2.members.length + " 位好友 · 群聊") : (cfg.status || "在你身边");
+    }
+  }
+}
 function showTyping(){
   hideTyping();
   markLastMeRead();
@@ -1743,7 +1760,7 @@ function showTyping(){
   typingRow.innerHTML = '<div class="m-avatar them">' + avatarHtml("them", tmid) + '</div><div class="msg typing"><i></i><i></i><i></i></div>';
   chatEl.appendChild(typingRow);
   scrollBottom();
-  $("statusEl").textContent = "正在输入…";
+  setGlobalTyping(true, tmid);
   /* 跨页面：非聊天页也弹打字通知 */
   if(!isChatVisible()){
     showTypingNotify(tmid);
@@ -1753,10 +1770,7 @@ function hideTyping(){
   if(typingRow && typingRow.parentNode) typingRow.parentNode.removeChild(typingRow);
   typingRow = null;
   hideTypingNotify();
-  if($("statusEl")){
-    var hg = activeGroup();
-    $("statusEl").textContent = hg ? (hg.members.length + " 位好友 · 群聊") : (cfg.status || "在你身边");
-  }
+  setGlobalTyping(false);
 }
 /* 跨页面打字通知 */
 var _typingNotifyT = null;
