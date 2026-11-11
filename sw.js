@@ -8,7 +8,7 @@
    ================================================================ */
 const CACHE = 'CHEESE_V5';
 /* 与页面 version.json 保持一致；激活时用它把旧页面强制带到新地址 */
-const VERSION = '2026.11.11-poke4';
+const VERSION = '2026.11.11-poke5';
 const PRECACHE = [
   './',
   './index.html',
