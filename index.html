@@ -58,6 +58,12 @@ button,input,textarea{font-family:inherit}
 .pages{position:relative;flex:1;min-height:0;overflow:hidden}
 .page{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;visibility:hidden;transform:translateY(10px) scale(.995);pointer-events:none;transition:opacity .28s ease,transform .28s ease,visibility .28s}
 .page.active{opacity:1;visibility:visible;transform:none;pointer-events:auto}
+@keyframes pageFromRight{from{opacity:0;transform:translateX(34px) scale(.995)}to{opacity:1;transform:none}}
+@keyframes pageFromLeft{from{opacity:0;transform:translateX(-34px) scale(.995)}to{opacity:1;transform:none}}
+.page.swipe-next{animation:pageFromRight .26s cubic-bezier(.22,.8,.3,1)}
+.page.swipe-prev{animation:pageFromLeft .26s cubic-bezier(.22,.8,.3,1)}
+.tab-item{position:relative}
+.tab-item.dot::after{content:"";position:absolute;top:7px;right:calc(50% - 17px);width:7px;height:7px;border-radius:50%;background:var(--pink-rose);box-shadow:0 0 0 2px rgba(255,251,248,.95)}
 /* ---------- 顶栏 ---------- */
 header{padding:calc(env(safe-area-inset-top,0px) + 14px) 18px 13px;display:flex;align-items:center;gap:12px;background:linear-gradient(180deg,rgba(255,250,246,.92),rgba(255,248,244,.66));backdrop-filter:blur(20px) saturate(1.15);border-bottom:1px solid rgba(247,200,216,.4);flex-shrink:0;position:relative;overflow:hidden}
 header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(251,198,220,.55),transparent 70%);pointer-events:none}
@@ -682,6 +688,7 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
 .conv-meta b{display:block;font-size:13.5px;color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .conv-meta i{display:block;font-style:normal;font-size:10.5px;color:var(--ink-soft);margin-top:2px}
 .conv-tag{font-size:9.5px;color:#B77C92;background:rgba(247,200,216,.4);border-radius:999px;padding:2px 8px;flex-shrink:0}
+.conv-dot{min-width:18px;height:18px;border-radius:999px;background:var(--pink-rose);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0;margin-left:6px;box-shadow:0 2px 8px rgba(232,127,164,.35)}
 .gc-list{max-height:38vh;overflow-y:auto;margin:8px 0 4px}
 .gc-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.8);margin-bottom:7px;font-size:13px;color:var(--ink)}
 .gc-item input{width:17px;height:17px;accent-color:#E87FA4}
@@ -1198,8 +1205,9 @@ function convKey(c){
 function chatKey(){ return convKey(cfg.conv); }
 function convName(){ var g = activeGroup(); return g ? g.name : (friendById(cfg.conv.id) || mainFriend()).name; }
 function senderFriend(mid){
-  if(!isGroup()) return mainFriend();
-  return friendById(mid) || friendById(activeGroup().members[0]) || mainFriend();
+  if(isGroup()) return friendById(mid) || friendById(activeGroup().members[0]) || mainFriend();
+  if(mid){ var f = friendById(mid); if(f) return f; }
+  return friendById(cfg.conv.id) || mainFriend();
 }
 function senderName(mid){ return senderFriend(mid).name; }
 function randMember(){
@@ -1214,7 +1222,7 @@ function friendAvatarHtml(f){
 }
 function convAvatarHtml(){
   var g = activeGroup();
-  if(!g) return friendAvatarHtml(mainFriend());
+  if(!g) return friendAvatarHtml(friendById(cfg.conv.id) || mainFriend());
   var a = friendById(g.members[0]), b = friendById(g.members[1]);
   if(a && b && a.avatar && b.avatar){
     return '<span class="stack"><img src="' + a.avatar + '" alt=""><img src="' + b.avatar + '" alt=""></span>';
@@ -1409,12 +1417,21 @@ function pushMsg(m){
   var em = chatEl.querySelector(".empty");
   if(em && em.parentNode) em.parentNode.removeChild(em);
   m.id = m.id || uid();
+  if(!m.mid && m.who === "them" && !isGroup()) m.mid = cfg.conv.id;
   chat.push(m);
   if(chat.length > 300) chat = chat.slice(-300);
   var pruned = saveChat();
   if(pruned){ renderAll(); } else { paintMsg(m); }
   scrollBottom();
-  if(m.who === "them" && !m.sys) notifyNewMsg(m);
+  if(m.who === "them" && !m.sys){
+    if(!isChatVisible()){
+      var u = unreadMap(), k = chatKey();
+      u[k] = (Number(u[k]) || 0) + 1;
+      saveCfg();
+      updateTabDot();
+    }
+    notifyNewMsg(m);
+  }
 }
 
 /* ================= 长按操作 ================= */
@@ -3094,7 +3111,7 @@ $("charBtn").onclick = openCharSheet;
 function goPage(id){
   document.querySelectorAll(".page").forEach(function(p){ p.classList.toggle("active", p.id === id); });
   document.querySelectorAll(".tab-item").forEach(function(t){ t.classList.toggle("on", t.dataset.page === id); });
-  if(id === "page-chat") $("newMsgBar").classList.remove("show");
+  if(id === "page-chat"){ $("newMsgBar").classList.remove("show"); markRead(cfg.conv); }
   if(id === "page-home") renderHome();
   if(id === "page-lib") renderLib();
   if(id === "page-diary") renderDiary();
@@ -3103,6 +3120,109 @@ function goPage(id){
 document.querySelectorAll(".tab-item").forEach(function(t){
   t.onclick = function(){ goPage(t.dataset.page); };
 });
+
+/* ================= 左右滑动切页 ================= */
+(function(){
+  var order = ["page-home","page-chat","page-lib","page-diary","page-me"];
+  var box = document.querySelector(".pages");
+  if(!box) return;
+  var sx = 0, sy = 0, st = 0, tracking = false, horizontal = false, suppress = false;
+  function hScrollable(el){
+    while(el && el !== box){
+      if(el.scrollWidth - el.clientWidth > 4){
+        var ox = "";
+        try{ ox = getComputedStyle(el).overflowX; }catch(e){}
+        if(ox === "auto" || ox === "scroll") return true;
+      }
+      el = el.parentElement;
+    }
+    return false;
+  }
+  function layerOpen(){
+    return !!(document.querySelector(".sheet.open, .modal.open, #viewer.open, #call.open, #callPill.show, #recOverlay.show, #rpOpen.open"));
+  }
+  function canStart(target){
+    if(layerOpen()) return false;
+    if(target && target.closest && target.closest("input,textarea,select,.chips,.stk-grid,.msg img")) return false;
+    return !hScrollable(target);
+  }
+  function begin(x, y){
+    sx = x; sy = y; st = Date.now(); tracking = true; horizontal = false;
+  }
+  function move(x, y){
+    if(!tracking) return;
+    var dx = x - sx, dy = y - sy;
+    if(dy > 14 && Math.abs(dy) > Math.abs(dx)){ tracking = false; return; }
+    if(Math.abs(dx) > 14) horizontal = true;
+  }
+  function jump(dir){
+    var active = document.querySelector(".page.active");
+    var i = order.indexOf(active ? active.id : "");
+    if(i < 0) return false;
+    var ni = i + dir;
+    if(ni < 0 || ni >= order.length) return false;
+    var id = order[ni];
+    goPage(id);
+    var p = document.getElementById(id);
+    if(p){
+      var cls = dir > 0 ? "swipe-next" : "swipe-prev";
+      p.classList.remove("swipe-next", "swipe-prev");
+      void p.offsetWidth;
+      p.classList.add(cls);
+      setTimeout(function(){ p.classList.remove(cls); }, 300);
+    }
+    suppress = true;
+    setTimeout(function(){ suppress = false; }, 350);
+    return true;
+  }
+  function end(x, y){
+    if(!tracking) return false;
+    tracking = false;
+    if(!horizontal || layerOpen()) return false;
+    var dx = x - sx, dy = y - sy;
+    if(Date.now() - st > 800) return false;
+    if(Math.abs(dx) < 64 || Math.abs(dx) < Math.abs(dy) * 1.6) return false;
+    return jump(dx < 0 ? 1 : -1);
+  }
+  box.addEventListener("touchstart", function(e){
+    if(e.touches.length !== 1) return;
+    if(!canStart(e.target)) return;
+    begin(e.touches[0].clientX, e.touches[0].clientY);
+  }, {passive:true});
+  box.addEventListener("touchmove", function(e){
+    if(e.touches.length !== 1) return;
+    move(e.touches[0].clientX, e.touches[0].clientY);
+  }, {passive:true});
+  box.addEventListener("touchend", function(e){
+    end(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+  }, {passive:true});
+  box.addEventListener("pointerdown", function(e){
+    if(e.pointerType !== "mouse" || e.button !== 0) return;
+    if(!canStart(e.target)) return;
+    begin(e.clientX, e.clientY);
+  });
+  box.addEventListener("pointermove", function(e){
+    if(e.pointerType !== "mouse") return;
+    move(e.clientX, e.clientY);
+  });
+  box.addEventListener("pointerup", function(e){
+    if(e.pointerType !== "mouse") return;
+    end(e.clientX, e.clientY);
+  });
+  box.addEventListener("pointercancel", function(e){
+    if(e.pointerType === "mouse") tracking = false;
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    var a = document.activeElement, tag = a ? a.tagName : "";
+    if(tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    if(layerOpen()) return;
+    if(jump(e.key === "ArrowRight" ? 1 : -1)) e.preventDefault();
+  });
+  box.addEventListener("click", function(e){
+    if(suppress){ e.preventDefault(); e.stopPropagation(); suppress = false; }
+  }, true);
+})();
 
 /* ================= 字卡库 ================= */
 function renderLib(){
@@ -3275,11 +3395,42 @@ function updateStorageInfo(){
 }
 /* ================= 会话 / 好友 / 群聊 ================= */
 var pendingFriendId = null;
+function unreadMap(){
+  if(!cfg.unread || typeof cfg.unread !== "object" || Array.isArray(cfg.unread)) cfg.unread = {};
+  return cfg.unread;
+}
+function updateTabDot(){
+  var u = unreadMap(), n = 0;
+  Object.keys(u).forEach(function(k){ n += Number(u[k]) || 0; });
+  var tab = document.querySelector('.tab-item[data-page="page-chat"]');
+  if(tab) tab.classList.toggle("dot", n > 0);
+}
+function markRead(conv){
+  var u = unreadMap(), k = convKey(conv || cfg.conv);
+  if(u[k]){ delete u[k]; saveCfg(); }
+  updateTabDot();
+}
+function convPreview(t, id){
+  var arr;
+  try{ arr = load(convKey({ t:t, id:id }), []); }catch(e){ arr = []; }
+  if(!arr || !arr.length) return "";
+  var m = arr[arr.length - 1], txt;
+  if(m.recalled) txt = "撤回了一条消息";
+  else if(m.type === "text") txt = m.text || "";
+  else if(m.type === "img") txt = "[图片]";
+  else if(m.type === "sticker") txt = "[表情包]";
+  else if(m.type === "redpacket") txt = "[红包] ¥" + (m.amount || "");
+  else if(m.type === "voice") txt = "[语音] " + (m.dur || 1) + "″";
+  else txt = m.text || "";
+  if(m.who === "me" && !m.sys) txt = "我：" + txt;
+  return String(txt).replace(/\s+/g, " ").slice(0, 18);
+}
 function openConv(conv){
   if(conv.t === "group" && !cfg.groups.some(function(g){ return g.id === conv.id; })) return;
   if(conv.t === "friend" && !friendById(conv.id)) return;
   clearReplies(); clearQuote();
   cfg.conv = conv;
+  markRead(conv);
   saveCfg();
   chat = load(chatKey(), []);
   applyCfg();
@@ -3290,10 +3441,14 @@ function openConv(conv){
 }
 function convRow(t, id, name, sub, avatar, tag){
   var on = cfg.conv.t === t && cfg.conv.id === id;
+  var prev = convPreview(t, id);
+  var un = Number(unreadMap()[convKey({ t:t, id:id })]) || 0;
   return '<button type="button" class="conv-row' + (on ? ' on' : '') + '" data-t="' + t + '" data-id="' + id + '">' +
     '<span class="conv-av">' + avatar + '</span>' +
-    '<span class="conv-meta"><b>' + esc(name) + '</b><i>' + esc(sub) + '</i></span>' +
-    (tag ? '<span class="conv-tag">' + tag + '</span>' : '') + '</button>';
+    '<span class="conv-meta"><b>' + esc(name) + '</b><i>' + esc(prev || sub) + '</i></span>' +
+    (tag ? '<span class="conv-tag">' + tag + '</span>' : '') +
+    (un ? '<span class="conv-dot">' + (un > 99 ? "99+" : un) + '</span>' : '') +
+    '</button>';
 }
 function openConvSheet(){
   var html = '<div class="sheet-title">会话</div><p class="hint">单聊随时切换，群聊至少需要 2 位好友</p>';
@@ -3446,11 +3601,17 @@ $("friendAvatarInput").onchange = function(e){
       w = Math.round(w * r); h = Math.round(h * r);
       var cv = document.createElement("canvas");
       cv.width = w; cv.height = h;
-      cv.getContext("2d").drawImage(img, 0, 0, w, h);
-      var src = cv.toDataURL("image/jpeg", 0.8);
+      var cx = cv.getContext("2d");
+      cx.fillStyle = "#FFF9F4";
+      cx.fillRect(0, 0, w, h);
+      cx.drawImage(img, 0, 0, w, h);
+      var src = cv.toDataURL("image/jpeg", 0.82);
+      var done = false;
       for(var i = 0; i < cfg.friends.length; i++){
-        if(cfg.friends[i].id === pendingFriendId) cfg.friends[i].avatar = src;
+        if(cfg.friends[i].id === pendingFriendId){ cfg.friends[i].avatar = src; done = true; }
       }
+      if(!done){ toast("好友不存在了"); return; }
+      pendingFriendId = null;
       saveCfg();
       applyCfg(); renderAll(); openFriendMgmt();
       toast("头像换好啦");
@@ -3650,6 +3811,7 @@ renderDiary();
 updateStkCount();
 renderHome();
 renderBubbles();
+updateTabDot();
 sayRandom();
 document.body.dataset.bubble = String(cfg.bubble || 0);
 document.body.dataset.bshape = cfg.bubbleShape || "standard";
