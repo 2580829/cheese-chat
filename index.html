@@ -831,9 +831,6 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
         <button type="button" class="tb" id="plusBtn" aria-label="更多功能">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
         </button>
-        <button type="button" class="tb" id="moreBtn" aria-label="继续说">
-          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18" cy="12" r="1.7"/></svg>
-        </button>
         <button type="button" class="tb send" id="sendBtn" aria-label="发送">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.1 11.2 19.4 3.5c.8-.4 1.6.4 1.3 1.2l-4.6 15.8c-.2.8-1.3 1-1.8.3l-3.1-4.4a1 1 0 0 0-.9-.4l-4.6.3c-.9.1-1.3-1-.6-1.5l4-2.9a1 1 0 0 0 .1-1.5l-.7-.7a1 1 0 0 1 .6-2.1z"/></svg>
         </button>
@@ -1254,6 +1251,17 @@ if(!cfg.mood) cfg.mood = 0;
 /* ---- 金币与自定义礼物 ---- */
 if(cfg.coins == null) cfg.coins = 60;
 if(!cfg.gifts || !Array.isArray(cfg.gifts)) cfg.gifts = [];
+/* ---- 主题与背景 ---- */
+if(!cfg.chatBg) cfg.chatBg = "";    /* 聊天页背景图 dataURL */
+if(!cfg.appBg) cfg.appBg = "";      /* 整体背景图 dataURL */
+if(!cfg.themePreset) cfg.themePreset = "pink"; /* 主题色 */
+/* ---- 挂件可配置化 ---- */
+if(!Array.isArray(cfg.widgets)) cfg.widgets = ["contract","cards","note"];
+cfg.widgets = cfg.widgets.map(function(w){
+  if(typeof w === "string") return { key:w, label:HM_WIDGETS[w] ? HM_WIDGETS[w].n : w, bg:"" };
+  return { key:w.key, label:w.label || (HM_WIDGETS[w.key] ? HM_WIDGETS[w.key].n : w.key), bg:w.bg || "" };
+}).filter(function(w){ return HM_WIDGETS[w.key]; });
+if(!cfg.widgets.length) cfg.widgets = [{ key:"contract", label:"在一起", bg:"" }];
 /* ---- 好友与群聊 ---- */
 if(!Array.isArray(cfg.friends)) cfg.friends = [];
 if(!Array.isArray(cfg.groups)) cfg.groups = [];
@@ -2047,20 +2055,13 @@ mask.onclick = hideSheet;
 
 /* ================= 输入栏功能 ================= */
 $("emojiBtn").onclick = function(){ openSticker(); };
-$("moreBtn").onclick = function(){
-  if(Date.now() - lastSendAt < 150) return;
-  continueTalk();
-};
-
 var ACTIONS = [
   { a:"img",   ic:"🖼️", n:"图片" },
-  { a:"stk",   ic:"🧸", n:"表情包" },
   { a:"rp",    ic:"🧧", n:"红包" },
+  { a:"gift",  ic:"🎁", n:"礼物" },
   { a:"throw", ic:"🍅", n:"搞怪" },
-  { a:"voice", ic:"🎙️", n:"语音" },
   { a:"call",  ic:"📹", n:"视频通话" },
-  { a:"ping",  ic:"✧",  n:"让 ta 主动" },
-  { a:"bulk",  ic:"⇪",  n:"批量发送" }
+  { a:"ping",  ic:"✧",  n:"让 ta 主动" }
 ];
 
 $("plusBtn").onclick = function(e){
@@ -2077,13 +2078,11 @@ $("plusBtn").onclick = function(e){
       var a = b.dataset.a;
       hideSheet();
       if(a === "img") $("imgInput").click();
-      if(a === "stk") openSticker();
       if(a === "rp") openRedPacket();
+      if(a === "gift") openGiftShop();
       if(a === "throw") openThrow();
-      if(a === "voice") openVoice();
       if(a === "call") startCall();
       if(a === "ping") pingThem();
-      if(a === "bulk") openBulk();
     };
   });
 };
@@ -2772,49 +2771,43 @@ var HM_WIDGETS = {
   memo:{ n:"小纸条" },
   stamp:{ n:"随机字卡贴" }
 };
-if(!Array.isArray(cfg.widgets)) cfg.widgets = ["contract","cards","note"];
-cfg.widgets = cfg.widgets.filter(function(k){ return HM_WIDGETS[k]; });
-if(!cfg.widgets.length) cfg.widgets = ["contract"];
 if(!cfg.countdown || !cfg.countdown.date) cfg.countdown = { title:"在一起的第", date:cfg.startDate || "2026-03-26" };
 if(typeof cfg.memo !== "string") cfg.memo = "今天也要好好吃饭呀";
 var lastSay = "", stampCard = "";
 
-function hmWidgetHTML(k){
-  if(k === "contract"){
-    return '<div class="hm-contract" data-w="contract" title="点击修改起始日期">' +
+function hmWidgetHTML(w){
+  /* w 可能是字符串 key 或 {key,label,bg} 对象 */
+  var k, label, bg;
+  if(typeof w === "string"){ k = w; label = HM_WIDGETS[k] ? HM_WIDGETS[k].n : k; bg = ""; }
+  else{ k = w.key; label = w.label || (HM_WIDGETS[k] ? HM_WIDGETS[k].n : k); bg = w.bg || ""; }
+  var bgStyle = bg ? "background-image:url('" + bg + "');background-size:cover;background-position:center" : "";
+  var inner = "";
+  if(k === "contract"){ inner = '<div class="hm-contract" data-w="contract" style="' + bgStyle + '">' +
       '<div class="hm-cav" id="hmCAv">🌷</div><div>' +
-      '<div class="hm-clabel">💜 签订契约的</div>' +
+      '<div class="hm-clabel">' + esc(label) + '</div>' +
       '<div class="hm-cnum"><b id="hmDays">1</b><span>天</span></div>' +
-      '<div class="hm-cfrom" id="hmFrom">从 今天 起 · 点击编辑</div></div></div>';
-  }
-  if(k === "cards"){
-    return '<div class="hm-duo" data-w="cards">' +
+      '<div class="hm-cfrom" id="hmFrom">从 今天 起 · 点击编辑</div></div></div>'; }
+  else if(k === "cards"){ inner = '<div class="hm-duo" data-w="cards" style="' + bgStyle + '">' +
       '<div class="hm-card" id="hmMoodCard"><div class="hm-t">TA 今日心情</div>' +
       '<div class="hm-mood-e" id="hmMoodE">🌸</div><div class="hm-mood-v" id="hmMoodV">开心</div></div>' +
       '<div class="hm-card"><div class="hm-t">时间</div><div class="hm-clocks">' +
       '<div><span>TA 那边</span><b id="hmTaTime">--:--</b></div>' +
-      '<div><span>我这边</span><b id="hmMyTime">--:--</b></div></div></div></div>';
-  }
-  if(k === "note"){
-    return '<div class="hm-say" data-w="note"><div class="hm-t">💌 TA 今天想对你说</div>' +
-      '<div class="hm-say-t" id="hmSay">…</div></div>';
-  }
-  if(k === "countdown"){
-    return '<div class="hm-mini" data-w="countdown"><div class="hm-t">🎗 ' + esc(cfg.countdown.title || "纪念日") + '</div>' +
+      '<div><span>我这边</span><b id="hmMyTime">--:--</b></div></div></div></div>'; }
+  else if(k === "note"){ inner = '<div class="hm-say" data-w="note" style="' + bgStyle + '"><div class="hm-t">' + esc(label) + '</div>' +
+      '<div class="hm-say-t" id="hmSay">…</div></div>'; }
+  else if(k === "countdown"){ inner = '<div class="hm-mini" data-w="countdown" style="' + bgStyle + '"><div class="hm-t">' + esc(label) + '</div>' +
       '<div class="hm-cd"><b id="hmCdNum">--</b><span>天</span></div>' +
-      '<div class="hm-cd-from" id="hmCdFrom">点击修改日期与标题</div></div>';
-  }
-  if(k === "memo"){
-    return '<div class="hm-mini" data-w="memo"><div class="hm-t">📝 小纸条</div>' +
+      '<div class="hm-cd-from" id="hmCdFrom">点击修改日期与标题</div></div>'; }
+  else if(k === "memo"){ inner = '<div class="hm-mini" data-w="memo" style="' + bgStyle + '"><div class="hm-t">' + esc(label) + '</div>' +
       '<div class="hm-memo">' + esc(cfg.memo) + '</div>' +
       '<div class="hm-cd-from">点一下可以改</div></div>';
   }
   if(k === "stamp"){
-    return '<div class="hm-stamp" data-w="stamp"><div class="hm-t">✨ 随机字卡</div>' +
+    inner = '<div class="hm-stamp" data-w="stamp" style="' + bgStyle + '"><div class="hm-t">' + esc(label) + '</div>' +
       '<div class="hm-stamp-t" id="hmStamp">…</div>' +
       '<div class="hm-cd-from">点一下换一张</div></div>';
   }
-  return "";
+  return inner || "";
 }
 function hmCountdown(){
   var d = new Date(); d.setHours(0,0,0,0);
@@ -3255,18 +3248,62 @@ function editCountdown(){
   inp.click();
 }
 function openHomeEdit(){
-  var rows = cfg.widgets.map(function(k, i){
-    return '<div class="wg-row"><span>' + HM_WIDGETS[k].n + '</span><div class="wg-ops">' +
+  /* 先让 cfg.widgets 确保全是对象 */
+  cfg.widgets = cfg.widgets.map(function(w){
+    if(typeof w === "string") return { key:w, label:HM_WIDGETS[w] ? HM_WIDGETS[w].n : w, bg:"" };
+    return { key:w.key, label:w.label || (HM_WIDGETS[w.key] ? HM_WIDGETS[w.key].n : w.key), bg:w.bg || "" };
+  }).filter(function(w){ return HM_WIDGETS[w.key]; });
+  var rows = cfg.widgets.map(function(w, i){
+    return '<div class="wg-row"><span>' + esc(w.label) + '</span>' +
+      '<div class="wg-ops">' +
+      '<button type="button" data-rename="' + i + '" title="改文字">✎</button>' +
+      '<button type="button" data-bg="' + i + '" title="改背景">🖼</button>' +
+      (w.bg ? '<button type="button" data-clrbg="' + i + '" title="清除背景">✕🖼</button>' : '') +
       '<button type="button" data-up="' + i + '">↑</button>' +
       '<button type="button" data-dn="' + i + '">↓</button>' +
       '<button type="button" data-del="' + i + '">✕</button></div></div>';
   }).join("");
-  var rest = Object.keys(HM_WIDGETS).filter(function(k){ return cfg.widgets.indexOf(k) < 0; });
+  var rest = Object.keys(HM_WIDGETS).filter(function(k){
+    return !cfg.widgets.some(function(w){ return w.key === k; });
+  });
   var addHtml = rest.length ? '<div class="section-label" style="padding-left:0;margin-top:14px">可以加回来</div>' +
     rest.map(function(k){ return '<button type="button" class="ghost-btn" data-add="' + k + '">+ ' + HM_WIDGETS[k].n + '</button>'; }).join("") : "";
   showSheet('<div class="sheet-title">桌面挂件</div>' +
-    '<p class="hint">用 ↑ ↓ 调整顺序，✕ 先收起来（不会删数据）</p>' + rows + addHtml);
+    '<p class="hint">✎ 改标题文字 · 🖼 换背景图 · ↑↓ 调顺序 · ✕ 收起</p>' + rows + addHtml +
+    '<div class="section-label" style="padding-left:0;margin-top:14px">整体背景</div>' +
+    '<div style="display:flex;gap:8px">' +
+    '<button type="button" class="ghost-btn" id="pickAppBg" style="flex:1;margin:0">📷 网站主背景</button>' +
+    '<button type="button" class="ghost-btn" id="pickChatBg" style="flex:1;margin:0">💌 聊天背景</button></div>' +
+    (cfg.appBg || cfg.chatBg ? '<div style="display:flex;gap:8px;margin-top:8px">' +
+      (cfg.appBg ? '<button type="button" class="ghost-btn" id="clrAppBg" style="flex:1;margin:0">清主背景</button>' : '') +
+      (cfg.chatBg ? '<button type="button" class="ghost-btn" id="clrChatBg" style="flex:1;margin:0">清聊天背景</button>' : '') +
+    '</div>' : '') +
+    '<input type="file" id="wgBgFile" accept="image/*" style="display:none">' +
+    '<input type="file" id="appBgFile" accept="image/*" style="display:none">' +
+    '<input type="file" id="chatBgFile" accept="image/*" style="display:none">');
   var body = $("sheetBody");
+  /* 改文字 */
+  body.querySelectorAll("[data-rename]").forEach(function(b){
+    b.onclick = function(){
+      var i = +b.getAttribute("data-rename");
+      var nw = prompt("改成什么文字？", cfg.widgets[i].label);
+      if(nw){ cfg.widgets[i].label = nw.trim() || cfg.widgets[i].label; saveCfg(); renderHome(); openHomeEdit(); }
+    };
+  });
+  /* 改挂件背景 */
+  body.querySelectorAll("[data-bg]").forEach(function(b){
+    b.onclick = function(){
+      var i = +b.getAttribute("data-bg");
+      $("wgBgFile").dataset.i = i;
+      $("wgBgFile").click();
+    };
+  });
+  body.querySelectorAll("[data-clrbg]").forEach(function(b){
+    b.onclick = function(){
+      var i = +b.getAttribute("data-clrbg");
+      cfg.widgets[i].bg = ""; saveCfg(); renderHome(); openHomeEdit();
+    };
+  });
   body.querySelectorAll("[data-up]").forEach(function(b){
     b.onclick = function(){
       var i = +b.getAttribute("data-up");
@@ -3288,9 +3325,52 @@ function openHomeEdit(){
   });
   body.querySelectorAll("[data-add]").forEach(function(b){
     b.onclick = function(){
-      cfg.widgets.push(b.getAttribute("data-add")); saveCfg(); renderHome(); openHomeEdit();
+      cfg.widgets.push({ key:b.getAttribute("data-add"), label:HM_WIDGETS[b.getAttribute("data-add")].n, bg:"" }); saveCfg(); renderHome(); openHomeEdit();
     };
   });
+  /* 挂件背景上传 */
+  var wgBgFile = $("wgBgFile");
+  if(wgBgFile){
+    wgBgFile.onchange = function(e){
+      var f = e.target.files[0];
+      if(!f) return;
+      var reader = new FileReader();
+      reader.onload = function(ev){
+        var i = +wgBgFile.dataset.i;
+        cfg.widgets[i].bg = ev.target.result; saveCfg(); renderHome(); openHomeEdit();
+      };
+      reader.readAsDataURL(f);
+      wgBgFile.value = "";
+    };
+  }
+  /* 整体背景上传 */
+  var appBgFile = $("appBgFile");
+  if(appBgFile){
+    appBgFile.onclick = function(){ $("appBgFile").click(); };
+    appBgFile.onchange = function(e){
+      var f = e.target.files[0];
+      if(!f) return;
+      var reader = new FileReader();
+      reader.onload = function(ev){ cfg.appBg = ev.target.result; saveCfg(); applyCfg(); openHomeEdit(); };
+      reader.readAsDataURL(f);
+      appBgFile.value = "";
+    };
+    if($("pickAppBg")) $("pickAppBg").onclick = function(){ $("appBgFile").click(); };
+    if($("clrAppBg")) $("clrAppBg").onclick = function(){ cfg.appBg = ""; saveCfg(); applyCfg(); openHomeEdit(); };
+  }
+  var chatBgFile = $("chatBgFile");
+  if(chatBgFile){
+    chatBgFile.onchange = function(e){
+      var f = e.target.files[0];
+      if(!f) return;
+      var reader = new FileReader();
+      reader.onload = function(ev){ cfg.chatBg = ev.target.result; saveCfg(); applyCfg(); openHomeEdit(); };
+      reader.readAsDataURL(f);
+      chatBgFile.value = "";
+    };
+    if($("pickChatBg")) $("pickChatBg").onclick = function(){ $("chatBgFile").click(); };
+    if($("clrChatBg")) $("clrChatBg").onclick = function(){ cfg.chatBg = ""; saveCfg(); applyCfg(); openHomeEdit(); };
+  }
 }
 if($("hmSay")) $("hmSay").textContent = "";
 setInterval(function(){
@@ -4116,6 +4196,21 @@ function applyCfg(){
   $("profileName").textContent = cfg.name;
   if($("avatar")) $("avatar").innerHTML = convAvatarHtml();
   if($("bigAvatar")) $("bigAvatar").innerHTML = friendAvatarHtml(mainFriend());
+  /* 整体背景 */
+  var bg = cfg.appBg || "";
+  document.querySelector(".bg").style.cssText = bg ? "background-image:url('" + bg + "');background-size:cover;background-position:center;background-attachment:fixed" : "";
+  /* 聊天页背景 */
+  var chatBgEl = document.getElementById("chat");
+  if(chatBgEl){
+    if(cfg.chatBg){
+      chatBgEl.style.backgroundImage = "url('" + cfg.chatBg + "')";
+      chatBgEl.style.backgroundSize = "cover";
+      chatBgEl.style.backgroundPosition = "center";
+      chatBgEl.style.backgroundAttachment = "local";
+    }else{
+      chatBgEl.style.backgroundImage = "";
+    }
+  }
 }
 $("setName").addEventListener("input", function(e){
   cfg.name = e.target.value.trim() || "念念";
