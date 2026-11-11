@@ -1320,13 +1320,6 @@ if(cfg.callPickChance == null) cfg.callPickChance = 80; /* 通话接听概率 0-
 if(cfg.textChance == null) cfg.textChance = 60;    /* 对方发文字概率 0-100 */
 if(cfg.voiceChance == null) cfg.voiceChance = 15;  /* 对方发语音概率 0-100 */
 if(cfg.giftAskChance == null) cfg.giftAskChance = 3; /* 对方主动送礼物概率 0-100 */
-/* ---- 挂件可配置化 ---- */
-if(!Array.isArray(cfg.widgets)) cfg.widgets = ["contract","cards","note"];
-cfg.widgets = cfg.widgets.map(function(w){
-  if(typeof w === "string") return { key:w, label:HM_WIDGETS[w] ? HM_WIDGETS[w].n : w, bg:"" };
-  return { key:w.key, label:w.label || (HM_WIDGETS[w.key] ? HM_WIDGETS[w.key].n : w.key), bg:w.bg || "" };
-}).filter(function(w){ return HM_WIDGETS[w.key]; });
-if(!cfg.widgets.length) cfg.widgets = [{ key:"contract", label:"在一起", bg:"" }];
 /* ---- 好友与群聊 ---- */
 if(!Array.isArray(cfg.friends)) cfg.friends = [];
 if(!Array.isArray(cfg.groups)) cfg.groups = [];
@@ -2894,6 +2887,13 @@ var HM_WIDGETS = {
   memo:{ n:"小纸条" },
   stamp:{ n:"随机字卡贴" }
 };
+/* ---- 挂件可配置化（必须在 HM_WIDGETS 定义之后） ---- */
+if(!Array.isArray(cfg.widgets)) cfg.widgets = ["contract","cards","note"];
+cfg.widgets = cfg.widgets.map(function(w){
+  if(typeof w === "string") return { key:w, label:HM_WIDGETS[w] ? HM_WIDGETS[w].n : w, bg:"" };
+  return { key:w.key, label:w.label || (HM_WIDGETS[w.key] ? HM_WIDGETS[w.key].n : w.key), bg:w.bg || "" };
+}).filter(function(w){ return HM_WIDGETS[w.key]; });
+if(!cfg.widgets.length) cfg.widgets = [{ key:"contract", label:"在一起", bg:"" }];
 if(!cfg.countdown || !cfg.countdown.date) cfg.countdown = { title:"在一起的第", date:cfg.startDate || "2026-03-26" };
 if(typeof cfg.memo !== "string") cfg.memo = "今天也要好好吃饭呀";
 var lastSay = "", stampCard = "";
