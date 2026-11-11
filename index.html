@@ -17,31 +17,66 @@
 <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 <script src="bubbles.js" defer></script>
 <script>
+/* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
+  var V = "2026.11.11-poke2";
+  window.APP_VER = V;
+  /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
-    var V = "2026.11.15-fullfix";
-    window.APP_VER = V;
-    if((location.search || "").indexOf("v=" + V) < 0){
-      location.replace(location.pathname + "?v=" + V + (location.hash || ""));
+    var u = new URL(location.href);
+    if(u.searchParams.get("v") !== V){
+      u.searchParams.set("v", V);
+      location.replace(u.toString());
     }
   }catch(e){}
+  /* 2) 拉服务端版本号；不一致就带新版本参数重开（保留 localStorage 聊天记录） */
+  window.__cheeseUpdateCheck = function(force){
+    if(!navigator.onLine) return;
+    fetch("version.json?t=" + Date.now(), {cache:"no-store"})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(!d || !d.v || d.v === window.APP_VER) return;
+        if(!force){
+          try{
+            if(sessionStorage.getItem("cheese_upd") === d.v) return;
+            sessionStorage.setItem("cheese_upd", d.v);
+          }catch(e){}
+        }
+        var url = new URL(location.href);
+        url.searchParams.set("v", d.v);
+        location.replace(url.toString());
+      })
+      .catch(function(){});
+  };
+  setTimeout(function(){ window.__cheeseUpdateCheck(); }, 800);
+  setTimeout(function(){ window.__cheeseUpdateCheck(); }, 4000);
+  document.addEventListener("visibilitychange", function(){
+    if(!document.hidden) setTimeout(function(){ window.__cheeseUpdateCheck(); }, 600);
+  });
 })();
 /* Service Worker 注册 —— 让网站变 App（离线可用 + 桌面图标） */
 if('serviceWorker' in navigator){
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('sw.js').then(function(reg){
+  var hadController = !!navigator.serviceWorker.controller;
+  var swReloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", function(){
+    if(!hadController || swReloaded) return;
+    swReloaded = true;
+    location.reload();
+  });
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register('sw.js?v=' + window.APP_VER).then(function(reg){
       console.log('[奶酪信笺] PWA 已注册，scope:', reg.scope);
       if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
-      reg.addEventListener('updatefound', function(){
+      reg.addEventListener("updatefound", function(){
         var nw = reg.installing;
         if(!nw) return;
-        nw.addEventListener('statechange', function(){
-          if(nw.state === 'installed' && navigator.serviceWorker.controller){
-            // 静默提示有新版本
-            console.log('[奶酪信笺] 发现新版本，刷新后生效');
+        nw.addEventListener("statechange", function(){
+          if(nw.state === "installed"){
+            try{ nw.postMessage({type:'SKIP_WAITING'}); }catch(e){}
           }
         });
       });
+      setTimeout(function(){ try{ reg.update(); }catch(e){} }, 1200);
     }).catch(function(err){ console.warn('[奶酪信笺] SW 注册失败:', err); });
   });
 }
@@ -1193,6 +1228,7 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
         <button class="ghost-btn" id="clearChat" style="border-color:rgba(232,105,143,.45);color:#E8698F">清空聊天记录</button>
         <p class="hint" id="storageInfo">已用存储：统计中…</p>
         <p class="hint" id="verInfo"></p>
+        <button class="ghost-btn" id="checkUpdateBtn">检查更新</button>
         <p class="hint">所有数据只保存在你自己的浏览器里。<br>换网址或换浏览器，数据不会互通，可先用「导出备份」迁移。</p>
       </div>
     </section>
@@ -5088,6 +5124,29 @@ $("clearChat").onclick = function(){
     renderAll(); renderStats();
     toast("已清空");
   }
+};
+$("checkUpdateBtn").onclick = function(){
+  var btn = this;
+  btn.textContent = "检查中…";
+  var restore = function(){ btn.textContent = "检查更新"; };
+  var pReg = (navigator.serviceWorker && navigator.serviceWorker.getRegistration)
+    ? navigator.serviceWorker.getRegistration().catch(function(){ return null; })
+    : Promise.resolve(null);
+  Promise.all([
+    pReg,
+    fetch("version.json?t=" + Date.now(), {cache:"no-store"}).then(function(r){ return r.json(); }).catch(function(){ return null; })
+  ]).then(function(arr){
+    var reg = arr[0], d = arr[1];
+    if(reg) { try{ reg.update(); }catch(e){} }
+    if(d && d.v && d.v !== window.APP_VER){
+      var url = new URL(location.href);
+      url.searchParams.set("v", d.v);
+      location.replace(url.toString());
+      return;
+    }
+    restore();
+    toast("已是最新版本 v" + window.APP_VER);
+  }).catch(function(){ restore(); toast("检查更新失败，检查一下网络"); });
 };
 $("exportBtn").onclick = function(){
   var convs = {};
