@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#F7C8D8">
 <title>奶酪信笺 · 字卡传讯</title>
+<!-- PWA：网站 → 独立 App -->
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<meta name="theme-color" content="#F7C8D8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="奶酪信笺">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
 <script src="bubbles.js" defer></script>
 <script>
 (function(){
@@ -16,6 +26,25 @@
     }
   }catch(e){}
 })();
+/* Service Worker 注册 —— 让网站变 App（离线可用 + 桌面图标） */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      console.log('[奶酪信笺] PWA 已注册，scope:', reg.scope);
+      if(reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
+      reg.addEventListener('updatefound', function(){
+        var nw = reg.installing;
+        if(!nw) return;
+        nw.addEventListener('statechange', function(){
+          if(nw.state === 'installed' && navigator.serviceWorker.controller){
+            // 静默提示有新版本
+            console.log('[奶酪信笺] 发现新版本，刷新后生效');
+          }
+        });
+      });
+    }).catch(function(err){ console.warn('[奶酪信笺] SW 注册失败:', err); });
+  });
+}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
