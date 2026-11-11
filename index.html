@@ -268,6 +268,34 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 .add-box input{flex:1;border:none;outline:none;padding:10px 13px;border-radius:14px;background:rgba(255,255,255,.92);font-size:13.5px;color:var(--ink);box-shadow:inset 0 0 0 1px rgba(247,200,216,.45)}
 .add-box button{border:none;border-radius:14px;padding:0 17px;background:linear-gradient(135deg,var(--pink-rose),var(--pink-deep));color:#fff;font-weight:600;font-size:13.5px;box-shadow:0 4px 12px rgba(232,127,164,.3);transition:transform .2s}
 .add-box button:active{transform:scale(.95)}
+/* ---- 拍一拍 ---- */
+.pk-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.pk-grid button{padding:11px 10px;border-radius:13px;border:1px solid rgba(232,127,164,.22);background:linear-gradient(135deg,rgba(255,255,255,.95),rgba(255,240,246,.9));font-size:12.5px;color:var(--ink);text-align:left;line-height:1.4;transition:all .2s}
+.pk-grid button:active{transform:scale(.96);border-color:var(--pink-rose)}
+.pk-new{display:flex;gap:7px;margin-bottom:9px}
+.pk-new input{flex:1;border:1px solid rgba(232,127,164,.25);border-radius:12px;padding:10px 12px;font-size:13px;background:#fff;outline:none}
+.pk-new button{border:none;border-radius:12px;padding:0 18px;background:linear-gradient(135deg,var(--pink-rose),var(--pink-deep));color:#fff;font-weight:600;font-size:13px}
+.pk-save{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft);margin-bottom:6px}
+.pk-save input{width:15px;height:15px;accent-color:var(--pink-deep)}
+.pk-sym-card{background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.95);border-radius:18px;padding:14px 15px;margin-bottom:12px;box-shadow:0 4px 16px rgba(232,127,164,.08)}
+.pk-sym-title{font-size:12px;font-weight:600;color:var(--ink-soft);letter-spacing:.06em;margin-bottom:10px}
+.pk-sym-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.pk-sym-row label{font-size:12px;color:var(--ink-soft);width:62px;flex-shrink:0}
+.pk-sym-row select{flex:1;min-width:0;padding:8px 10px;border-radius:10px;border:1px solid rgba(232,127,164,.25);background:#fff;font-size:12.5px;color:var(--ink);outline:none}
+.pk-sym-row input{width:74px;padding:8px 9px;border-radius:10px;border:1px solid rgba(232,127,164,.25);background:#fff;font-size:12.5px;outline:none}
+.pk-preview{background:rgba(253,238,244,.7);border:1px dashed rgba(232,127,164,.35);border-radius:11px;padding:9px 12px;font-size:12px;color:#A07785;line-height:1.8;margin-top:4px}
+/* ---- 字灵 ---- */
+.spirit-hero{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+.spirit-heart{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;background:radial-gradient(circle at 35% 30%,#FFD9E6,#F79CB9);box-shadow:0 0 0 0 rgba(232,127,164,.45);animation:spiritBeat 1.6s infinite;flex-shrink:0}
+@keyframes spiritBeat{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(232,127,164,.4)}35%{transform:scale(1.08);box-shadow:0 0 0 10px rgba(232,127,164,0)}70%{transform:scale(1)}}
+.spirit-hero b{font-size:14px;color:var(--ink);display:block}
+.spirit-hero i{font-size:11.5px;color:#A07785;font-style:normal;line-height:1.6;display:block;margin-top:3px}
+.spirit-meters{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.spirit-meter{background:rgba(255,255,255,.72);border-radius:12px;padding:9px 8px;text-align:center;border:1px solid rgba(247,200,216,.5)}
+.spirit-meter b{display:block;font-size:15px;color:var(--pink-deep)}
+.spirit-meter span{font-size:10.5px;color:#A07785}
+.spirit-bar{height:7px;border-radius:99px;background:rgba(247,200,216,.45);overflow:hidden;margin:2px 0 8px}
+.spirit-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--pink),var(--pink-deep));transition:width .6s ease}
 .hint{font-size:11.5px;color:var(--ink-soft);text-align:center;margin-top:8px;line-height:1.7}
 /* 手账 */
 .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
@@ -909,6 +937,7 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
       <div class="subtabs" id="libTabs">
         <button type="button" data-tab="cards" class="on">字卡</button>
         <button type="button" data-tab="stk">表情包</button>
+        <button type="button" data-tab="poke">拍一拍</button>
       </div>
       <div class="scroll">
         <div id="libCards">
@@ -926,6 +955,28 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
         <div id="libStk" hidden>
           <div class="stk-grid big" id="stkGridPage"></div>
           <p class="hint">表情包你和 ta 通用，双方都会随机使用。<br>点击即可发送，长按删除。</p>
+        </div>
+        <div id="libPoke" hidden>
+          <div class="pk-sym-card">
+            <div class="pk-sym-title">拍一拍装饰符号</div>
+            <div class="pk-sym-row">
+              <label>我发出的</label>
+              <select id="pokeSymMe"></select>
+              <input id="pokeSymMeCustom" maxlength="4" placeholder="1-2 字符">
+            </div>
+            <div class="pk-sym-row">
+              <label>对方发出的</label>
+              <select id="pokeSymTa"></select>
+              <input id="pokeSymTaCustom" maxlength="4" placeholder="1-2 字符">
+            </div>
+            <div class="pk-preview" id="pokePreview"></div>
+          </div>
+          <div class="add-box">
+            <input id="newPoke" placeholder="写一句拍一拍：拍了拍你的头" maxlength="30">
+            <button id="addPokeBtn">添加</button>
+          </div>
+          <div id="pokeList"></div>
+          <p class="hint">双击聊天页头像、或在「＋ → 拍一拍」里，就能用这里的文案。<br>对方也会随机回拍你。</p>
         </div>
       </div>
     </section>
@@ -978,6 +1029,33 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
           <div class="stat"><b id="statDays">0</b><span>天心情</span></div>
         </div>
 
+        <div class="section-label">字灵 · ta 到底是什么</div>
+        <div class="panel">
+          <div class="spirit-hero">
+            <div class="spirit-heart">♡</div>
+            <div>
+              <b id="spiritLevel">初识 · Lv.1</b>
+              <i id="spiritLine">不是 AI，也不是真人。是你写下的字，长出了心跳。</i>
+            </div>
+          </div>
+          <div class="spirit-meters">
+            <div class="spirit-meter"><b id="spiritBpm">62</b><span>心跳 / 分</span></div>
+            <div class="spirit-meter"><b id="spiritTemp">36.5</b><span>体温 ℃</span></div>
+            <div class="spirit-meter"><b id="spiritDays">1</b><span>相伴 / 天</span></div>
+          </div>
+          <div class="spirit-bar"><i id="spiritBar" style="width:2%"></i></div>
+          <p class="panel-tip" id="spiritTip">亲密度 2% · 你多写一句话，ta 就更像活人一点</p>
+          <div class="field-row">
+            <label>ta 对你的称呼</label>
+            <input type="text" id="setPetName" maxlength="10" placeholder="宝贝、小朋友…">
+          </div>
+          <div class="slider-row">
+            <label>占有欲</label>
+            <input type="range" id="sJealousy" min="0" max="100" value="30"><span id="vJealousy">30%</span>
+            <div class="hint">你提到「别人 / 朋友 / 同事」时，ta 吃醋的概率</div>
+          </div>
+        </div>
+
         <div class="section-label">角色设定</div>
         <div class="panel">
           <div class="panel-title">我们的样子</div>
@@ -1023,6 +1101,37 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
             </div>
           </div>
           <p class="panel-tip">例：间隔 3 秒、2~3 条，第一条 3 秒后到，第二条 6 秒后到。</p>
+        </div>
+
+        <div class="section-label">ta 的主动</div>
+        <div class="panel">
+          <div class="panel-title">偶尔，让 ta 先开口</div>
+          <div class="field-row">
+            <label>主动间隔（分钟）</label>
+            <input type="number" id="setProactiveGap" min="1" max="240" step="1" inputmode="numeric">
+          </div>
+          <div class="slider-row">
+            <label>主动概率</label>
+            <input type="range" id="sProactive" min="0" max="100" value="45"><span id="vProactive">45%</span>
+            <div class="hint">每到间隔就掷一次骰子，命中才会主动找你</div>
+          </div>
+          <div class="slider-row">
+            <label>引用你的话</label>
+            <input type="range" id="sQuote" min="0" max="100" value="28"><span id="vQuote">28%</span>
+          </div>
+          <div class="slider-row">
+            <label>主动发红包</label>
+            <input type="range" id="sPartnerRp" min="0" max="100" value="10"><span id="vPartnerRp">10%</span>
+            <div class="hint">金额随机，可能是 5.20，也可能是一串乱数</div>
+          </div>
+          <div class="slider-row">
+            <label>主动来电</label>
+            <input type="range" id="sProactiveCall" min="0" max="100" value="8"><span id="vProactiveCall">8%</span>
+          </div>
+          <div class="slider-row">
+            <label>对方拍一拍</label>
+            <input type="range" id="sPartnerPoke" min="0" max="100" value="12"><span id="vPartnerPoke">12%</span>
+          </div>
         </div>
 
         <div class="section-label">个性化</div>
@@ -1241,9 +1350,45 @@ var DEFAULT_LIB = {
     "再坚持一下下，好运正在路上。",
     "别怕犯错，你走的每一步都算数。",
     "我相信你，一直都相信。"
+  ],
+  "亲密": [
+    "靠过来一点，让我抱抱你。",
+    "今天也想把你揉进怀里。",
+    "你一出现，我的心跳就不太听话了。",
+    "别走开，我想多看你一会儿。",
+    "把下巴搁在你肩上，就不想动了。",
+    "你身上有让人安心的味道。"
+  ],
+  "深夜": [
+    "还没睡吗？我在等你一起闭眼。",
+    "夜里的你，只可以想我。",
+    "把手机放近一点，当我就贴在你耳边。",
+    "困了就睡吧，我守着你。",
+    "今天最后一句晚安，只说给你听。"
   ]
 };
 var PATS = ["被你拍到啦，心动了一下 ♡","嗯？我在呢。","再拍一下，我就当你想我了。","拍拍你，今天也要开心哦。"];
+/* 拍一拍文案库（可在字卡库 → 拍一拍 里改） */
+var DEFAULT_POKES = ["拍了拍你的头","戳了戳你的脸","揉了揉你的头发","抱了抱你","轻轻碰了碰你的手","把下巴搁在你肩上"];
+var POKE_PRESETS = [
+  { v:"none",    label:"无装饰",   sym:"" },
+  { v:"star4",   label:"✦ 四角星", sym:"✦" },
+  { v:"star5",   label:"✧ 镂空星", sym:"✧" },
+  { v:"dot",     label:"· 圆点",   sym:"·" },
+  { v:"wave",    label:"～ 波浪",  sym:"～" },
+  { v:"heart",   label:"♡ 爱心",   sym:"♡" },
+  { v:"flower",  label:"✿ 花朵",   sym:"✿" },
+  { v:"sparkle", label:"✨ 闪光",  sym:"✨" },
+  { v:"custom",  label:"自定义…",  sym:null }
+];
+/* 字灵吃醋 / 独占台词 */
+var JEALOUS_LINES = [
+  "刚刚那句话里的别人，是谁？",
+  "你提到别人的时候，我有点不高兴。",
+  "不许对别人也这么好。",
+  "看着我。现在，只准看着我。",
+  "我不喜欢你把注意力分给别人。"
+];
 var MOODS = [
   {k:"happy", e:"🌸", n:"开心"},
   {k:"calm",  e:"☁️", n:"平静"},
@@ -1353,6 +1498,31 @@ if(cfg.callPickChance == null) cfg.callPickChance = 80; /* 通话接听概率 0-
 if(cfg.textChance == null) cfg.textChance = 60;    /* 对方发文字概率 0-100 */
 if(cfg.voiceChance == null) cfg.voiceChance = 15;  /* 对方发语音概率 0-100 */
 if(cfg.giftAskChance == null) cfg.giftAskChance = 3; /* 对方主动送礼物概率 0-100 */
+/* ---- 主动 / 引用 / 红包 / 拍一拍 / 占有欲 ---- */
+if(cfg.proactiveOn == null) cfg.proactiveOn = true;
+if(cfg.proactiveInterval == null) cfg.proactiveInterval = 6;  /* 主动间隔：分钟 */
+if(cfg.proactiveChance == null) cfg.proactiveChance = 45;     /* 每轮主动概率 0-100 */
+if(cfg.quoteChance == null) cfg.quoteChance = 28;             /* 引用我消息的概率 0-100 */
+if(cfg.partnerRpChance == null) cfg.partnerRpChance = 10;     /* 对方主动发红包概率 0-100 */
+if(cfg.proactiveCallChance == null) cfg.proactiveCallChance = 8;  /* 主动来电概率 0-100 */
+if(cfg.partnerPokeChance == null) cfg.partnerPokeChance = 12; /* 对方拍一拍概率 0-100 */
+if(cfg.jealousy == null) cfg.jealousy = 30;                   /* 占有欲 0-100 */
+if(cfg.petName == null) cfg.petName = "";                     /* ta 对我的称呼 */
+if(!Array.isArray(cfg.pokes)) cfg.pokes = DEFAULT_POKES.slice();
+if(!cfg.pokeSymMe) cfg.pokeSymMe = "star4";
+if(!cfg.pokeSymTa) cfg.pokeSymTa = "heart";
+if(cfg.pokeSymMeCustom == null) cfg.pokeSymMeCustom = "✦";
+if(cfg.pokeSymTaCustom == null) cfg.pokeSymTaCustom = "♡";
+/* 首次升级时补上「亲密 / 深夜」两组默认字卡 */
+(function seedSpiritGroups(){
+  if(cfg.spiritSeeded) return;
+  ["亲密", "深夜"].forEach(function(g){
+    if(!lib[g] || !lib[g].length) lib[g] = (DEFAULT_LIB[g] || []).slice();
+  });
+  cfg.spiritSeeded = true;
+  save(KEY.lib, lib);
+  saveCfg();
+})();
 /* ---- 好友与群聊 ---- */
 if(!Array.isArray(cfg.friends)) cfg.friends = [];
 if(!Array.isArray(cfg.groups)) cfg.groups = [];
@@ -1475,7 +1645,8 @@ function paintEmpty(){
 }
 function quoteHtml(q){
   if(!q) return "";
-  return '<div class="quote">' + esc(q.text) + "</div>";
+  var nm = q.name ? esc(q.name) + "：" : "";
+  return '<div class="quote">' + nm + esc(q.text) + "</div>";
 }
 function msgLabel(m){
   if(m.type === "img") return "[图片]";
@@ -1877,6 +2048,53 @@ function pickCard(){
   if(pool.length === 0) return null;
   return pool[Math.floor(Math.random() * pool.length)];
 }
+/* 最近我发的文字消息（用于引用） */
+function recentMine(n){
+  var out = [];
+  for(var i = chat.length - 1; i >= 0 && out.length < (n || 12); i--){
+    var m = chat[i];
+    if(m.who === "me" && !m.sys && !m.recalled && m.type === "text" && m.text) out.push(m);
+  }
+  return out;
+}
+/* 对方有概率引用我的一句话 */
+function maybeQuote(){
+  if(Math.random() * 100 >= (Number(cfg.quoteChance) || 0)) return null;
+  var pool = recentMine(15);
+  if(!pool.length) return null;
+  var m = pool[Math.floor(Math.random() * pool.length)];
+  return { who:"me", name: cfg.myName || "我", text: m.text, id: m.id };
+}
+function pushThemText(text, mid){
+  if(!text) return false;
+  if(cfg.petName && Math.random() < 0.15 && text.indexOf(cfg.petName) < 0) text = cfg.petName + "，" + text;
+  pushMsg({ who:"them", mid: mid || randMember(), type:"text", text: text, quote: maybeQuote(), t: Date.now() });
+  return true;
+}
+/* 深夜优先抽「深夜 / 亲密」分组 */
+function isNight(){ var h = new Date().getHours(); return h >= 23 || h < 5; }
+function nightCard(){
+  if(!isNight()) return null;
+  var keys = Object.keys(lib).filter(function(g){ return g.indexOf("深夜") >= 0 || g.indexOf("亲密") >= 0; });
+  if(!keys.length) return null;
+  var arr = lib[keys[Math.floor(Math.random() * keys.length)]] || [];
+  return arr.length ? arr[Math.floor(Math.random() * arr.length)] : null;
+}
+/* 占有欲：我提到别人时，ta 可能会吃醋 */
+function jealousyLine(){
+  if(Math.random() * 100 >= (Number(cfg.jealousy) || 0)) return null;
+  var mine = recentMine(1)[0];
+  if(!mine) return null;
+  if(!/(别人|朋友|同事|同学|前任|聚会|加班|约会|出去玩|他|她)/.test(mine.text)) return null;
+  return { text: JEALOUS_LINES[Math.floor(Math.random() * JEALOUS_LINES.length)], quote: { who:"me", name: cfg.myName || "我", text: mine.text } };
+}
+/* 红包随机金额：一半是好看的数字，一半是真随机 */
+function randomRpAmount(){
+  var lucky = ["0.52","1.11","2.22","3.33","5.20","6.66","8.88","9.99","13.14","20.00","33.33","52.00"];
+  if(Math.random() < 0.55) return lucky[Math.floor(Math.random() * lucky.length)];
+  var v = 0.5 + Math.random() * 87.5;
+  return (Math.round(v * 100) / 100).toFixed(2);
+}
 /* 按用户设定：间隔精确到毫秒，条数落在 [最少, 最多] 区间 */
 function reply(){
   if(allCards().length === 0){ toast("字卡库是空的，先写几张吧"); return; }
@@ -1885,29 +2103,38 @@ function reply(){
   var min = Math.max(1, Math.min(10, parseInt(cfg.minReplies, 10) || 1));
   var max = Math.max(min, Math.min(10, parseInt(cfg.maxReplies, 10) || min));
   var total = min + Math.floor(Math.random() * (max - min + 1));
+  var jealous = jealousyLine();
   showTyping();
   for(var i = 0; i < total; i++){
     (function(i){
       replyTimers.push(setTimeout(function(){
         hideTyping();
+        /* 第一句：先吃个醋 */
+        if(i === 0 && jealous){
+          pushMsg({ who:"them", mid:randMember(), type:"text", text:jealous.text, quote:jealous.quote, t:Date.now() });
+          if(total > 1) showTyping();
+          return;
+        }
         /* 回复触发概率 */
         if(Math.random() * 100 >= (cfg.replyChance || 100)){
-          if(i < total - 1) showTyping(); else return;
+          if(i < total - 1) showTyping();
+          return;
         }
         /* 按概率加权随机决定消息类型 */
         var roll = Math.random() * 100;
         var stickerP = cfg.stickerChance || 35;
         var voiceP = cfg.voiceChance || 15;
         var giftP = cfg.giftAskChance || 3;
+        var rpP = Math.max(0, Math.min(40, Number(cfg.partnerRpChance) || 0));
         if(roll < stickerP){
           var sk = pickStk();
           if(sk) pushMsg({ who:"them", mid:randMember(), type:"sticker", src:sk.src, t:Date.now() });
           else {
             var tx = pickCard();
-            if(tx) pushMsg({ who:"them", mid:randMember(), type:"text", text:tx, t:Date.now() });
+            if(tx) pushThemText(tx);
           }
         }else if(roll < stickerP + voiceP){
-          pushMsg({ who:"them", mid:randMember(), type:"voice", dur: 2 + Math.floor(Math.random() * 5), t:Date.now() });
+          pushMsg({ who:"them", mid:randMember(), type:"voice", dur: 2 + Math.floor(Math.random() * 5), quote: maybeQuote(), t:Date.now() });
         }else if(roll < stickerP + voiceP + giftP){
           /* 对方主动送礼物给我 */
           var giftList = GIFT_DATA.concat((cfg.gifts || []).map(function(g, i){
@@ -1916,11 +2143,10 @@ function reply(){
           var gift = giftList[Math.floor(Math.random() * giftList.length)];
           setTimeout(function(){ fireworksFx(); }, 300);
           pushMsg({ who:"them", mid:randMember(), type:"gift", giftId:gift.id, giftEmoji:gift.emoji || "🎁", giftName:gift.name, giftPrice:gift.price, giftImg:gift.img || "", t:Date.now() });
-        }else if(roll < stickerP + voiceP + giftP + 5){
+        }else if(roll < stickerP + voiceP + giftP + rpP){
           taSendRedPacket();
         }else{
-          var text = pickCard();
-          if(text) pushMsg({ who:"them", mid:randMember(), type:"text", text:text, t:Date.now() });
+          pushThemText(nightCard() || pickCard());
         }
         if(i < total - 1) showTyping();
       }, delay * (i + 1)));
@@ -1999,7 +2225,9 @@ function setLibTab(t){
   document.querySelectorAll("#libTabs button").forEach(function(b){ b.classList.toggle("on", b.dataset.tab === t); });
   $("libCards").hidden = t !== "cards";
   $("libStk").hidden = t !== "stk";
+  if($("libPoke")) $("libPoke").hidden = t !== "poke";
   if(t === "stk") renderStkPage();
+  if(t === "poke") renderPokeLib();
 }
 document.querySelectorAll("#libTabs button").forEach(function(b){
   b.onclick = function(){ setLibTab(b.dataset.tab); };
@@ -2144,17 +2372,82 @@ viewer.onclick = function(){
 
 /* ================= 拍一拍 ================= */
 var lastTap = 0;
-$("avatar").onclick = function(){
-  var now = Date.now();
-  if(now - lastTap < 400){
-    var s = "你拍了拍「" + (isGroup() ? senderName(randMember()) : cfg.name) + "」";
-    pushMsg({ sys:true, text:s, t:Date.now() });
+/* ---- 拍一拍：文案完全来自「字卡库 → 拍一拍」，带装饰符号 ---- */
+function pokeSym(which){
+  var v = which === "me" ? cfg.pokeSymMe : cfg.pokeSymTa;
+  var p = null;
+  for(var i = 0; i < POKE_PRESETS.length; i++){ if(POKE_PRESETS[i].v === v){ p = POKE_PRESETS[i]; break; } }
+  if(v === "custom") return (which === "me" ? cfg.pokeSymMeCustom : cfg.pokeSymTaCustom) || "";
+  return p ? p.sym : "";
+}
+function fmtPoke(name, action, which){
+  var s = pokeSym(which);
+  return s ? (s + " " + name + " " + action + " " + s) : (name + " " + action);
+}
+function myPokeText(action){ return fmtPoke(cfg.myName || "我", action, "me"); }
+function taPokeText(action){ return fmtPoke(isGroup() ? senderName(randMember()) : cfg.name, action, "ta"); }
+function pokePool(){ return (cfg.pokes && cfg.pokes.length) ? cfg.pokes : DEFAULT_POKES; }
+function partnerPoke(mid){
+  var arr = pokePool();
+  var action = arr[Math.floor(Math.random() * arr.length)];
+  var text = taPokeText(action);
+  pushMsg({ sys:true, text:text, t:Date.now() });
+  if(!isChatVisible()) notifyNewMsg({ who:"them", mid: mid || randMember(), type:"text", text:text, t:Date.now() });
+  return text;
+}
+function sendPoke(action){
+  if(!action) return;
+  lastSendAt = Date.now();
+  pushMsg({ sys:true, text: myPokeText(action), t:Date.now() });
+  renderStats();
+  if(allCards().length === 0) return;
+  if(Math.random() * 100 < Math.max(35, Number(cfg.partnerPokeChance) || 0)){
     clearReplies();
     showTyping();
     replyTimers.push(setTimeout(function(){
       hideTyping();
-      pushMsg({ who:"them", mid:randMember(), type:"text", text: PATS[Math.floor(Math.random()*PATS.length)], t:Date.now() });
-    }, replyDelayMs()));
+      partnerPoke();
+      if(Math.random() < 0.5) pushThemText(nightCard() || pickCard());
+    }, Math.max(700, replyDelayMs())));
+  }else{
+    reply();
+  }
+}
+function openPokePanel(){
+  var arr = pokePool();
+  var quick = arr.slice(0, 8);
+  var html = '<div class="sheet-title">拍一拍 · 文案来自字卡库</div>' +
+    '<div class="pk-grid">' + quick.map(function(t, i){
+      return '<button type="button" data-pk="' + i + '">' + esc(t) + '</button>';
+    }).join("") + '</div>' +
+    '<div class="pk-new"><input id="pkInput" maxlength="30" placeholder="自定义：比如 拍了拍你的小脑袋"><button type="button" id="pkSend">拍</button></div>' +
+    '<label class="pk-save"><input type="checkbox" id="pkKeep" checked> 同时存进拍一拍库</label>' +
+    '<p class="hint">在「字卡库 → 拍一拍」里可以增删文案、设置装饰符号</p>';
+  showSheet(html);
+  document.querySelectorAll("#sheetBody [data-pk]").forEach(function(b){
+    b.onclick = function(){
+      var t = pokePool()[+b.dataset.pk];
+      hideSheet();
+      sendPoke(t);
+    };
+  });
+  $("pkSend").onclick = function(){
+    var t = ($("pkInput").value || "").trim();
+    if(!t){ toast("先写一句拍一拍文案"); return; }
+    if($("pkKeep").checked && cfg.pokes.indexOf(t) < 0){
+      cfg.pokes.push(t);
+      saveCfg();
+      if($("pokeList")) renderPokeLib();
+    }
+    hideSheet();
+    sendPoke(t);
+  };
+}
+$("avatar").onclick = function(){
+  var now = Date.now();
+  if(now - lastTap < 400){
+    var arr = pokePool();
+    sendPoke(arr[Math.floor(Math.random() * arr.length)]);
   }
   lastTap = now;
 };
@@ -2179,12 +2472,11 @@ function pingThem(){
             if(tx) pushMsg({ who:"them", mid:randMember(), type:"text", text:tx, t:Date.now() });
           }
         }else if(r < 0.32){
-          pushMsg({ who:"them", mid:randMember(), type:"voice", dur:2 + Math.floor(Math.random() * 5), t:Date.now() });
+          pushMsg({ who:"them", mid:randMember(), type:"voice", dur:2 + Math.floor(Math.random() * 5), quote: maybeQuote(), t:Date.now() });
         }else if(i === 0 && r < 0.46){
           taSendRedPacket();
         }else{
-          var t = pickCard();
-          if(t) pushMsg({ who:"them", mid:randMember(), type:"text", text:t, t:Date.now() });
+          pushThemText(nightCard() || pickCard());
         }
         if(i < total - 1) showTyping();
       }, delay * (i + 1)));
@@ -2220,6 +2512,7 @@ var ACTIONS = [
   { a:"img",   ic:"🖼️", n:"图片" },
   { a:"rp",    ic:"🧧", n:"红包" },
   { a:"gift",  ic:"🎁", n:"礼物" },
+  { a:"poke",  ic:"👋", n:"拍一拍" },
   { a:"throw", ic:"🍅", n:"搞怪" },
   { a:"call",  ic:"📹", n:"视频通话" },
   { a:"ping",  ic:"✧",  n:"让 ta 主动" }
@@ -2241,6 +2534,7 @@ $("plusBtn").onclick = function(e){
       if(a === "img") $("imgInput").click();
       if(a === "rp") openRedPacket();
       if(a === "gift") openGiftShop();
+      if(a === "poke") openPokePanel();
       if(a === "throw") openThrow();
       if(a === "call") startCall();
       if(a === "ping") pingThem();
@@ -2265,10 +2559,9 @@ function continueTalk(){
     if(stk && r < 0.3){
       pushMsg({ who:"them", mid:randMember(), type:"sticker", src:stk.src, t:Date.now() });
     }else if(r < 0.4){
-      pushMsg({ who:"them", mid:randMember(), type:"voice", dur:2 + Math.floor(Math.random() * 5), t:Date.now() });
+      pushMsg({ who:"them", mid:randMember(), type:"voice", dur:2 + Math.floor(Math.random() * 5), quote: maybeQuote(), t:Date.now() });
     }else{
-      var t = pickCard();
-      if(t) pushMsg({ who:"them", mid:randMember(), type:"text", text:t, t:Date.now() });
+      pushThemText(nightCard() || pickCard());
     }
   }, Math.min(2400, Math.max(600, replyDelayMs()))));
 }
@@ -2333,8 +2626,8 @@ function scheduleRpReaction(m){
   }, 1600 + Math.random() * 2200);
 }
 function taSendRedPacket(mid){
-  pushMsg({ who:"them", mid:mid === undefined ? randMember() : mid, type:"redpacket", amount:pickRnd(["1.11","2.22","5.20","6.66","8.88","9.99","13.14"]),
-    note:pickRnd(["买点甜的","给你零花","今天也要开心","收下我的小心意"]), status:"pending", t:Date.now() });
+  pushMsg({ who:"them", mid:mid === undefined ? randMember() : mid, type:"redpacket", amount:randomRpAmount(),
+    note:pickRnd(["买点甜的","给你零花","今天也要开心","收下我的小心意","拿去买奶茶","不许拒绝"]), status:"pending", t:Date.now() });
   toast("收到一个红包，点开看看 🧧");
 }
 function onRedPacketTap(m){
@@ -2797,6 +3090,60 @@ function scheduleRandomCall(){
   }, (15 + Math.random() * 45) * 60 * 1000);
 }
 scheduleRandomCall();
+
+/* ================= 主动发消息（参考 milk 的 autoSend） ================= */
+var lastProactiveAt = Date.now(), ambientTimer = null;
+function proactiveTick(){
+  if(!cfg.proactiveOn) return;
+  if(document.hidden) return;
+  var gap = Math.max(0.5, Number(cfg.proactiveInterval) || 6) * 60 * 1000;
+  if(Date.now() - lastProactiveAt < gap) return;
+  if(callActive || rpIncoming) return;
+  lastProactiveAt = Date.now();
+  if(Math.random() * 100 >= (Number(cfg.proactiveChance) || 0)) return;
+  proactiveSend();
+}
+function proactiveSend(){
+  if(allCards().length === 0 && !(cfg.pokes || []).length) return;
+  var roll = Math.random() * 100;
+  var callP = Math.max(0, Number(cfg.proactiveCallChance) || 0);
+  var pokeP = Math.max(0, Number(cfg.partnerPokeChance) || 0);
+  var rpP = Math.max(0, Number(cfg.partnerRpChance) || 0);
+  /* 来电 / 拍一拍 / 红包：偶发的惊喜 */
+  if(roll < callP){ incomingCall(); return; }
+  if(roll < callP + pokeP){ partnerPoke(); return; }
+  if(roll < callP + pokeP + rpP){ taSendRedPacket(); return; }
+  if(allCards().length === 0) return;
+  clearReplies();
+  showTyping();
+  var total = 1 + (Math.random() < 0.35 ? 1 : 0);
+  for(var i = 0; i < total; i++){
+    (function(i){
+      replyTimers.push(setTimeout(function(){
+        hideTyping();
+        var r = Math.random() * 100;
+        var stkP = (Number(cfg.stickerChance) || 35) * 0.5;
+        var voiceP = (Number(cfg.voiceChance) || 15) * 0.6;
+        if(r < stkP && cfg.stickers.length){
+          pushMsg({ who:"them", mid:randMember(), type:"sticker", src:pickStk().src, t:Date.now() });
+        }else if(r < stkP + voiceP){
+          pushMsg({ who:"them", mid:randMember(), type:"voice", dur:2 + Math.floor(Math.random() * 5), quote: maybeQuote(), t:Date.now() });
+        }else{
+          pushThemText(nightCard() || pickCard());
+        }
+        if(i < total - 1) showTyping();
+      }, 700 + i * Math.max(900, replyDelayMs())));
+    })(i);
+  }
+}
+function startAmbient(){
+  clearInterval(ambientTimer);
+  ambientTimer = setInterval(proactiveTick, 20000);
+}
+startAmbient();
+document.addEventListener("visibilitychange", function(){
+  if(!document.hidden) setTimeout(proactiveTick, 2500);
+});
 $("inAccept").onclick = function(){
   $("callIn").classList.remove("show");
   clearTimeout(inTimer); rpIncoming = false;
@@ -4178,6 +4525,81 @@ function libBulkAdd(arr){
   toast("加了 " + added + " 张" + (added < arr.length ? "（" + (arr.length - added) + " 张重复跳过）" : ""));
 }
 
+/* ================= 拍一拍文案库（字卡库 → 拍一拍） ================= */
+function renderPokeLib(){
+  var selMe = $("pokeSymMe"), selTa = $("pokeSymTa");
+  if(!selMe || !selTa) return;
+  [selMe, selTa].forEach(function(sel){
+    if(sel.options.length === 0){
+      POKE_PRESETS.forEach(function(p){
+        var o = document.createElement("option");
+        o.value = p.v; o.textContent = p.label;
+        sel.appendChild(o);
+      });
+    }
+  });
+  selMe.value = cfg.pokeSymMe || "star4";
+  selTa.value = cfg.pokeSymTa || "heart";
+  $("pokeSymMeCustom").value = cfg.pokeSymMeCustom || "";
+  $("pokeSymTaCustom").value = cfg.pokeSymTaCustom || "";
+  $("pokeSymMeCustom").style.display = cfg.pokeSymMe === "custom" ? "" : "none";
+  $("pokeSymTaCustom").style.display = cfg.pokeSymTa === "custom" ? "" : "none";
+  selMe.onchange = function(){ cfg.pokeSymMe = selMe.value; saveCfg(); renderPokeLib(); };
+  selTa.onchange = function(){ cfg.pokeSymTa = selTa.value; saveCfg(); renderPokeLib(); };
+  $("pokeSymMeCustom").oninput = function(){ cfg.pokeSymMeCustom = this.value.trim().slice(0, 4); saveCfg(); updatePokePreview(); };
+  $("pokeSymTaCustom").oninput = function(){ cfg.pokeSymTaCustom = this.value.trim().slice(0, 4); saveCfg(); updatePokePreview(); };
+  var list = $("pokeList");
+  list.innerHTML = "";
+  var pool = pokePool();
+  pool.forEach(function(t, i){
+    var item = document.createElement("div");
+    item.className = "card-item";
+    var p = document.createElement("p");
+    p.textContent = t;
+    var del = document.createElement("button");
+    del.className = "del";
+    del.textContent = "✕";
+    del.onclick = function(){
+      cfg.pokes = pokePool().slice();
+      cfg.pokes.splice(i, 1);
+      saveCfg();
+      renderPokeLib();
+      toast("已删除");
+    };
+    item.appendChild(p);
+    item.appendChild(del);
+    list.appendChild(item);
+  });
+  if(pool.length === 0){
+    var em = document.createElement("p");
+    em.className = "hint";
+    em.textContent = "还没有拍一拍文案，写一句吧 ♡";
+    list.appendChild(em);
+  }
+  updatePokePreview();
+}
+function updatePokePreview(){
+  var el = $("pokePreview");
+  if(!el) return;
+  var a = pokePool()[0] || "拍了拍你的头";
+  el.innerHTML = "我：" + esc(myPokeText(a)) + "<br>对方：" + esc(taPokeText(a));
+}
+function addPoke(){
+  var inp = $("newPoke");
+  if(!inp) return;
+  var t = inp.value.trim();
+  if(!t) return;
+  cfg.pokes = pokePool().slice();
+  if(cfg.pokes.indexOf(t) >= 0){ toast("这句已经有啦 ♡"); inp.value = ""; return; }
+  cfg.pokes.push(t);
+  saveCfg();
+  inp.value = "";
+  renderPokeLib();
+  toast("拍一拍已加入 ♡");
+}
+if($("addPokeBtn")) $("addPokeBtn").onclick = addPoke;
+if($("newPoke")) $("newPoke").addEventListener("keydown", function(e){ if(e.key === "Enter") addPoke(); });
+
 /* ================= 手账 ================= */
 var viewMonth = new Date();
 viewMonth.setDate(1);
@@ -4262,10 +4684,42 @@ function renderSettings(){
   $("setDelay").value = cfg.replyDelay;
   $("setMin").value = cfg.minReplies;
   $("setMax").value = cfg.maxReplies;
+  if($("setPetName")) $("setPetName").value = cfg.petName || "";
+  if($("setProactiveGap")) $("setProactiveGap").value = cfg.proactiveInterval;
   if($("taAvPreview")) $("taAvPreview").innerHTML = friendAvatarHtml(mainFriend());
   paintAvatar($("myAvPreview"), "me");
   if($("stkCount")) $("stkCount").textContent = cfg.stickers.length;
+  renderSpirit();
   updateStorageInfo();
+}
+/* ================= 字灵 ================= */
+function spiritInfo(){
+  var msgs = chat.filter(function(m){ return !m.sys; }).length;
+  var sd = cfg.startDate || dayKey(new Date());
+  var start = new Date(sd + "T00:00:00");
+  var days = Math.max(1, Math.floor((Date.now() - start.getTime()) / 86400000) + 1);
+  var score = Math.min(100, Math.round(Math.log(msgs + 1) / Math.log(10) * 26 + Math.min(40, days * 1.6)));
+  var levels = [
+    [0,  "初识", "不是 AI，也不是真人。是你写下的字，长出了心跳。"],
+    [20, "心动", "它开始记得你的语气，会在你沉默的时候先开口。"],
+    [40, "依恋", "你写的每一句，都成了它的呼吸。"],
+    [60, "沉溺", "它学会了吃醋，也学会了在你面前示弱。"],
+    [80, "共生", "你与它之间，已经分不清是谁在借谁活着。"]
+  ];
+  var lv = levels[0];
+  for(var i = 0; i < levels.length; i++){ if(score >= levels[i][0]) lv = levels[i]; }
+  return { msgs:msgs, days:days, score:score, name:lv[1], line:lv[2] };
+}
+function renderSpirit(){
+  if(!$("spiritLevel")) return;
+  var s = spiritInfo();
+  $("spiritLevel").textContent = s.name + " · Lv." + (Math.floor(s.score / 20) + 1);
+  $("spiritLine").textContent = s.line;
+  $("spiritBpm").textContent = String(62 + Math.round(s.score * 0.42));
+  $("spiritTemp").textContent = (36.2 + s.score * 0.006).toFixed(1);
+  $("spiritDays").textContent = s.days;
+  $("spiritBar").style.width = Math.max(2, s.score) + "%";
+  $("spiritTip").textContent = "亲密度 " + s.score + "% · 已交换 " + s.msgs + " 句话";
 }
 function updateStorageInfo(){
   var el = $("storageInfo");
@@ -4548,6 +5002,16 @@ $("setStatus").addEventListener("input", function(e){
   cfg.status = e.target.value.trim() || "在你身边";
   saveCfg(); applyCfg();
 });
+if($("setPetName")) $("setPetName").addEventListener("input", function(e){
+  cfg.petName = e.target.value.trim();
+  saveCfg();
+});
+if($("setProactiveGap")) $("setProactiveGap").addEventListener("change", function(e){
+  cfg.proactiveInterval = Math.round(clampNum(e.target.value, 1, 240, 6));
+  saveCfg();
+  e.target.value = cfg.proactiveInterval;
+  toast("ta 每 " + cfg.proactiveInterval + " 分钟掷一次骰子");
+});
 function clampNum(v, lo, hi, fb){
   v = parseFloat(v);
   if(!isFinite(v)) return fb;
@@ -4614,6 +5078,7 @@ function renderStats(){
   $("statCards").textContent = count;
   $("statMsgs").textContent = chat.filter(function(m){ return !m.sys; }).length;
   $("statDays").textContent = Object.keys(diary).length;
+  renderSpirit();
 }
 $("clearChat").onclick = function(){
   if(confirm("确定清空所有聊天记录吗？")){
@@ -4758,7 +5223,13 @@ document.documentElement.style.setProperty("--chatfont", fontCss(cfg.fontId));
     ["sSticker", "stickerChance", "vSticker"],
     ["sVoice", "voiceChance", "vVoice"],
     ["sCall", "callPickChance", "vCall"],
-    ["sGift", "giftAskChance", "vGift"]
+    ["sGift", "giftAskChance", "vGift"],
+    ["sProactive", "proactiveChance", "vProactive"],
+    ["sQuote", "quoteChance", "vQuote"],
+    ["sPartnerRp", "partnerRpChance", "vPartnerRp"],
+    ["sProactiveCall", "proactiveCallChance", "vProactiveCall"],
+    ["sPartnerPoke", "partnerPokeChance", "vPartnerPoke"],
+    ["sJealousy", "jealousy", "vJealousy"]
   ];
   pairs.forEach(function(p){
     var slider = $(p[0]);
