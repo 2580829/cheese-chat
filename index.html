@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.11-poke2";
+  var V = "2026.11.11-poke3";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -184,7 +184,6 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 .row.them .msg.sticker-emoji{border-radius:6px 18px 18px 18px}
 .row.me .msg.sticker-emoji{background:rgba(255,255,255,.8)!important;border-radius:18px 6px 18px 18px}
 .lost-img{font-size:12px;color:var(--ink-soft);background:rgba(255,255,255,.7);border:1px dashed rgba(230,160,185,.6);border-radius:12px;padding:12px 14px;letter-spacing:.04em}
-.read-tag{display:block;text-align:right;font-size:9px;line-height:1;margin-top:5px;opacity:.7;letter-spacing:.1em}
 /* 表情包面板 */
 .stk-tabs{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
 .stk-tabs button{border:1px solid rgba(247,200,216,.6);background:rgba(255,255,255,.8);color:var(--ink-soft);padding:6px 18px;border-radius:999px;font-size:12px}
@@ -368,7 +367,7 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 .panel-title{font-size:10.5px;font-weight:700;color:#BD8FA0;letter-spacing:.16em;padding:13px 0 3px}
 .slider-row{margin:10px 0 4px}
 .slider-row label{display:block;font-size:12px;color:#8B4A5D;font-weight:600;margin-bottom:4px}
-.slider-row input[type=range]{width:calc(100% - 52px);accent-color:#E87FA4}
+.slider-row input[type=range]{width:calc(100% - 52px);accent-color:#E87FA4;touch-action:none;-webkit-tap-highlight-color:transparent}
 .slider-row > span{display:inline-block;width:46px;font-size:12px;color:#E87FA4;font-weight:700;text-align:right}
 .field-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid rgba(247,200,216,.32)}
 .field-row label{font-size:13px;color:var(--ink);white-space:nowrap;letter-spacing:.02em}
@@ -1771,12 +1770,6 @@ function paintMsg(m){
   }else{
     b.innerHTML = quoteHtml(m.quote) + esc(m.text).replace(/\n/g, "<br>");
   }
-  if(m.read && m.who === "me" && m.type === "text" && !m.recalled){
-    var rt = document.createElement("span");
-    rt.className = "read-tag";
-    rt.textContent = "已读";
-    b.appendChild(rt);
-  }
 
   row.appendChild(av);
   if(isGroup() && m.who === "them" && !m.recalled){
@@ -1840,17 +1833,36 @@ function pushMsg(m){
 
 /* ================= 长按操作 ================= */
 function bindLongPress(el){
-  var timer = null;
-  el.addEventListener("touchstart", function(){
-    timer = setTimeout(function(){ openMsgActions(el.dataset.id); }, 520);
+  var timer = null, sx = 0, sy = 0;
+  el.addEventListener("touchstart", function(e){
+    var t = e.touches[0];
+    if(t){ sx = t.clientX; sy = t.clientY; }
+    timer = setTimeout(function(){ openMsgActions(el.dataset.id); }, 480);
   }, {passive:true});
   el.addEventListener("touchend", function(){ clearTimeout(timer); });
-  el.addEventListener("touchmove", function(){ clearTimeout(timer); });
+  el.addEventListener("touchcancel", function(){ clearTimeout(timer); });
+  el.addEventListener("touchmove", function(e){
+    var t = e.touches[0];
+    if(!t) return;
+    /* 轻微抖动不算滑动，真正滚动才取消长按 */
+    if(Math.abs(t.clientX - sx) > 12 || Math.abs(t.clientY - sy) > 12) clearTimeout(timer);
+  }, {passive:true});
   el.addEventListener("contextmenu", function(e){ e.preventDefault(); openMsgActions(el.dataset.id); });
 }
 /* 当前 popover 关闭标记 */
-var _msgPopEl = null;
-function closeMsgPop(){ if(_msgPopEl && _msgPopEl.parentNode){ _msgPopEl.parentNode.removeChild(_msgPopEl); } _msgPopEl = null; document.removeEventListener("click", closeMsgPop, true); document.removeEventListener("touchstart", closeMsgPop, true); }
+var _msgPopEl = null, _popOpenedAt = 0;
+function closeMsgPop(){
+  if(_msgPopEl && _msgPopEl.parentNode) _msgPopEl.parentNode.removeChild(_msgPopEl);
+  _msgPopEl = null;
+  document.removeEventListener("click", _popAway, true);
+  document.removeEventListener("touchstart", _popAway, true);
+}
+/* 只有点到菜单外面才关闭；菜单内点击一律放行 */
+function _popAway(e){
+  if(Date.now() - _popOpenedAt < 450) return;
+  if(_msgPopEl && e.target && (e.target === _msgPopEl || _msgPopEl.contains(e.target))) return;
+  closeMsgPop();
+}
 function openMsgActions(id){
   var m = chat.filter(function(x){ return x.id === id; })[0];
   if(!m || m.sys) return;
@@ -1899,11 +1911,12 @@ function openMsgActions(id){
       }
     };
   });
-  /* 点击外面关闭 */
+  /* 点击外面关闭（菜单内的点击会被 _popAway 放行） */
+  _popOpenedAt = Date.now();
   setTimeout(function(){
-    document.addEventListener("click", closeMsgPop, true);
-    document.addEventListener("touchstart", closeMsgPop, true);
-  }, 10);
+    document.addEventListener("click", _popAway, true);
+    document.addEventListener("touchstart", _popAway, true);
+  }, 0);
 }
 function startQuote(m){
   quoting = m;
@@ -1990,7 +2003,6 @@ function setGlobalTyping(on, mid){
 }
 function showTyping(){
   hideTyping();
-  markLastMeRead();
   typingRow = document.createElement("div");
   typingRow.className = "row them";
   var tmid = isGroup() ? randMember() : null;
@@ -2028,28 +2040,6 @@ function hideTypingNotify(){
   }
 }
 /* 新消息横条 */
-/* 已读回执：ta 开始输入时，把我最后一条文字消息标为已读 */
-function markLastMeRead(){
-  for(var i = chat.length - 1; i >= 0; i--){
-    if(chat[i].who === "me" && !chat[i].sys && !chat[i].recalled && chat[i].type === "text"){
-      if(!chat[i].read){
-        chat[i].read = true;
-        var rowEl = chatEl.querySelector('[data-id="' + chat[i].id + '"]');
-        if(rowEl){
-          var b = rowEl.querySelector(".msg");
-          if(b && !b.querySelector(".read-tag")){
-            var s = document.createElement("span");
-            s.className = "read-tag";
-            s.textContent = "已读";
-            b.appendChild(s);
-          }
-        }
-        saveChat();
-      }
-      break;
-    }
-  }
-}
 function isChatVisible(){
   var p = $("page-chat");
   return !!(p && p.classList.contains("active")) && !document.hidden;
@@ -5301,6 +5291,13 @@ document.documentElement.style.setProperty("--chatfont", fontCss(cfg.fontId));
       label.textContent = cfg[p[1]] + "%";
       saveCfg();
     };
+  });
+  /* 概率滑块：不参与页面滑动、不弹软键盘 */
+  document.querySelectorAll('input[type="range"]').forEach(function(r){
+    r.setAttribute("inputmode", "none");
+    r.setAttribute("tabindex", "-1");
+    r.addEventListener("touchstart", function(e){ e.stopPropagation(); }, {passive:true});
+    r.addEventListener("pointerdown", function(e){ e.stopPropagation(); }, {passive:true});
   });
 })();
 
