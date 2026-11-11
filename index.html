@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.11-poke5";
+  var V = "2026.11.11-shop1";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -874,6 +874,103 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
 @keyframes splashHeart{0%{opacity:0;transform:scale(.6)}50%{transform:scale(1.3)}100%{opacity:1;transform:scale(1)}}
 /* 跳过按钮（调试用） */
 #splash-skip{position:absolute;bottom:24px;right:24px;font-size:11px;color:rgba(139,74,93,.45);background:rgba(255,255,255,.5);border:none;padding:4px 12px;border-radius:999px;pointer-events:auto}
+/* ===== 商城 / 礼物（参考 ZY 商城） ===== */
+.shop{position:fixed;inset:0;z-index:40;display:none;flex-direction:column;max-width:520px;margin:0 auto;background:linear-gradient(170deg,#FFF9F5 0%,#FDEBF2 55%,#FFF6EF 100%)}
+.shop.on{display:flex}
+.shop-head{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 8px;flex-shrink:0}
+.shop-back{width:34px;height:34px;flex-shrink:0;border-radius:12px;border:1px solid rgba(232,127,164,.2);background:#fff;color:#8B4A5D;font-size:16px;line-height:1;padding:0}
+.shop-head b{flex:1;text-align:center;font-size:16px;letter-spacing:.06em;color:var(--ink)}
+.shop-bal{border:none;background:linear-gradient(135deg,#FFE3F0,#FFF0E4);border-radius:999px;padding:6px 12px;font-size:12px;color:#B35A78;font-weight:700;white-space:nowrap}
+.shop-search{display:flex;gap:8px;padding:2px 16px 8px;flex-shrink:0}
+.shop-search input{flex:1;min-width:0;border:1px solid rgba(232,127,164,.22);background:rgba(255,255,255,.92);border-radius:12px;padding:9px 12px;font-size:13px;color:var(--ink);outline:none}
+.shop-wish{border:none;border-radius:12px;padding:0 13px;background:linear-gradient(135deg,#FFD9E8,#FFC6D8);color:#8B4A5D;font-size:12px;font-weight:600;white-space:nowrap}
+.shop-tabs{display:flex;gap:6px;padding:0 16px 6px;flex-shrink:0}
+.shop-tab{flex:1;border:none;background:rgba(255,255,255,.7);color:#A07785;font-size:12.5px;padding:8px 0;border-radius:12px;font-weight:600}
+.shop-tab.on{background:linear-gradient(135deg,#FFE3F0,#FFF0E4);color:#8B4A5D;box-shadow:0 3px 10px rgba(232,127,164,.16)}
+.shop-sub{display:flex;gap:6px;overflow-x:auto;padding:2px 16px 8px;flex-shrink:0;scrollbar-width:none}
+.shop-sub::-webkit-scrollbar{display:none}
+.shop-sub button{border:1px solid rgba(232,127,164,.22);background:#fff;color:#A07785;border-radius:999px;padding:5px 11px;font-size:11px;white-space:nowrap}
+.shop-sub button.on{background:#FFE3F0;border-color:#E87FA4;color:#8B4A5D;font-weight:600}
+.shop-main{flex:1;min-height:0;overflow-y:auto;padding:2px 16px 16px;-webkit-overflow-scrolling:touch}
+.shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.p-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 14px rgba(232,127,164,.1);border:1px solid rgba(255,255,255,.9);display:flex;flex-direction:column;cursor:pointer}
+.p-img{height:86px;display:flex;align-items:center;justify-content:center;font-size:40px;background:linear-gradient(135deg,#FFF2F7,#FFF6EC);overflow:hidden}
+.p-img img{width:100%;height:100%;object-fit:cover}
+.p-info{padding:8px 10px 10px;display:flex;flex-direction:column;gap:4px}
+.p-name{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.25;height:32px;overflow:hidden}
+.p-desc{font-size:10px;color:#B494A0;line-height:1.3;height:26px;overflow:hidden}
+.p-tags{display:flex;gap:4px;flex-wrap:wrap;min-height:14px}
+.p-tag{font-size:9px;color:#E87FA4;background:rgba(247,200,216,.35);border-radius:5px;padding:1px 5px}
+.p-row{display:flex;align-items:center;justify-content:space-between;margin-top:2px}
+.p-price{font-size:13px;font-weight:700;color:#E8698F}
+.p-add{width:26px;height:26px;border-radius:50%;border:none;background:linear-gradient(135deg,#FFD9E8,#FFC0D4);color:#8B4A5D;font-size:16px;line-height:1;padding:0}
+.shop-foot{display:flex;flex-shrink:0;margin:0 12px calc(env(safe-area-inset-bottom,0px) + 10px);padding:6px;border-radius:20px;background:rgba(255,252,249,.94);border:1px solid rgba(255,255,255,.95);box-shadow:0 10px 28px rgba(232,127,164,.16)}
+.shop-nav{flex:1;border:none;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 0;border-radius:14px;font-size:10px;color:#BFA0AB}
+.shop-nav.on{color:var(--pink-rose);font-weight:600;background:linear-gradient(180deg,rgba(247,200,216,.5),rgba(247,200,216,.18))}
+.shop-nav .ic{font-size:17px;line-height:1;position:relative}
+.shop-nav .bdg{position:absolute;left:10px;top:-4px;min-width:14px;height:14px;border-radius:7px;background:#E8698F;color:#fff;font-size:9px;line-height:14px;text-align:center;padding:0 3px;font-style:normal}
+.shop-empty{text-align:center;color:#B494A0;font-size:12px;padding:44px 0;line-height:1.7}
+.cart-item{display:flex;gap:10px;align-items:center;background:#fff;border-radius:14px;padding:10px;margin-bottom:8px;box-shadow:0 3px 10px rgba(232,127,164,.07)}
+.cart-ck{width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(232,127,164,.5);background:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;padding:0}
+.cart-ck.on{background:var(--pink-rose);border-color:var(--pink-rose)}
+.cart-ico{width:44px;height:44px;border-radius:10px;background:#FFF2F7;display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden;flex-shrink:0}
+.cart-ico img{width:100%;height:100%;object-fit:cover}
+.cart-mid{flex:1;min-width:0}
+.cart-mid b{display:block;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cart-mid i{font-style:normal;font-size:11px;color:#E8698F;font-weight:700}
+.cart-qty{display:flex;align-items:center;gap:7px}
+.cart-qty button{width:22px;height:22px;border-radius:50%;border:1px solid rgba(232,127,164,.3);background:#fff;color:#8B4A5D;font-size:13px;line-height:1;padding:0}
+.cart-footbar{display:flex;align-items:center;gap:8px;padding:10px 0 2px}
+.cart-footbar .tot{flex:1;font-size:12px;color:#8B4A5D}
+.cart-footbar .tot b{color:#E8698F;font-size:15px}
+.cart-btn{border:none;border-radius:12px;padding:9px 15px;font-size:12px;font-weight:600;background:linear-gradient(135deg,#FFD9E8,#FFC0D4);color:#8B4A5D}
+.cart-btn.danger{background:#FFE9EC;color:#D9566E}
+.od-filter{display:flex;gap:6px;margin-bottom:10px}
+.od-filter button{flex:1;border:none;background:rgba(255,255,255,.7);border-radius:10px;padding:6px 0;font-size:11px;color:#A07785}
+.od-filter button.on{background:#FFE3F0;color:#8B4A5D;font-weight:600}
+.od-item{background:#fff;border-radius:14px;padding:11px;margin-bottom:8px;box-shadow:0 3px 10px rgba(232,127,164,.07)}
+.od-top{display:flex;gap:10px;align-items:center}
+.od-top b{font-size:12.5px}
+.od-top i{font-style:normal;font-size:11px;color:#E8698F;font-weight:700}
+.od-time{font-size:10px;color:#B494A0;margin-top:4px}
+.od-tag{display:inline-block;font-size:9px;padding:1px 6px;border-radius:6px;background:#FFE3F0;color:#B35A78;margin-left:6px;vertical-align:middle}
+.od-tag.done{background:#E7F6EC;color:#4E9968}
+.od-tag.cancel{background:#F1EEF0;color:#A08E96}
+.od-tag.pending{background:#FFF0DC;color:#B7813C}
+.od-act{display:flex;gap:8px;margin-top:8px}
+.od-act button{border:1px solid rgba(232,127,164,.3);background:#fff;border-radius:10px;padding:5px 11px;font-size:11px;color:#8B4A5D}
+.cab-item{background:#fff;border-radius:14px;padding:11px;margin-bottom:8px;box-shadow:0 3px 10px rgba(232,127,164,.07)}
+.cab-top{display:flex;gap:10px;align-items:center}
+.cab-rp{background:rgba(232,127,164,.08);border-radius:9px;padding:7px 9px;font-size:11.5px;color:#9C5A72;line-height:1.45;margin-top:7px}
+.cab-more{border:none;background:none;color:#E8698F;font-size:10.5px;padding:6px 0 0}
+.sh-card{display:flex;gap:8px;align-items:center;width:238px;max-width:70vw;background:linear-gradient(135deg,#fff5f5,#fff);border:1px solid #ffe0e0;border-radius:10px;padding:7px;box-shadow:0 3px 10px rgba(232,127,164,.1)}
+.sh-thumb{width:44px;height:44px;border-radius:8px;background:#FFF2F7;display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;flex-shrink:0}
+.sh-thumb img{width:100%;height:100%;object-fit:cover}
+.sh-info{flex:1;min-width:0;line-height:1.2}
+.sh-note{font-size:9.5px;color:#96777F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sh-name{font-size:11.5px;color:#6B4A56;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sh-price{font-size:12px;color:#ff4757;font-weight:700;margin-top:1px}
+.sh-tag{display:inline-block;color:#fff;font-size:9px;padding:1px 5px;border-radius:6px;margin-top:2px}
+.msg.share{background:none!important;box-shadow:none!important;padding:0!important;border:none!important}
+.sd-top{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.sd-ico{width:62px;height:62px;border-radius:14px;background:linear-gradient(135deg,#FFF2F7,#FFF6EC);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;flex-shrink:0}
+.sd-ico img{width:100%;height:100%;object-fit:cover}
+.sd-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.sd-t b{font-size:14px;color:var(--ink)}
+.sd-t span{font-size:10.5px;color:#B494A0;line-height:1.35}
+.sd-t i{font-style:normal;font-size:16px;font-weight:700;color:#E8698F}
+.sd-spec{margin-bottom:8px}
+.sd-spec .tt{font-size:10.5px;color:#A07785;margin-bottom:5px}
+.sd-opts{display:flex;gap:6px;flex-wrap:wrap}
+.sd-opt{border:1px solid rgba(232,127,164,.25);background:#fff;border-radius:8px;padding:4px 10px;font-size:11px;color:#8B4A5D}
+.sd-opt.on{border-color:#E87FA4;background:#FFE3F0;font-weight:600}
+.sd-line{display:flex;align-items:center;gap:8px;font-size:12px;color:#A07785;margin:10px 0}
+.sd-line button{width:24px;height:24px;border-radius:50%;border:1px solid rgba(232,127,164,.3);background:#fff;color:#8B4A5D;font-size:14px;line-height:1;padding:0}
+.sd-line b{color:#E8698F;min-width:20px;text-align:center}
+.sd-remark{width:100%;border:1px solid rgba(232,127,164,.25);border-radius:10px;padding:9px 11px;font-size:12px;background:#fff;color:var(--ink);outline:none;margin-bottom:8px}
+.sd-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sd-btns button{border:none;border-radius:12px;padding:10px 0;font-size:12.5px;font-weight:600;background:#FFF0F5;color:#8B4A5D}
+.sd-btns button.main{grid-column:span 2;background:linear-gradient(135deg,#FFD9E8,#FFC0D4);font-size:13.5px;padding:12px 0;box-shadow:0 5px 14px rgba(232,127,164,.25)}
 </style>
 </head>
 <body>
@@ -921,6 +1018,7 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
             <button class="hm-app sm" data-act="timer"><span class="ic">⏰</span>计时</button>
             <button class="hm-app sm" data-act="say"><span class="ic">✨</span>换一句</button>
             <button class="hm-app sm" data-act="gift"><span class="ic">🎁</span>礼物</button>
+            <button class="hm-app sm" data-act="shop"><span class="ic">🏬</span>商城</button>
           </div>
         </div>
         <div class="hm-apps-pager" id="hmAppsPager"><span class="dot on"></span><span class="dot"></span></div>
@@ -1798,6 +1896,9 @@ function paintMsg(m){
       b.classList.add("playing");
       setTimeout(function(){ b.classList.remove("playing"); }, 1300);
     });
+  }else if(m.type === "share"){
+    b.classList.add("share");
+    b.innerHTML = quoteHtml(m.quote) + shareCardHtml(m);
   }else if(m.type === "gift"){
     /* 礼物消息：完整自定义行 */
     var gbIcon = m.giftImg
@@ -2095,7 +2196,7 @@ function notifyNewMsg(m){
   if(isChatVisible()) return;
   $("newMsgAv").innerHTML = avatarHtml("them", m.mid);
   $("newMsgName").textContent = senderName(m.mid);
-  var txt = m.type === "text" ? m.text : m.type === "sticker" ? "[表情包]" : m.type === "img" ? "[图片]" : m.type === "voice" ? "[语音] " + (m.dur || 1) + "″" : m.type === "redpacket" ? "[红包] ¥" + (m.amount || "") : m.type === "gift" ? "[礼物] " + (m.giftName || "") : "新消息";
+  var txt = m.type === "text" ? m.text : m.type === "sticker" ? "[表情包]" : m.type === "img" ? "[图片]" : m.type === "voice" ? "[语音] " + (m.dur || 1) + "″" : m.type === "redpacket" ? "[红包] ¥" + (m.amount || "") : m.type === "gift" ? "[礼物] " + (m.giftName || "") : m.type === "share" ? "[好物] " + (m.shareName || "") : "新消息";
   $("newMsgText").textContent = txt;
   $("newMsgBar").classList.add("show");
   clearTimeout(notifyNewMsg._t);
@@ -3543,6 +3644,7 @@ function setupHomeWidgets(){
 
 function runHmAct(act){
   if(act === "gift") openGiftShop();
+  else if(act === "shop") openShop("recommend");
   else if(act === "coin") openCoinShop();
   else if(act === "timer") openTimer();
   else if(act === "bubble"){ goPage("page-me"); openBubbleCenter(); }
@@ -4850,6 +4952,7 @@ function convPreview(t, id){
   else if(m.type === "redpacket") txt = "[红包] ¥" + (m.amount || "");
   else if(m.type === "voice") txt = "[语音] " + (m.dur || 1) + "″";
   else if(m.type === "gift") txt = "[礼物] " + (m.giftName || "") + " 🪙" + (m.giftPrice || "");
+  else if(m.type === "share") txt = "[好物] " + (m.shareName || "") + " ¥" + (m.sharePrice || "");
   else txt = m.text || "";
   if(m.who === "me" && !m.sys) txt = "我：" + txt;
   return String(txt).replace(/\s+/g, " ").slice(0, 18);
@@ -5402,6 +5505,591 @@ window.addEventListener("storage", function(e){
     renderDiary(); renderStats();
   }
 });
+
+/* ================= 商城 · 礼物系统（参考 ZY 商城 1:1 搬运） ================= */
+function SP(id, name, price, cat, tags, icon, desc, specs){
+  return { id:id, name:name, price:Number(price) || 0, category:cat, tags:tags, icon:icon, desc:desc, specs:specs || [] };
+}
+function SPs(str){
+  if(!str) return [];
+  var out = [];
+  str.split("|").forEach(function(seg){
+    var i = seg.indexOf(":");
+    if(i > 0) out.push({ name:seg.slice(0, i), options:seg.slice(i + 1).split("/") });
+  });
+  return out;
+}
+var SHOP_PRODUCTS = [
+  SP("p1","纯棉白衬衫",129,"recommend","衣物,新品","👔","100%新疆长绒棉，亲肤透气，商务休闲两相宜",SPs("尺码:S/M/L/XL|颜色:白色/黑色/浅蓝")),
+  SP("p9","连帽卫衣",169,"recommend","衣物,热销","🧥","加绒加厚，宽松版型，秋冬必备。情侣款可配对穿",SPs("尺码:M/L/XL/2XL|颜色:灰色/黑色/卡其/雾霾蓝")),
+  SP("p10","真丝睡裙",259,"recommend","衣物,性感","👗","100%桑蚕丝，亲肤丝滑，蕾丝拼接设计",SPs("尺码:S/M/L|颜色:酒红/黑色/香槟金")),
+  SP("p11","情侣拖鞋",49,"recommend","衣物,情侣","🩴","EVA材质，防滑耐磨，可定制刺绣",SPs("尺码:36-37/38-39/40-41/42-43")),
+  SP("p35","羊绒围巾",139,"recommend","衣物,秋冬","🧣","100%山羊绒，柔软亲肤，保暖不扎脖子",SPs("颜色:驼色/灰色/酒红/黑色")),
+  SP("p36","毛绒袜子套装",29,"recommend","衣物,温馨","🧦","5双装，珊瑚绒内里，冬天踩在云朵上",SPs("颜色:暖棕/灰粉/藏蓝")),
+  SP("p2","香氛沐浴露",59,"recommend","日用品","🧴","持久留香72小时，温和不刺激，适合敏感肌",SPs("香型:白茶/玫瑰/檀木/海洋")),
+  SP("p12","电动牙刷",189,"recommend","日用品,热销","🪥","声波震动，5种清洁模式，IPX7防水",SPs("颜色:白色/粉色/黑色")),
+  SP("p13","香薰蜡烛",68,"recommend","日用品,氛围","🕯️","大豆蜡+精油，燃烧40小时，助眠安神",SPs("香型:薰衣草/佛手柑/雪松/琥珀")),
+  SP("p14","护手霜礼盒",79,"recommend","日用品,礼盒","🧴","6支护手霜套装，滋润不油腻，精美礼盒装"),
+  SP("p37","暖宝宝贴",19,"recommend","日用品,冬日","🔥","10片装，持续发热12小时，冬天贴心小温暖",SPs("规格:10片装/20片装/50片装")),
+  SP("p38","蒸汽眼罩",39,"recommend","日用品,助眠","😴","30片装，40℃恒温，薰衣草香，缓解眼疲劳",SPs("香型:薰衣草/洋甘菊/无香")),
+  SP("p3","降噪耳机",899,"recommend","数码,热销","🎧","主动降噪，40小时续航，Hi-Res音质认证",SPs("颜色:黑色/白色/蓝色")),
+  SP("p15","桌面加湿器",128,"recommend","数码,小物","💨","超声波雾化，静音运行，RGB氛围灯",SPs("颜色:白色/粉色/绿色")),
+  SP("p16","蓝牙音箱",299,"recommend","数码","🔊","TWS串联，IPX7防水，20小时续航",SPs("颜色:黑色/红色/军绿")),
+  SP("p17","超薄避孕套",39,"recommend","计生用品,热销","🛡️","0.01mm超薄，水润润滑，每盒12只装",SPs("规格:12只装/24只装/36只装")),
+  SP("p18","延时安全套",45,"recommend","计生用品","⏱️","苯佐卡因延时配方，有效延长亲密时间",SPs("规格:6只装/12只装")),
+  SP("p19","小型跳蛋",89,"recommend","计生用品,情趣","🪬","医用硅胶，10频震动，静音防水，USB充电",SPs("颜色:粉色/紫色/白色")),
+  SP("p20","情趣润滑液",35,"recommend","计生用品,情趣","💧","水基配方，温和不刺激，100ml大瓶装",SPs("类型:水润型/热感型/果味型")),
+  SP("p21","震动环",69,"recommend","计生用品,情趣","💍","医用硅胶，双重震动，可调节强度，USB充电",SPs("颜色:黑色/透明/紫色")),
+  SP("p4","情侣对戒",199,"recommend","饰品,定制","💍","925纯银，可调节尺寸，刻字服务",SPs("尺寸:5号/6号/7号/8号")),
+  SP("p22","项链吊坠",158,"recommend","饰品,新品","📿","S925银链+天然珍珠，简约优雅",SPs("材质:银+珍珠/银+水晶/玫瑰金")),
+  SP("p23","手链",89,"recommend","饰品","✨","天然紫水晶+转运珠，手工编织",SPs("颜色:紫水晶/粉水晶/黑曜石")),
+  SP("p39","法兰绒毛毯",89,"recommend","居家,温馨","🛋️","150x200cm，双面绒，柔软不掉毛，窝沙发必备",SPs("颜色:奶白/灰色/粉色/驼色")),
+  SP("p40","情侣马克杯",35,"recommend","居家,情侣","☕","一对装，可定制刻字，400ml大容量",SPs("颜色:白色/黑色/粉色")),
+  SP("p41","小夜灯",28,"recommend","居家,温馨","🌙","感应式，暖光不刺眼，起夜不摸黑",SPs("造型:月亮/星星/小熊/云朵")),
+  SP("p42","抱枕",45,"recommend","居家","🛌","记忆棉填充，可拆洗，靠腰神器",SPs("颜色:奶白/灰色/粉色/蓝色")),
+  SP("p43","面膜礼盒",69,"recommend","美妆,礼盒","🧖","20片装，玻尿酸+烟酰胺，补水提亮",SPs("类型:补水/美白/抗皱")),
+  SP("p44","润唇膏",25,"recommend","美妆","💋","天然蜂蜡，不粘腻，可当口红打底",SPs("色号:透明/珊瑚红/樱花粉")),
+  SP("p45","身体乳",49,"recommend","美妆","🫧","乳木果油配方，滋润全身，留香持久",SPs("香型:樱花/白茶/椰子")),
+  SP("p46","手账本套装",58,"recommend","文具,文艺","📓","A5本子+贴纸+彩色笔，记录日常小确幸",SPs("封面:星空/花卉/简约黑")),
+  SP("p47","明信片套装",22,"recommend","文具,文艺","📮","20张手绘风明信片，写给TA的悄悄话"),
+  SP("p48","书签",15,"recommend","文具","🔖","黄铜材质，镂空叶片造型，精致小巧",SPs("造型:银杏叶/枫叶/羽毛")),
+  SP("b1","《傲慢与撒娇》",35,"recommend","书籍,甜宠","📖","高冷型就应该配小太阳啊！看似大冰山的人看到爱人的笑脸也会忍不住萌化吧。",SPs("版本:平装/精装")),
+  SP("b2","《■■三十六式》",42,"recommend","书籍,成人","📕","如何让伴侣在■■时神魂颠倒。双人学习阅读此书，效果更佳。",SPs("版本:平装/精装")),
+  SP("b3","《千年等一信息》",30,"recommend","书籍,浪漫","📗","忙碌的日子里，还有一个人在手机那端等待你的消息...",SPs("版本:平装/精装")),
+  SP("b4","《反向驯化》",38,"recommend","书籍,心动","📘","高端的猎人往往以猎物的形态出现。",SPs("版本:平装/精装")),
+  SP("b5","《醋精的自我修养》",32,"recommend","书籍,甜宠","📙","爱人太有魅力我吃点醋怎么了。",SPs("版本:平装/精装")),
+  SP("b6","《半糖去冰》",28,"recommend","书籍,日常","📓","我们的爱情，不过分甜，不假装淡。",SPs("版本:平装/精装")),
+  SP("b7","《心动无期限》",25,"recommend","书籍,浪漫","📒","未完待续。",SPs("版本:平装/精装")),
+  SP("p5","芋泥波波奶茶",18,"food","奶茶,人气","🧋","手工芋泥+黑糖珍珠，大杯700ml",SPs("甜度:三分糖/五分糖/七分糖/全糖|温度:常温/去冰/少冰/正常冰")),
+  SP("p24","杨枝甘露",22,"food","奶茶,新品","🥭","新鲜芒果+西柚+椰浆，清爽解腻",SPs("甜度:三分糖/五分糖/七分糖|温度:常温/去冰/少冰")),
+  SP("p25","生椰拿铁",20,"food","奶茶,热销","☕","现萃咖啡+厚椰乳，丝滑香浓",SPs("甜度:无糖/三分糖/五分糖|温度:常温/去冰/少冰/热")),
+  SP("p49","百香果柠檬茶",16,"food","奶茶,清爽","🍋","新鲜百香果+手捣柠檬，酸甜开胃",SPs("甜度:三分糖/五分糖/七分糖|温度:常温/去冰/少冰")),
+  SP("p50","蜜桃气泡水",15,"food","奶茶,饮品","🫧","白桃汁+苏打气泡，少女心满满",SPs("温度:常温/去冰/少冰")),
+  SP("p51","鲜榨橙汁",18,"food","奶茶,饮品,健康","🍊","现榨新鲜橙子，不加水不加糖，500ml",SPs("温度:常温/去冰")),
+  SP("p6","双层牛肉堡套餐",39,"food","快餐","🍔","双层安格斯牛肉+薯条+可乐",SPs("套餐:标准/加大")),
+  SP("p26","日式拉面",32,"food","快餐","🍜","豚骨浓汤+溏心蛋+叉烧，12小时慢熬",SPs("辣度:不辣/微辣/中辣")),
+  SP("p27","炸鸡桶",45,"food","快餐,人气","🍗","6块黄金脆皮炸鸡+蜂蜜芥末酱",SPs("口味:原味/香辣/蒜香")),
+  SP("p52","照烧鸡腿饭",28,"food","快餐","🍱","蜜汁照烧鸡腿+溏心蛋+蔬菜，米饭管够"),
+  SP("p28","薯片大礼包",25,"food","零食","🥔","5种口味混合装，追剧必备"),
+  SP("p29","坚果混合装",38,"food","零食,健康","🥜","每日坚果，7种坚果+果干，30包独立装"),
+  SP("p30","巧克力礼盒",68,"food","零食,礼盒","🍫","比利时进口，12种口味，精美铁盒装"),
+  SP("p53","海苔脆片",12,"food","零食","🟢","夹心海苔，芝麻/坚果夹心，香脆可口",SPs("口味:芝麻/坚果/芥末")),
+  SP("p54","果冻礼盒",18,"food","零食,可爱","🍮","12个装，果汁果冻，Q弹爽滑"),
+  SP("p7","丹东草莓礼盒",88,"food","水果,礼盒","🍓","精选大果，单果30g+，顺丰包邮",SPs("规格:500g/1kg")),
+  SP("p31","榴莲",128,"food","水果","🍈","金枕头榴莲，4-5房肉，包出肉率",SPs("规格:整果约3斤/整果约5斤/果肉500g")),
+  SP("p32","阳光玫瑰葡萄",59,"food","水果,新品","🍇","晴王品种，无籽脆甜，一串约500g"),
+  SP("p55","车厘子",69,"food","水果","🍒","智利进口，JJ级大果，2斤装",SPs("规格:2斤装/4斤装")),
+  SP("p56","蓝莓",35,"food","水果,健康","🫐","云南高原蓝莓，花青素满满，4盒装"),
+  SP("p8","提拉米苏蛋糕",128,"food","甜品","🍰","意式经典，马斯卡彭芝士，6寸",SPs("尺寸:4寸/6寸/8寸")),
+  SP("p33","芒果千层",98,"food","甜品,人气","🥭","20层薄饼+新鲜芒果+淡奶油",SPs("尺寸:6寸/8寸")),
+  SP("p34","舒芙蕾松饼",36,"food","甜品,新品","🧁","现做现烤，云朵般绵密，配冰淇淋",SPs("口味:原味/抹茶/巧克力/草莓")),
+  SP("p57","双皮奶",22,"food","甜品","🍮","传统广式甜品，奶香浓郁，配红豆/芒果",SPs("配料:原味/红豆/芒果/莲子")),
+  SP("p58","冰糖银耳汤",15,"food","汤品,养生","🥣","古田银耳+红枣+枸杞，胶质满满",SPs("甜度:无糖/三分糖/五分糖|温度:常温/热")),
+  SP("p59","椰子鸡汤",42,"food","汤品,养生","🥥","新鲜椰子水+走地鸡，清甜滋补",SPs("辣度:不辣/微辣")),
+  SP("p60","红豆沙",12,"food","汤品,甜蜜","🫘","绵密红豆沙+小汤圆，暖胃暖心",SPs("温度:常温/热")),
+  SP("p61","关东煮",25,"food","夜宵,温暖","🍢","8串拼盘，鱼丸+萝卜+海带+福袋，鲜汤打底",SPs("辣度:不辣/微辣")),
+  SP("p62","烤串拼盘",38,"food","夜宵,人气","🍢","10串混合，羊肉+牛肉+鸡翅+玉米+韭菜",SPs("辣度:不辣/微辣/中辣/变态辣")),
+  SP("p63","小龙虾",59,"food","夜宵,人气","🦞","麻辣小龙虾2斤，十三香/蒜蓉/麻辣可选",SPs("口味:十三香/蒜蓉/麻辣/蛋黄")),
+  SP("p64","炒粉",18,"food","夜宵","🍜","广式炒河粉，牛肉+豆芽+鸡蛋，镬气十足",SPs("辣度:不辣/微辣"))
+];
+var SHOP_TABS = [{ id:"recommend", name:"推荐" }, { id:"food", name:"外卖" }, { id:"gifts", name:"礼物" }];
+var SHOP_SUBS = {
+  recommend:["全部","衣物","日用品","数码","计生用品","饰品","居家","美妆","文具","书籍"],
+  food:["全部","奶茶","快餐","零食","水果","甜品","汤品","夜宵"],
+  gifts:["全部","小甜","日常","心动","奢礼"]
+};
+var SHOP_GIFT_CAT = { sweet:"小甜", daily:"日常", love:"心动", luxury:"奢礼" };
+(function(){
+  for(var gi = 0; gi < GIFT_DATA.length; gi++){
+    var gg = GIFT_DATA[gi];
+    SHOP_PRODUCTS.push(SP("g_" + gg.id, gg.name, gg.price, "gifts", "礼物," + (SHOP_GIFT_CAT[gg.cat] || "礼物"), gg.emoji, "送给 TA 的一份心意 ♡"));
+  }
+})();
+
+var shopEl = null, shopView = "shop", shopTab = "recommend", shopSub = "全部",
+    shopKeyword = "", shopOpen = false, shopOF = "all", shopDetail = null, shopAutoStarted = true;
+
+function shopS(){
+  if(!cfg.shop || typeof cfg.shop !== "object") cfg.shop = {};
+  var s = cfg.shop;
+  if(!Array.isArray(s.cart)) s.cart = [];
+  if(!Array.isArray(s.orders)) s.orders = [];
+  if(!Array.isArray(s.cabinet)) s.cabinet = [];
+  if(!Array.isArray(s.myCabinet)) s.myCabinet = [];
+  if(!Array.isArray(s.products)) s.products = [];
+  return s;
+}
+function shopTime(t){
+  var d = new Date(t);
+  function p2(n){ return n < 10 ? "0" + n : "" + n; }
+  return p2(d.getMonth() + 1) + "-" + p2(d.getDate()) + " " + p2(d.getHours()) + ":" + p2(d.getMinutes());
+}
+function shopThumb(p){
+  if(p.img) return '<img src="' + esc(p.img) + '" alt="">';
+  return esc(p.icon || "🎁");
+}
+function shopAllProducts(){
+  var arr = SHOP_PRODUCTS.slice();
+  (shopS().products || []).forEach(function(p, i){
+    arr.push({ id:"w" + i, name:p.name, price:p.price, category:p.category || "recommend", tags:p.tags || "许愿", icon:p.icon || "🎀", desc:p.desc || "你许愿的商品", specs:[] });
+  });
+  return arr;
+}
+function shopFind(pid){
+  var arr = shopAllProducts();
+  for(var i = 0; i < arr.length; i++) if(arr[i].id === pid) return arr[i];
+  return null;
+}
+function shareCardHtml(m){
+  var thumb = m.shareImg ? '<img src="' + esc(m.shareImg) + '" alt="">' : esc(m.shareIcon || "🎁");
+  return '<div class="sh-card"><div class="sh-thumb">' + thumb + '</div><div class="sh-info">' +
+    (m.shareNote ? '<div class="sh-note">' + esc(m.shareNote) + '</div>' : '') +
+    '<div class="sh-name">' + esc(m.shareName || "好物") + '</div>' +
+    '<div class="sh-price">¥' + esc(String(m.sharePrice == null ? "" : m.sharePrice)) + '</div>' +
+    '<span class="sh-tag" style="background:' + esc(m.shareTagColor || "#ff8fa8") + '">' + esc(m.shareTag || "好物分享") + '</span>' +
+    '</div></div>';
+}
+function shopReplyPool(){
+  var pool = [];
+  try{
+    Object.keys(lib).forEach(function(k){
+      if(Array.isArray(lib[k])) lib[k].forEach(function(t){ if(typeof t === "string" && t.trim()) pool.push(t.trim()); });
+    });
+  }catch(e){}
+  return pool;
+}
+function randomShopReply(){
+  var pool = shopReplyPool();
+  return pool.length ? pool[Math.floor(Math.random() * pool.length)] : "这个好适合你！";
+}
+function shopGenReplies(){
+  var pool = shopReplyPool(), out = [];
+  if(pool.length){
+    var count = Math.random() < 0.6 ? 1 : (Math.random() < 0.85 ? 2 : 3);
+    var sh = pool.slice().sort(function(){ return Math.random() - 0.5; });
+    for(var i = 0; i < Math.min(count, sh.length); i++) out.push({ text:sh[i], time:shopTime(Date.now()) });
+  }else{
+    ["谢谢你送我的礼物！我很喜欢~","这个礼物太贴心了，你眼光真好！","今天一直在用你送的东西，感觉你就在身边~"].forEach(function(t){ out.push({ text:t, time:shopTime(Date.now()) }); });
+  }
+  return out;
+}
+function shopSendCard(p, tag, color, who, price, note){
+  pushMsg({
+    who: who || "me",
+    type: "share",
+    shareName: p.name,
+    sharePrice: price == null ? p.price : price,
+    shareIcon: p.icon || "🎁",
+    shareImg: p.img || "",
+    shareTag: tag,
+    shareTagColor: color || "#ff8fa8",
+    shareNote: note || "",
+    t: Date.now()
+  });
+}
+function shopTaReply(delay){
+  setTimeout(function(){
+    showTyping();
+    setTimeout(function(){
+      hideTyping();
+      pushMsg({ who:"them", type:"text", text:randomShopReply(), t:Date.now() });
+    }, 700 + Math.random() * 900);
+  }, delay == null ? (1200 + Math.random() * 2200) : delay);
+}
+
+function shopDom(){
+  if(shopEl) return shopEl;
+  shopEl = document.createElement("div");
+  shopEl.className = "shop";
+  shopEl.innerHTML =
+    '<div class="shop-head"><button class="shop-back" id="shopBack">←</button><b id="shopTitle">商城</b><button class="shop-bal" id="shopBal">¥<span id="shopBalVal">0</span></button></div>' +
+    '<div class="shop-search" id="shopSearchBar"><input id="shopSearch" placeholder="搜索商品…" autocomplete="off"><button class="shop-wish" id="shopWish">✨ 许愿</button></div>' +
+    '<div class="shop-tabs" id="shopTabs"></div>' +
+    '<div class="shop-sub" id="shopSub"></div>' +
+    '<div class="shop-main" id="shopMain"></div>' +
+    '<div class="shop-foot" id="shopFoot"></div>';
+  document.body.appendChild(shopEl);
+  $("shopBack").onclick = closeShop;
+  $("shopBal").onclick = shopEditBalance;
+  $("shopWish").onclick = shopWish;
+  $("shopSearch").oninput = function(){ shopKeyword = this.value.trim(); refreshShopGrid(); };
+  shopEl.addEventListener("click", shopClick);
+  return shopEl;
+}
+function shopClick(e){
+  var t = e.target;
+  if(!t || !t.closest) return;
+  var nav = t.closest("[data-nav]");
+  if(nav){ shopView = nav.getAttribute("data-nav"); shopOF = "all"; renderShop(); return; }
+  var tab = t.closest("[data-tab]");
+  if(tab){ shopTab = tab.getAttribute("data-tab"); shopSub = "全部"; shopKeyword = ""; var si = $("shopSearch"); if(si) si.value = ""; renderShop(); return; }
+  var sub = t.closest("[data-sub]");
+  if(sub){ shopSub = sub.getAttribute("data-sub"); renderShop(); return; }
+  var add = t.closest("[data-addcart]");
+  if(add){ shopAddCart(add.getAttribute("data-addcart")); return; }
+  var card = t.closest("[data-pid]");
+  if(card){ openShopProduct(card.getAttribute("data-pid")); return; }
+  var cact = t.closest("[data-cact]");
+  if(cact){ shopCartAct(cact.getAttribute("data-cact"), cact.getAttribute("data-idx")); return; }
+  var ofil = t.closest("[data-ofil]");
+  if(ofil){ shopOF = ofil.getAttribute("data-ofil"); renderShop(); return; }
+  var oact = t.closest("[data-oact]");
+  if(oact){ shopOrderAct(oact.getAttribute("data-oact"), oact.getAttribute("data-oid")); return; }
+  var cexp = t.closest("[data-cexp]");
+  if(cexp){ shopToggleCabinet(Number(cexp.getAttribute("data-cexp"))); return; }
+}
+function renderShop(){
+  if(!shopEl) return;
+  var titles = { shop:"商城", cart:"购物车", order:"订单", cabinet:"礼物柜" };
+  $("shopTitle").textContent = titles[shopView] || "商城";
+  $("shopBalVal").textContent = getCoins();
+  $("shopSearchBar").style.display = shopView === "shop" ? "flex" : "none";
+  $("shopTabs").style.display = shopView === "shop" ? "flex" : "none";
+  $("shopSub").style.display = shopView === "shop" ? "flex" : "none";
+  $("shopTabs").innerHTML = SHOP_TABS.map(function(t){
+    return '<button class="shop-tab' + (shopTab === t.id ? " on" : "") + '" data-tab="' + t.id + '">' + t.name + '</button>';
+  }).join("");
+  $("shopSub").innerHTML = (SHOP_SUBS[shopTab] || []).map(function(s){
+    return '<button' + (shopSub === s ? ' class="on"' : '') + ' data-sub="' + esc(s) + '">' + esc(s) + '</button>';
+  }).join("");
+  renderShopMain();
+  renderShopFoot();
+}
+function refreshShopGrid(){
+  var main = $("shopMain");
+  if(main && shopView === "shop") main.innerHTML = shopGridHtml();
+}
+function renderShopMain(){
+  var main = $("shopMain");
+  if(!main) return;
+  if(shopView === "shop") main.innerHTML = shopGridHtml();
+  else if(shopView === "cart") main.innerHTML = shopCartHtml();
+  else if(shopView === "order") main.innerHTML = shopOrdersHtml();
+  else main.innerHTML = shopCabinetHtml();
+  main.scrollTop = 0;
+}
+function renderShopFoot(){
+  if(!shopEl) return;
+  var s = shopS();
+  var n = s.cart.reduce(function(a, c){ return a + (Number(c.qty) || 1); }, 0);
+  var items = [{ v:"shop", ic:"🏬", n:"商城" }, { v:"cart", ic:"🛒", n:"购物车", b:n }, { v:"order", ic:"📋", n:"订单" }, { v:"cabinet", ic:"🎁", n:"礼物柜" }];
+  $("shopFoot").innerHTML = items.map(function(it){
+    return '<button class="shop-nav' + (shopView === it.v ? " on" : "") + '" data-nav="' + it.v + '"><span class="ic">' + it.ic + (it.b ? '<i class="bdg">' + it.b + '</i>' : '') + '</span>' + it.n + '</button>';
+  }).join("");
+}
+function shopGridHtml(){
+  var list = shopAllProducts().filter(function(p){
+    if(p.category !== shopTab) return false;
+    if(shopSub !== "全部" && (p.tags || "").indexOf(shopSub) < 0) return false;
+    if(shopKeyword && (p.name + p.tags + p.desc).indexOf(shopKeyword) < 0) return false;
+    return true;
+  });
+  if(!list.length) return '<div class="shop-empty">没有找到相关商品<br>试试「许愿」把它加进来 ♡</div>';
+  return '<div class="shop-grid">' + list.map(function(p){
+    return '<div class="p-card" data-pid="' + p.id + '"><div class="p-img">' + shopThumb(p) + '</div>' +
+      '<div class="p-info"><div class="p-name">' + esc(p.name) + '</div><div class="p-desc">' + esc(p.desc || "") + '</div>' +
+      '<div class="p-tags">' + (p.tags || "").split(",").slice(0, 2).map(function(t){ return '<span class="p-tag">' + esc(t) + '</span>'; }).join("") + '</div>' +
+      '<div class="p-row"><span class="p-price">¥' + p.price + '</span><button class="p-add" data-addcart="' + p.id + '">+</button></div></div></div>';
+  }).join("") + '</div>';
+}
+function shopAddCart(pid){
+  var p = shopFind(pid);
+  if(!p) return;
+  var s = shopS(), found = null;
+  for(var i = 0; i < s.cart.length; i++){ if(s.cart[i].pid === pid){ found = s.cart[i]; break; } }
+  if(found) found.qty = (Number(found.qty) || 1) + 1;
+  else s.cart.push({ pid:pid, name:p.name, price:p.price, icon:p.icon, img:p.img || "", qty:1, specs:[], remark:"", selected:true });
+  saveCfg();
+  toast("已加入购物车 ♡");
+  renderShopFoot();
+}
+function shopCartHtml(){
+  var s = shopS();
+  if(!s.cart.length) return '<div class="shop-empty">购物车空空的<br>去商城逛逛，把喜欢的东西加进来 ♡</div>';
+  var total = 0;
+  s.cart.forEach(function(c){ if(c.selected !== false) total += c.price * (Number(c.qty) || 1); });
+  var allSel = s.cart.every(function(c){ return c.selected !== false; });
+  var html = '<div style="font-size:11px;color:#A07785;letter-spacing:.06em;margin:4px 2px 8px">共 ' + s.cart.length + ' 件商品</div>';
+  html += s.cart.map(function(c, i){
+    return '<div class="cart-item"><button class="cart-ck' + (c.selected !== false ? " on" : "") + '" data-cact="sel" data-idx="' + i + '">' + (c.selected !== false ? "✓" : "") + '</button>' +
+      '<div class="cart-ico">' + shopThumb(c) + '</div>' +
+      '<div class="cart-mid"><b>' + esc(c.name) + '</b><i>¥' + c.price + '</i></div>' +
+      '<div class="cart-qty"><button data-cact="qty-" data-idx="' + i + '">−</button><span style="font-size:12px;font-weight:600;color:#8B4A5D">' + (Number(c.qty) || 1) + '</span><button data-cact="qty+" data-idx="' + i + '">+</button></div></div>';
+  }).join("");
+  html += '<div class="cart-footbar"><button class="cart-ck' + (allSel ? " on" : "") + '" data-cact="selall">' + (allSel ? "✓" : "") + '</button>' +
+    '<span style="font-size:11px;color:#A07785">全选</span><span class="tot">合计 <b>¥' + total + '</b></span>' +
+    '<button class="cart-btn danger" data-cact="delsel">删除</button><button class="cart-btn" data-cact="checkout">结算</button></div>';
+  return html;
+}
+function shopCartAct(act, idxRaw){
+  var s = shopS(), idx = Number(idxRaw), it = s.cart[idx];
+  if(act === "sel"){ if(it){ it.selected = it.selected === false; saveCfg(); renderShopMain(); } }
+  else if(act === "qty-" && it){ it.qty = Math.max(1, (Number(it.qty) || 1) - 1); saveCfg(); renderShopMain(); }
+  else if(act === "qty+" && it){ it.qty = Math.min(99, (Number(it.qty) || 1) + 1); saveCfg(); renderShopMain(); }
+  else if(act === "del" && it){ s.cart.splice(idx, 1); saveCfg(); renderShopMain(); renderShopFoot(); }
+  else if(act === "selall"){
+    var all = s.cart.every(function(c){ return c.selected !== false; });
+    s.cart.forEach(function(c){ c.selected = !all; });
+    saveCfg(); renderShopMain();
+  }
+  else if(act === "delsel"){ s.cart = s.cart.filter(function(c){ return c.selected === false; }); saveCfg(); renderShopMain(); renderShopFoot(); }
+  else if(act === "checkout"){ shopCheckout(); }
+}
+function shopCheckout(){
+  var s = shopS();
+  var sel = s.cart.filter(function(c){ return c.selected !== false; });
+  if(!sel.length){ toast("先选要结算的商品哦"); return; }
+  var total = sel.reduce(function(a, c){ return a + c.price * (Number(c.qty) || 1); }, 0);
+  if(getCoins() < total){ toast("余额不够啦，点右上角余额设置一下 ♡"); return; }
+  cfg.coins = getCoins() - total;
+  sel.forEach(function(c){
+    var q = Number(c.qty) || 1;
+    var o = { id:"O" + uid(), name:c.name, price:c.price, qty:q, icon:c.icon, img:c.img || "", specs:(c.specs || []).join(" | "), remark:c.remark || "", target:"self", status:"completed", time:Date.now() };
+    s.orders.unshift(o);
+    s.myCabinet.unshift({ name:c.name, icon:c.icon, img:c.img || "", price:c.price, qty:q, source:"购买", orderId:o.id, time:Date.now() });
+  });
+  s.cart = s.cart.filter(function(c){ return c.selected === false; });
+  saveCfg();
+  shopView = "order"; shopOF = "all"; renderShop();
+  toast("结算成功 ♡");
+}
+function shopOrdersHtml(){
+  var s = shopS();
+  var fil = [{ v:"all", n:"全部" }, { v:"pending", n:"待送达" }, { v:"completed", n:"已完成" }, { v:"cancelled", n:"已取消" }];
+  var html = '<div class="od-filter">' + fil.map(function(f){
+    return '<button class="' + (shopOF === f.v ? "on" : "") + '" data-ofil="' + f.v + '">' + f.n + '</button>';
+  }).join("") + '</div>';
+  var list = s.orders.filter(function(o){ return shopOF === "all" || o.status === shopOF; });
+  if(!list.length) return html + '<div class="shop-empty">还没有订单<br>去商城挑一份礼物吧 ♡</div>';
+  return html + list.map(function(o){
+    var st = o.status === "completed" ? '<span class="od-tag done">已完成</span>' : (o.status === "pending" ? '<span class="od-tag pending">待送达</span>' : '<span class="od-tag cancel">已取消</span>');
+    var tg = o.target === "ta" ? '<span class="od-tag">送 TA</span>' : '<span class="od-tag">自己</span>';
+    return '<div class="od-item"><div class="od-top"><div class="cart-ico">' + shopThumb(o) + '</div><div style="flex:1;min-width:0"><b>' + esc(o.name) + '</b>' + st + tg +
+      '<div class="od-time">' + shopTime(o.time) + ' · ¥' + o.price + ' × ' + (o.qty || 1) + (o.specs ? ' · ' + esc(o.specs) : '') + '</div></div></div>' +
+      (o.status === "pending" ? '<div class="od-act"><button data-oact="cancel" data-oid="' + esc(o.id) + '">取消并退款</button></div>' : '') + '</div>';
+  }).join("");
+}
+function shopOrderAct(act, oid){
+  if(act !== "cancel") return;
+  var s = shopS();
+  for(var i = 0; i < s.orders.length; i++){
+    var o = s.orders[i];
+    if(o.id === oid && o.status === "pending"){
+      o.status = "cancelled";
+      cfg.coins = getCoins() + o.price * (Number(o.qty) || 1);
+      saveCfg(); toast("订单已取消，钱退回来了 ♡"); renderShopMain(); return;
+    }
+  }
+}
+function shopCabinetHtml(){
+  var s = shopS();
+  if(!s.cabinet.length) return '<div class="shop-empty">礼物柜还是空的<br>去商城给 TA 买份礼物吧 ♡</div>';
+  return s.cabinet.map(function(g, i){
+    var reps = g.replies || [];
+    var shown = g._open ? reps : reps.slice(0, 1);
+    return '<div class="cab-item"><div class="cab-top"><div class="cart-ico">' + shopThumb(g) + '</div><div style="flex:1;min-width:0"><b style="font-size:12.5px">' + esc(g.name) + '</b>' +
+      '<div class="od-time">¥' + g.price + ' × ' + (g.qty || 1) + ' · ' + shopTime(g.time) + '</div></div></div>' +
+      shown.map(function(r){ return '<div class="cab-rp">' + esc(r.text) + '</div>'; }).join("") +
+      (reps.length > 1 && !g._open ? '<button class="cab-more" data-cexp="' + i + '">查看全部回复（' + reps.length + ' 条）</button>' : '') +
+      (g.remark ? '<div class="od-time">备注：' + esc(g.remark) + '</div>' : '') + '</div>';
+  }).join("");
+}
+function shopToggleCabinet(i){
+  var g = shopS().cabinet[i];
+  if(!g) return;
+  g._open = !g._open;
+  renderShopMain();
+}
+function openShop(view){
+  shopDom();
+  shopView = view === "gifts" ? "shop" : (view || "shop");
+  if(view === "gifts"){ shopTab = "gifts"; shopSub = "全部"; }
+  shopEl.classList.add("on");
+  shopOpen = true;
+  renderShop();
+}
+function closeShop(){
+  if(shopEl) shopEl.classList.remove("on");
+  shopOpen = false;
+}
+function shopEditBalance(){
+  var v = prompt("设置余额（¥）", String(getCoins()));
+  if(v === null) return;
+  var n = Number(v);
+  if(!isFinite(n) || n < 0){ toast("数字不太对哦"); return; }
+  cfg.coins = Math.round(n);
+  saveCfg();
+  renderShop();
+  toast("余额已更新 ♡");
+}
+function shopWish(){
+  showSheet(
+    '<div class="sheet-title">✨ 许愿一件商品</div>' +
+    '<input class="sd-remark" id="wName" maxlength="20" placeholder="商品名字">' +
+    '<input class="sd-remark" id="wPrice" type="number" inputmode="decimal" placeholder="价格（¥）">' +
+    '<input class="sd-remark" id="wIcon" maxlength="4" placeholder="一个 emoji 图标，例如 🧸">' +
+    '<input class="sd-remark" id="wDesc" maxlength="30" placeholder="描述（可不填）">' +
+    '<div class="sd-btns"><button data-wcat="recommend">加入推荐</button><button data-wcat="food">加入外卖</button><button class="main" data-wcat="gifts">加入礼物</button></div>'
+  );
+  document.querySelectorAll("#sheetBody [data-wcat]").forEach(function(b){
+    b.onclick = function(){
+      var name = ($("wName").value || "").trim();
+      var price = Number($("wPrice").value);
+      if(!name || !isFinite(price) || price <= 0){ toast("名字和价格要填哦"); return; }
+      shopS().products.push({ name:name, price:price, category:b.getAttribute("data-wcat"), tags:"许愿", icon:($("wIcon").value || "🎀").trim(), desc:($("wDesc").value || "你许愿的商品").trim() });
+      saveCfg();
+      hideSheet();
+      shopTab = b.getAttribute("data-wcat"); shopSub = "全部"; renderShop();
+      toast("许愿成功，已经在商城里啦 ♡");
+    };
+  });
+}
+function openShopProduct(pid){
+  var p = shopFind(pid);
+  if(!p) return;
+  shopDetail = { p:p, qty:1, specs:(p.specs || []).map(function(s){ return s.options[0]; }) };
+  drawShopDetail();
+}
+function drawShopDetail(){
+  var d = shopDetail;
+  if(!d) return;
+  var p = d.p;
+  var specsHtml = (p.specs || []).map(function(s, si){
+    return '<div class="sd-spec"><div class="tt">' + esc(s.name) + '</div><div class="sd-opts">' +
+      s.options.map(function(o, oi){ return '<button class="sd-opt' + (d.specs[si] === o ? " on" : "") + '" data-spec="' + si + '" data-opt="' + oi + '">' + esc(o) + '</button>'; }).join("") +
+      '</div></div>';
+  }).join("");
+  showSheet(
+    '<div class="sd"><div class="sd-top"><div class="sd-ico">' + shopThumb(p) + '</div><div class="sd-t"><b>' + esc(p.name) + '</b><span>' + esc(p.desc || "") + '</span><i>¥' + p.price + '</i></div></div>' +
+    specsHtml +
+    '<div class="sd-line">数量<button data-qd="-1">−</button><b id="sdQty">' + d.qty + '</b><button data-qd="1">+</button><span style="margin-left:auto;font-size:11px">小计 <b id="sdSub" style="color:#E8698F">¥' + (p.price * d.qty) + '</b></span></div>' +
+    '<input class="sd-remark" id="sdRemark" maxlength="60" placeholder="备注：想对 TA 说的话（可不填）">' +
+    '<div class="sd-btns">' +
+      '<button class="main" data-buy="ta">🎁 买给 TA</button>' +
+      '<button data-buy="self">自己买</button>' +
+      '<button data-buy="cart">加入购物车</button>' +
+      '<button data-buy="book">预订送达</button>' +
+      '<button data-buy="share">分享到聊天</button>' +
+      '<button data-buy="askpay">让 TA 帮我买</button>' +
+    '</div></div>'
+  );
+  sheetBody.querySelectorAll("[data-qd]").forEach(function(b){
+    b.onclick = function(){
+      d.qty = Math.max(1, Math.min(99, d.qty + Number(b.getAttribute("data-qd"))));
+      $("sdQty").textContent = d.qty;
+      $("sdSub").textContent = "¥" + (p.price * d.qty);
+    };
+  });
+  sheetBody.querySelectorAll("[data-spec]").forEach(function(b){
+    b.onclick = function(){
+      var si = Number(b.getAttribute("data-spec"));
+      d.specs[si] = p.specs[si].options[Number(b.getAttribute("data-opt"))];
+      sheetBody.querySelectorAll('[data-spec="' + si + '"]').forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on");
+    };
+  });
+  sheetBody.querySelectorAll("[data-buy]").forEach(function(b){
+    b.onclick = function(){
+      var r = $("sdRemark");
+      doShopBuy(b.getAttribute("data-buy"), r ? r.value.trim() : "");
+    };
+  });
+}
+function doShopBuy(target, remark){
+  var d = shopDetail;
+  if(!d) return;
+  var p = d.p, qty = d.qty, specs = d.specs.slice(), total = p.price * qty;
+  var s = shopS();
+  if(target === "cart"){
+    s.cart.push({ pid:p.id, name:p.name, price:p.price, icon:p.icon, img:p.img || "", qty:qty, specs:specs, remark:remark || "", selected:true });
+    saveCfg(); hideSheet(); toast("已加入购物车 ♡"); renderShop(); return;
+  }
+  if(target === "share"){
+    shopSendCard(p, "好物分享", "#ff8fa8", "me");
+    hideSheet(); toast("已分享到聊天 ♡"); shopTaReply(); return;
+  }
+  if(target === "askpay"){
+    shopSendCard(p, "💝 求代付", "#ff9a56", "me", total, "帮我买这个好不好~");
+    hideSheet(); toast("已经去问 TA 啦 ♡");
+    setTimeout(function(){
+      hideTyping();
+      pushMsg({ who:"them", type:"text", text:randomShopReply(), t:Date.now() });
+      setTimeout(function(){ shopSendCard(p, "已代付", "#ff9a56", "them", total); }, 900);
+    }, 1500 + Math.random() * 2000);
+    return;
+  }
+  if(getCoins() < total){ toast("余额不够啦，点右上角余额设置一下 ♡"); return; }
+  cfg.coins = getCoins() - total;
+  if(target === "book"){
+    var ask = prompt("多少分钟后送达？（默认 5 分钟）", "5");
+    if(ask === null){ cfg.coins = getCoins() + total; saveCfg(); return; }
+    var mins = parseInt(ask, 10);
+    if(!mins || mins < 1) mins = 5;
+    var bo = { id:"B" + uid(), name:p.name, price:p.price, qty:qty, icon:p.icon, img:p.img || "", specs:specs.join(" | "), remark:remark || "", target:"ta", status:"pending", time:Date.now(), deliverAt:Date.now() + mins * 60000 };
+    s.orders.unshift(bo);
+    saveCfg(); hideSheet(); renderShop();
+    toast("已预订，" + mins + " 分钟后送达 ♡");
+    setTimeout(function(){
+      var cur = s.orders.filter(function(o){ return o.id === bo.id; })[0];
+      if(!cur || cur.status !== "pending") return;
+      cur.status = "completed";
+      s.cabinet.unshift({ orderId:bo.id, name:p.name, icon:p.icon, img:p.img || "", price:p.price, qty:qty, specs:specs.join(" | "), remark:remark || "", time:Date.now(), replies:shopGenReplies() });
+      saveCfg();
+      shopSendCard(p, "已送达", "#ff9aa8", "them");
+      shopTaReply(600);
+      if(shopOpen) renderShop();
+      toast("预订的礼物送到啦 ♡");
+    }, mins * 60000);
+    return;
+  }
+  if(target === "ta"){
+    var o = { id:"O" + uid(), name:p.name, price:p.price, qty:qty, icon:p.icon, img:p.img || "", specs:specs.join(" | "), remark:remark || "", target:"ta", status:"completed", time:Date.now() };
+    s.orders.unshift(o);
+    s.cabinet.unshift({ orderId:o.id, name:p.name, icon:p.icon, img:p.img || "", price:p.price, qty:qty, specs:specs.join(" | "), remark:remark || "", time:Date.now(), replies:shopGenReplies() });
+    saveCfg(); hideSheet(); renderShop();
+    shopSendCard(p, "已送达", "#ff9aa8", "me");
+    toast("礼物已经送到 TA 手里啦 ♡");
+    shopTaReply(1400);
+    return;
+  }
+  var o2 = { id:"O" + uid(), name:p.name, price:p.price, qty:qty, icon:p.icon, img:p.img || "", specs:specs.join(" | "), remark:remark || "", target:"self", status:"completed", time:Date.now() };
+  s.orders.unshift(o2);
+  s.myCabinet.unshift({ name:p.name, icon:p.icon, img:p.img || "", price:p.price, qty:qty, source:"购买", orderId:o2.id, time:Date.now() });
+  saveCfg(); hideSheet(); renderShop();
+  toast("购买成功 ♡");
+}
+
+/* 触发条件：购物车里 30% 概率被 TA 自动下单（10~60 秒轮询） */
+function shopAutoLoop(){
+  if(!shopAutoStarted) return;
+  setTimeout(function(){
+    try{ shopAutoBuy(); }catch(e){}
+    shopAutoLoop();
+  }, 10000 + Math.random() * 50000);
+}
+function shopAutoBuy(){
+  var s = shopS();
+  if(!s.cart.length) return;
+  if(Math.random() > 0.3) return;
+  var idx = Math.floor(Math.random() * s.cart.length);
+  var it = s.cart[idx];
+  var q = Number(it.qty) || 1;
+  var total = it.price * q;
+  if(getCoins() < total) return;
+  cfg.coins = getCoins() - total;
+  var o = { id:"OA" + uid(), name:it.name, price:it.price, qty:q, icon:it.icon, img:it.img || "", specs:(it.specs || []).join(" | "), remark:it.remark || "", target:"self", status:"completed", time:Date.now(), auto:true };
+  s.orders.unshift(o);
+  s.myCabinet.unshift({ name:it.name, icon:it.icon, img:it.img || "", price:it.price, qty:q, source:"自动购买", orderId:o.id, time:Date.now() });
+  s.cart.splice(idx, 1);
+  saveCfg();
+  shopSendCard(it, "已自动下单", "#ff9a56", "them");
+  setTimeout(function(){ pushMsg({ who:"them", type:"text", text:"你的购物车我帮你清了一件，惊喜吗？", t:Date.now() }); }, 1200);
+  if(shopOpen){ renderShop(); }
+}
+setTimeout(shopAutoLoop, 5000);
+
+/* 原来的「礼物商城」入口全部换成新的商城（礼物页签） */
+openGiftShop = function(){ openShop("gifts"); };
 })();
 </script>
 </body>
