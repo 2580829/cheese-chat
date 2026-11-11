@@ -8,7 +8,7 @@
 <script>
 (function(){
   try{
-    var V = "2026.11.15-widget";
+    var V = "2026.11.15-widget2";
     window.APP_VER = V;
     if((location.search || "").indexOf("v=" + V) < 0){
       location.replace(location.pathname + "?v=" + V + (location.hash || ""));
@@ -729,10 +729,15 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
 .conv-row.on{box-shadow:inset 0 0 0 1.5px var(--pink-deep)}
 .conv-av{width:38px;height:38px;border-radius:50%;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#F9B8D0,#FCE4EC 60%,#FFE9D6);font-size:16px;position:relative}
 .conv-av img{width:100%;height:100%;object-fit:cover}
-.conv-av.stack{padding:0}
-.conv-av.stack img{position:absolute;width:26px;height:26px;border-radius:50%;box-shadow:0 0 0 2px #fff}
-.conv-av.stack img:first-child{left:1px;top:2px}
-.conv-av.stack img:last-child{right:1px;bottom:2px}
+.conv-av.stack{overflow:visible;padding:0}
+.conv-av.stack > *{position:absolute;width:26px;height:26px;border-radius:50%;box-shadow:0 0 0 2px #fff;object-fit:cover;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#F9B8D0,#FCE4EC)}
+.conv-av.stack > *:first-child{left:0;top:2px;z-index:2}
+.conv-av.stack > *:last-child{right:0;bottom:2px;z-index:1}
+/* 头部 .avatar 也统一用这个叠加逻辑 */
+.avatar > .conv-av.stack{width:100%;height:100%}
+.avatar > .conv-av.stack > *{width:28px;height:28px}
+.avatar > .conv-av.stack > *:first-child{left:2px;top:4px}
+.avatar > .conv-av.stack > *:last-child{right:2px;bottom:4px}
 .conv-meta{flex:1;min-width:0}
 .conv-meta b{display:block;font-size:13.5px;color:var(--ink);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .conv-meta i{display:block;font-style:normal;font-size:10.5px;color:var(--ink-soft);margin-top:2px}
@@ -1285,10 +1290,8 @@ function convAvatarHtml(){
   var g = activeGroup();
   if(!g) return friendAvatarHtml(friendById(cfg.conv.id) || mainFriend());
   var a = friendById(g.members[0]), b = friendById(g.members[1]);
-  if(a && b && a.avatar && b.avatar){
-    return '<span class="stack"><img src="' + a.avatar + '" alt=""><img src="' + b.avatar + '" alt=""></span>';
-  }
-  return "🫂";
+  var ah = friendAvatarHtml(a), bh = friendAvatarHtml(b);
+  return '<span class="conv-av stack">' + ah + bh + '</span>';
 }
 var chat = load(chatKey(), []);
 var diary = load(KEY.diary, {});
