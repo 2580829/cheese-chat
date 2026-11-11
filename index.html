@@ -8,7 +8,7 @@
 <script>
 (function(){
   try{
-    var V = "2026.11.15-widget2";
+    var V = "2026.11.15-fullfix";
     window.APP_VER = V;
     if((location.search || "").indexOf("v=" + V) < 0){
       location.replace(location.pathname + "?v=" + V + (location.hash || ""));
@@ -336,12 +336,19 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 .storage-warn b{color:#E8698F}
 .storage-warn .x{position:absolute;right:8px;top:6px;border:none;background:transparent;color:#C79AA9;font-size:14px;padding:4px}
 /* ---------- 新消息横条 ---------- */
-.newmsg{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:78;max-width:496px;margin:0 auto;display:flex;align-items:center;gap:9px;padding:8px 15px;border-radius:999px;background:rgba(255,251,248,.97);border:1px solid rgba(247,200,216,.75);box-shadow:0 10px 28px rgba(232,127,164,.24);transform:translateY(-160%);transition:transform .36s cubic-bezier(.34,1.3,.64,1);font-size:12px;color:var(--ink);cursor:pointer}
+.newmsg{position:fixed;left:10px;right:10px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:78;max-width:500px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.98);backdrop-filter:blur(10px);border:1px solid rgba(0,0,0,.06);box-shadow:0 8px 28px rgba(0,0,0,.18);transform:translateY(-160%);transition:transform .38s cubic-bezier(.2,.9,.3,1);font-size:13px;color:#333;cursor:pointer}
 .newmsg.show{transform:translateY(0)}
-.newmsg .nm-av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#F9B8D0,#FFE9D6);display:flex;align-items:center;justify-content:center;font-size:13px;overflow:hidden;flex-shrink:0}
+.newmsg .nm-av{width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#F9B8D0,#FFE9D6);display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.1)}
 .newmsg .nm-av img{width:100%;height:100%;object-fit:cover}
-.newmsg .nm-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.newmsg .nm-go{color:var(--pink-rose);font-weight:600;flex-shrink:0}
+.newmsg .nm-info{flex:1;min-width:0}
+.newmsg .nm-info b{display:block;font-size:12.5px;color:#333;font-weight:600;margin-bottom:2px}
+.newmsg .nm-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#666;font-size:12.5px}
+.newmsg .nm-go{color:#07C160;font-weight:600;flex-shrink:0;font-size:12px}
+/* 微信风格弹窗 toast */
+.toast-msg{position:fixed;top:calc(env(safe-area-inset-top,0px) + 50px);left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(0,0,0,.75);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;z-index:9999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none}
+.toast-msg.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* 礼物弹窗内的分类按钮 */
+.gift-cat{cursor:pointer}
 /* ---------- 红包 ---------- */
 .rp-top{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;letter-spacing:.06em;opacity:.95}
 .rp-status{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10.5px;opacity:.88;margin-top:9px;padding-top:7px;border-top:1px dashed rgba(255,255,255,.45);letter-spacing:.03em}
@@ -1090,7 +1097,10 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
 
 <div class="newmsg" id="newMsgBar">
   <span class="nm-av" id="newMsgAv">🌷</span>
-  <span class="nm-text" id="newMsgText">新消息</span>
+  <div class="nm-info">
+    <b id="newMsgName">念念</b>
+    <span class="nm-text" id="newMsgText">新消息</span>
+  </div>
   <span class="nm-go">查看</span>
 </div>
 
@@ -1241,6 +1251,9 @@ if(cfg.callBgIdx == null) cfg.callBgIdx = 0;
 if(cfg.skinId == null) cfg.skinId = "";
 if(cfg.fontId == null) cfg.fontId = "";
 if(!cfg.mood) cfg.mood = 0;
+/* ---- 金币与自定义礼物 ---- */
+if(cfg.coins == null) cfg.coins = 60;
+if(!cfg.gifts || !Array.isArray(cfg.gifts)) cfg.gifts = [];
 /* ---- 好友与群聊 ---- */
 if(!Array.isArray(cfg.friends)) cfg.friends = [];
 if(!Array.isArray(cfg.groups)) cfg.groups = [];
@@ -1623,13 +1636,35 @@ function showTyping(){
   chatEl.appendChild(typingRow);
   scrollBottom();
   $("statusEl").textContent = "正在输入…";
+  /* 跨页面：非聊天页也弹打字通知 */
+  if(!isChatVisible()){
+    showTypingNotify(tmid);
+  }
 }
 function hideTyping(){
   if(typingRow && typingRow.parentNode) typingRow.parentNode.removeChild(typingRow);
   typingRow = null;
+  hideTypingNotify();
   if($("statusEl")){
     var hg = activeGroup();
     $("statusEl").textContent = hg ? (hg.members.length + " 位好友 · 群聊") : (cfg.status || "在你身边");
+  }
+}
+/* 跨页面打字通知 */
+var _typingNotifyT = null;
+function showTypingNotify(mid){
+  if(!$("newMsgBar")) return;
+  $("newMsgAv").innerHTML = avatarHtml("them", mid);
+  $("newMsgName").textContent = senderName(mid);
+  $("newMsgText").textContent = "正在输入…";
+  $("newMsgBar").classList.add("show");
+  clearTimeout(_typingNotifyT);
+}
+function hideTypingNotify(){
+  if(!$("newMsgBar")) return;
+  var t = $("newMsgText").textContent;
+  if(t && t.indexOf("正在输入") >= 0){
+    $("newMsgBar").classList.remove("show");
   }
 }
 /* 新消息横条 */
@@ -1662,8 +1697,9 @@ function isChatVisible(){
 function notifyNewMsg(m){
   if(isChatVisible()) return;
   $("newMsgAv").innerHTML = avatarHtml("them", m.mid);
-  var txt = m.type === "text" ? m.text : m.type === "sticker" ? "[表情包]" : m.type === "img" ? "[图片]" : m.type === "voice" ? "[语音] " + (m.dur || 1) + "″" : m.type === "redpacket" ? "[红包] ¥" + (m.amount || "") : "新消息";
-  $("newMsgText").textContent = senderName(m.mid) + "：" + txt;
+  $("newMsgName").textContent = senderName(m.mid);
+  var txt = m.type === "text" ? m.text : m.type === "sticker" ? "[表情包]" : m.type === "img" ? "[图片]" : m.type === "voice" ? "[语音] " + (m.dur || 1) + "″" : m.type === "redpacket" ? "[红包] ¥" + (m.amount || "") : m.type === "gift" ? "[礼物] " + (m.giftName || "") : "新消息";
+  $("newMsgText").textContent = txt;
   $("newMsgBar").classList.add("show");
   clearTimeout(notifyNewMsg._t);
   notifyNewMsg._t = setTimeout(function(){ $("newMsgBar").classList.remove("show"); }, 5200);
@@ -2828,32 +2864,68 @@ function getCoins(){ cfg.coins = Number(cfg.coins) || 60; return cfg.coins; }
 function addCoins(n){ cfg.coins = getCoins() + n; saveCfg(); }
 function spendCoins(n){ if(getCoins() < n){ toast("金币不够啦 ♡"); return false; } cfg.coins -= n; saveCfg(); return true; }
 
-/* 礼物数据 */
+/* 礼物数据（完全照搬参考站风格 + 扩展） */
 var GIFT_DATA = [
-  { id:"rose",    cat:"sweet",   emoji:"🌹", name:"一朵玫瑰", price:3 },
-  { id:"cake",    cat:"sweet",   emoji:"🎂", name:"小蛋糕",   price:8 },
-  { id:"heart",   cat:"sweet",   emoji:"💗", name:"爱心",     price:2 },
-  { id:"teddy",   cat:"sweet",   emoji:"🧸", name:"抱抱熊",   price:12 },
-  { id:"box",     cat:"luxury",  emoji:"🎁", name:"神秘礼盒", price:28 },
-  { id:"diamond", cat:"luxury",  emoji:"💎", name:"小钻石",   price:66 },
-  { id:"ring",    cat:"luxury",  emoji:"💍", name:"心动戒指", price:99 },
-  { id:"cup",     cat:"luxury",  emoji:"🏆", name:"专属奖杯", price:52 },
-  { id:"coffee",  cat:"daily",   emoji:"☕", name:"一杯咖啡", price:5 },
-  { id:"icecream",cat:"daily",   emoji:"🍦", name:"冰淇淋",   price:4 },
-  { id:"flower",  cat:"daily",   emoji:"🌷", name:"郁金香",   price:6 },
-  { id:"stars",   cat:"daily",   emoji:"🌟", name:"星光",     price:10 },
-  { id:"heart2",  cat:"love",    emoji:"💝", name:"爱心盒",   price:18 },
-  { id:"moon",    cat:"love",    emoji:"🌙", name:"月亮",     price:25 }
+  /* 小甜 */
+  { id:"rose",    cat:"sweet",   emoji:"🌹", name:"一朵玫瑰",  price:3  },
+  { id:"2rose",   cat:"sweet",   emoji:"🌹🌹", name:"两朵玫瑰", price:5 },
+  { id:"cake",    cat:"sweet",   emoji:"🎂", name:"小蛋糕",    price:8  },
+  { id:"cupcake", cat:"sweet",   emoji:"🧁", name:"纸杯蛋糕",  price:6  },
+  { id:"heart",   cat:"sweet",   emoji:"💗", name:"爱心",      price:2  },
+  { id:"heart2",  cat:"sweet",   emoji:"💖", name:"闪亮爱心",  price:5  },
+  { id:"teddy",   cat:"sweet",   emoji:"🧸", name:"抱抱熊",    price:12 },
+  { id:"candy",   cat:"sweet",   emoji:"🍬", name:"糖果",      price:3  },
+  { id:"lollipop",cat:"sweet",   emoji:"🍭", name:"棒棒糖",    price:2  },
+  { id:"strawb",  cat:"sweet",   emoji:"🍓", name:"草莓",      price:4  },
+  { id:"donut",   cat:"sweet",   emoji:"🍩", name:"甜甜圈",    price:5  },
+  { id:"choco",   cat:"sweet",   emoji:"🍫", name:"巧克力",    price:7  },
+  /* 日常 */
+  { id:"coffee",  cat:"daily",   emoji:"☕", name:"一杯咖啡",  price:5  },
+  { id:"icecream",cat:"daily",   emoji:"🍦", name:"冰淇淋",    price:4  },
+  { id:"flower",  cat:"daily",   emoji:"🌷", name:"郁金香",    price:6  },
+  { id:"tulip2",  cat:"daily",   emoji:"🌸", name:"樱花",      price:5  },
+  { id:"sunflower",cat:"daily", emoji:"🌻", name:"向日葵",    price:7  },
+  { id:"stars",   cat:"daily",   emoji:"🌟", name:"星光",      price:10 },
+  { id:"star",    cat:"daily",   emoji:"⭐", name:"小星星",    price:3  },
+  { id:"coffee2", cat:"daily",   emoji:"🍵", name:"一杯茶",    price:4  },
+  { id:"apple",   cat:"daily",   emoji:"🍎", name:"苹果",      price:3  },
+  { id:"lemon",   cat:"daily",   emoji:"🍋", name:"柠檬",      price:3  },
+  /* 心动 */
+  { id:"heartbox",cat:"love",    emoji:"💝", name:"爱心盒",    price:18 },
+  { id:"moon",    cat:"love",    emoji:"🌙", name:"月亮",      price:25 },
+  { id:"sun",     cat:"love",    emoji:"☀️", name:"太阳",      price:22 },
+  { id:"rainbow", cat:"love",    emoji:"🌈", name:"彩虹",      price:35 },
+  { id:"unicorn", cat:"love",    emoji:"🦄", name:"独角兽",    price:30 },
+  { id:"kiss",    cat:"love",    emoji:"💋", name:"亲亲",      price:15 },
+  { id:"rosebunch",cat:"love",   emoji:"💐", name:"花束",      price:40 },
+  { id:"music",   cat:"love",    emoji:"🎵", name:"一首小情歌", price:12 },
+  { id:"letter",  cat:"love",    emoji:"💌", name:"情书",      price:10 },
+  /* 奢礼 */
+  { id:"box",     cat:"luxury",  emoji:"🎁", name:"神秘礼盒",  price:28 },
+  { id:"diamond", cat:"luxury",  emoji:"💎", name:"小钻石",    price:66 },
+  { id:"ring",    cat:"luxury",  emoji:"💍", name:"心动戒指",  price:99 },
+  { id:"cup",     cat:"luxury",  emoji:"🏆", name:"专属奖杯",  price:52 },
+  { id:"crown",   cat:"luxury",  emoji:"👑", name:"皇冠",      price:88 },
+  { id:"sparkles",cat:"luxury",  emoji:"✨", name:"闪耀",      price:45 },
+  { id:"car",     cat:"luxury",  emoji:"🚗", name:"跑车",      price:188 },
+  { id:"airplane",cat:"luxury",  emoji:"✈️", name:"飞机",      price:128 },
+  { id:"house",   cat:"luxury",  emoji:"🏠", name:"小房子",    price:266 },
+  { id:"balloon", cat:"luxury",  emoji:"🎈", name:"热气球",    price:58 },
+  { id:"shopping",cat:"luxury",  emoji:"🛍️", name:"购物袋",    price:32 },
+  { id:"camera",  cat:"luxury",  emoji:"📷", name:"相机",      price:78 }
 ];
 var GIFT_CATS = [
-  { id:"all",   name:"全部" },
-  { id:"sweet", name:"小甜" },
-  { id:"daily", name:"日常" },
-  { id:"love",  name:"心动" },
-  { id:"luxury",name:"奢礼" }
+  { id:"all",   name:"全部", emoji:"🎁" },
+  { id:"sweet", name:"小甜", emoji:"🍰" },
+  { id:"daily", name:"日常", emoji:"🌷" },
+  { id:"love",  name:"心动", emoji:"💗" },
+  { id:"luxury",name:"奢礼", emoji:"💎" },
+  { id:"custom",name:"自定义",emoji:"➕" }
 ];
 var GIFT_CUR_CAT = "all";
 var GIFT_SEL = null;
+var GIFT_CUSTOM_PRICE = null;
+var GIFT_COUNT = 1;
 
 /* 挂件栏逻辑 */
 function setupHomeWidgets(){
@@ -2899,55 +2971,137 @@ function runHmAct(act){
   else if(act === "say") toast(PATS[Math.floor(Math.random()*PATS.length)]);
 }
 
-/* 礼物商店弹窗 */
+/* 礼物商店弹窗（完整版） */
 function openGiftShop(){
   GIFT_CUR_CAT = "all"; GIFT_SEL = null;
+  GIFT_CUSTOM_PRICE = null; GIFT_COUNT = 1;
   showSheet(
     '<div class="sheet-title">🎁 礼物商城</div>' +
-    '<p class="hint">余额 🪙 <b id="giftBal">0</b></p>' +
-    '<div id="giftCats" style="display:flex;gap:6px;padding:8px 0;overflow-x:auto"></div>' +
-    '<div id="giftGrid" style="max-height:50vh;overflow-y:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:6px 0 16px"></div>' +
-    '<div id="giftSelBar" style="display:none;padding-top:10px;border-top:1px solid rgba(232,127,164,.15);display:flex;align-items:center;gap:10px">' +
-    '<span id="giftSelInfo" style="font-size:13px;color:#8B4A5D;flex:1"></span>' +
-    '<button class="primary" id="giftSendBtn" style="margin:0">送 ♡</button></div>'
+    '<div style="display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,#FFE3F0,#FFF0E4);border-radius:14px;padding:10px 14px;margin:4px 0">' +
+    '<span style="font-size:22px">🪙</span>' +
+    '<div style="flex:1"><div style="font-size:11px;color:#A07785">我的余额</div><div id="giftBal" style="font-size:18px;font-weight:700;color:#E87FA4">0</div></div>' +
+    '<button class="ghost-btn" id="giftTopUp" style="margin:0;padding:4px 10px;font-size:11px">+10</button></div>' +
+    '<div id="giftCats" style="display:flex;gap:6px;padding:8px 0;overflow-x:auto;-webkit-overflow-scrolling:touch"></div>' +
+    '<div id="giftGrid" style="max-height:46vh;overflow-y:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:4px 0 12px"></div>' +
+    '<div id="giftCustomBar" style="display:none;padding:10px;background:rgba(255,243,247,.8);border-radius:12px;margin:4px 0">' +
+      '<div style="font-size:12px;color:#A07785;margin-bottom:6px">自定义价格（金币）</div>' +
+      '<div style="display:flex;gap:6px;align-items:center">' +
+        '<input type="number" id="giftCustomPrice" min="1" max="9999" value="10" style="flex:1;padding:8px 10px;border:1px solid rgba(232,127,164,.25);border-radius:10px;font-size:14px;background:#fff">' +
+        '<button class="ghost-btn" id="giftCustomOk" style="margin:0;padding:8px 12px">确定</button>' +
+      '</div>' +
+    '</div>' +
+    '<div id="giftSelBar" style="display:none;padding-top:10px;border-top:1px solid rgba(232,127,164,.15)">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">' +
+        '<span id="giftSelPreview" style="font-size:32px;line-height:1">🎁</span>' +
+        '<div id="giftSelInfo" style="font-size:13px;color:#8B4A5D;flex:1"></div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">' +
+        '<span style="font-size:11px;color:#A07785">数量</span>' +
+        '<button class="ghost-btn" id="giftCountMinus" style="margin:0;padding:4px 10px;min-width:auto">−</button>' +
+        '<span id="giftCountVal" style="font-size:13px;font-weight:600;color:#E87FA4;min-width:24px;text-align:center">1</span>' +
+        '<button class="ghost-btn" id="giftCountPlus" style="margin:0;padding:4px 10px;min-width:auto">+</button>' +
+        '<span style="font-size:11px;color:#A07785;margin-left:auto">共 🪙<b id="giftTotal">0</b></span>' +
+      '</div>' +
+      '<button class="primary" id="giftSendBtn" style="width:100%;margin:0">送出礼物 ♡</button>' +
+    '</div>'
   );
   renderGiftShop();
+  $("giftTopUp").onclick = function(){
+    addCoins(10);
+    renderGiftShop();
+    toast("签到 +10 🪙");
+  };
 }
 function renderGiftShop(){
   $("giftBal").textContent = getCoins();
   /* 分类 */
   $("giftCats").innerHTML = GIFT_CATS.map(function(c){
-    return '<button type="button" class="gift-cat' + (c.id === GIFT_CUR_CAT ? " on" : "") + '" data-gc="' + c.id + '" style="padding:6px 14px;border-radius:999px;border:1px solid rgba(232,127,164,.25);background:#fff;font-size:11px;color:#A07785;white-space:nowrap">' + c.name + '</button>';
+    var on = c.id === GIFT_CUR_CAT;
+    return '<button type="button" class="gift-cat' + (on ? " on" : "") + '" data-gc="' + c.id + '" style="padding:6px 12px;border-radius:999px;border:1px solid ' + (on ? "#E87FA4" : "rgba(232,127,164,.25)") + ';background:' + (on ? "linear-gradient(135deg,#FFE3F0,#FFF0E4)" : "#fff") + ';font-size:11px;color:' + (on ? "#8B4A5D" : "#A07785") + ';white-space:nowrap;font-weight:' + (on ? "600" : "400") + '">' + c.emoji + " " + c.name + '</button>';
   }).join("");
   $("giftCats").querySelectorAll("[data-gc]").forEach(function(b){
-    b.onclick = function(){ GIFT_CUR_CAT = b.getAttribute("data-gc"); GIFT_SEL = null; renderGiftShop(); };
-  });
-  /* 列表 */
-  var list = GIFT_CUR_CAT === "all" ? GIFT_DATA : GIFT_DATA.filter(function(g){ return g.cat === GIFT_CUR_CAT; });
-  $("giftGrid").innerHTML = list.map(function(g){
-    var on = GIFT_SEL && GIFT_SEL.id === g.id;
-    return '<div data-gift="' + g.id + '" style="padding:12px 6px;border-radius:14px;background:' + (on ? "linear-gradient(135deg,#FFE3F0,#FFF0E4);border:1px solid #E87FA4" : "#fff;border:1px solid rgba(247,200,216,.3)") + ';display:flex;flex-direction:column;align-items:center;gap:5px;box-shadow:0 3px 10px rgba(232,127,164,.1);cursor:pointer">' +
-      '<span style="font-size:34px;line-height:1">' + g.emoji + '</span>' +
-      '<span style="font-size:11px;color:#8B4A5D;font-weight:600">' + g.name + '</span>' +
-      '<span style="font-size:10px;color:#E87FA4">🪙 ' + g.price + '</span></div>';
-  }).join("");
-  $("giftGrid").querySelectorAll("[data-gift]").forEach(function(b){
     b.onclick = function(){
-      GIFT_SEL = GIFT_DATA.find(function(g){ return g.id === b.getAttribute("data-gift"); });
+      GIFT_CUR_CAT = b.getAttribute("data-gc");
+      GIFT_SEL = null; GIFT_CUSTOM_PRICE = null; GIFT_COUNT = 1;
       renderGiftShop();
     };
   });
-  /* 底部栏 */
+  /* 自定义栏显示 */
+  if(GIFT_CUR_CAT === "custom"){
+    $("giftCustomBar").style.display = "block";
+  }else{
+    $("giftCustomBar").style.display = "none";
+  }
+  /* 列表 */
+  var list = [];
+  if(GIFT_CUR_CAT === "custom"){
+    list = (cfg.gifts || []).map(function(g, i){
+      return { id:"u"+i, cat:"custom", emoji:g.emoji, name:g.name, price:g.price || 10 };
+    });
+    if(list.length === 0){
+      $("giftGrid").innerHTML = '<p class="hint" style="grid-column:1/-1;text-align:center;padding:20px 0">还没有自定义礼物，选好 emoji 和名字添加吧 ♡</p>';
+    }
+  }else{
+    list = GIFT_CUR_CAT === "all" ? GIFT_DATA : GIFT_DATA.filter(function(g){ return g.cat === GIFT_CUR_CAT; });
+  }
+  if(list.length > 0){
+    $("giftGrid").innerHTML = list.map(function(g){
+      var on = GIFT_SEL && GIFT_SEL.id === g.id && !GIFT_CUSTOM_PRICE;
+      return '<div data-gift="' + g.id + '" style="padding:12px 6px;border-radius:14px;background:' + (on ? "linear-gradient(135deg,#FFE3F0,#FFF0E4);border:1.5px solid #E87FA4" : "#fff;border:1px solid rgba(247,200,216,.3)") + ';display:flex;flex-direction:column;align-items:center;gap:5px;box-shadow:0 3px 10px rgba(232,127,164,.08);cursor:pointer;transition:transform .12s">' +
+        '<span style="font-size:32px;line-height:1">' + g.emoji + '</span>' +
+        '<span style="font-size:11px;color:#8B4A5D;font-weight:600">' + g.name + '</span>' +
+        '<span style="font-size:10px;color:#E87FA4">🪙 ' + g.price + '</span></div>';
+    }).join("");
+    $("giftGrid").querySelectorAll("[data-gift]").forEach(function(b){
+      b.onclick = function(){
+        var gid = b.getAttribute("data-gift");
+        if(GIFT_CUR_CAT === "custom"){
+          var idx = Number(gid.substring(1));
+          var c = cfg.gifts[idx];
+          GIFT_SEL = { id:"c"+idx, emoji:c.emoji, name:c.name, price:c.price };
+        }else{
+          GIFT_SEL = GIFT_DATA.find(function(g){ return g.id === gid; });
+        }
+        GIFT_CUSTOM_PRICE = null; GIFT_COUNT = 1;
+        renderGiftShop();
+      };
+    });
+  }
+  /* 自定义价格按钮 */
+  if(GIFT_CUR_CAT === "custom" && $("giftCustomOk")){
+    $("giftCustomOk").onclick = function(){
+      var emoji = prompt("选个 emoji（直接粘贴或用文字描述）：", "🎁");
+      if(!emoji) return;
+      var name = prompt("礼物名字：", "我最喜欢的礼物");
+      if(!name) return;
+      var price = Number($("giftCustomPrice").value) || 10;
+      cfg.gifts = cfg.gifts || [];
+      cfg.gifts.push({ emoji:emoji, name:name, price:price });
+      saveCfg();
+      toast("礼物已添加 ♡");
+      renderGiftShop();
+    };
+  }
+  /* 选中栏 */
   var bar = $("giftSelBar");
+  var total = 0;
   if(GIFT_SEL){
-    bar.style.display = "flex";
-    $("giftSelInfo").textContent = "已选：" + GIFT_SEL.emoji + " " + GIFT_SEL.name + " · 🪙" + GIFT_SEL.price;
+    total = (GIFT_CUSTOM_PRICE || GIFT_SEL.price) * GIFT_COUNT;
+    bar.style.display = "block";
+    $("giftSelPreview").textContent = GIFT_SEL.emoji;
+    $("giftSelInfo").innerHTML = '<b>' + esc(GIFT_SEL.name) + '</b>' +
+      (GIFT_CUSTOM_PRICE ? '<br><span style="font-size:11px;color:#E87FA4">自定义价格</span>' : '<br><span style="font-size:11px;color:#A07785">单价 🪙' + GIFT_SEL.price + '</span>');
+    $("giftCountVal").textContent = GIFT_COUNT;
+    $("giftTotal").textContent = total;
+    /* 数量按钮 */
+    $("giftCountMinus").onclick = function(){ if(GIFT_COUNT > 1){ GIFT_COUNT--; renderGiftShop(); } };
+    $("giftCountPlus").onclick = function(){ if(GIFT_COUNT < 99){ GIFT_COUNT++; renderGiftShop(); } };
+    /* 发送按钮 */
     $("giftSendBtn").onclick = function(){
-      if(!GIFT_SEL) return;
-      if(!spendCoins(GIFT_SEL.price)) return;
-      sendGiftMsg(GIFT_SEL);
+      if(!spendCoins(total)) return;
+      sendGiftMsg(GIFT_SEL, GIFT_CUSTOM_PRICE, GIFT_COUNT);
       fireworksFx();
-      GIFT_SEL = null;
+      GIFT_SEL = null; GIFT_CUSTOM_PRICE = null; GIFT_COUNT = 1;
       hideSheet();
       toast("礼物已送出 ♡");
     };
@@ -2955,22 +3109,26 @@ function renderGiftShop(){
     bar.style.display = "none";
   }
 }
-function sendGiftMsg(g){
+function sendGiftMsg(g, customPrice, count){
+  var price = customPrice || g.price;
+  /* 单份或批量：都发成一条礼物消息，但数量体现在 name 里 */
+  var finalName = count > 1 ? g.name + " ×" + count : g.name;
+  var finalPrice = price * count;
   pushMsg({
     id: uid(), who:"me", type:"gift",
-    giftId: g.id, giftEmoji: g.emoji, giftName: g.name, giftPrice: g.price,
+    giftId: g.id, giftEmoji: g.emoji, giftName: finalName, giftPrice: finalPrice,
     t: Date.now()
   });
   saveChat();
   setTimeout(function(){
     pushMsg({
       id: uid(), who:"them", mid: randMember(), type:"gift",
-      giftId: g.id, giftEmoji: g.emoji, giftName: g.name, giftPrice: g.price,
+      giftId: g.id, giftEmoji: g.emoji, giftName: finalName, giftPrice: finalPrice,
       t: Date.now()
     });
     saveChat(); renderAll();
     fireworksFx();
-  }, 800 + Math.random() * 600);
+  }, 900 + Math.random() * 700);
 }
 function fireworksFx(){
   var fx = document.createElement("div");
