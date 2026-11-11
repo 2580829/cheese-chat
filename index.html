@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.11-poke4";
+  var V = "2026.11.11-poke5";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -1228,7 +1228,7 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
         <p class="hint" id="storageInfo">已用存储：统计中…</p>
         <p class="hint" id="verInfo"></p>
         <button class="ghost-btn" id="checkUpdateBtn">检查更新</button>
-        <p class="hint">所有数据只保存在你自己的浏览器里。<br>换网址或换浏览器，数据不会互通，可先用「导出备份」迁移。</p>
+        <p class="hint">设置会自动保存在本机，更新版本不会清空；<br>浏览器清理站点数据时才会丢失，可先用「导出备份」留底。</p>
       </div>
     </section>
 
@@ -1477,7 +1477,9 @@ function save(k, v){
 }
 /* 设置保存：空间不足时优先保住名字/字卡，清理最旧的表情包 */
 function saveCfg(){
-  if(rawSave(KEY.cfg, cfg)) return true;
+  var ok = rawSave(KEY.cfg, cfg);
+  if(ok) rawSave("cheese.cfg.snap", settingsSnapshot());
+  if(ok) return true;
   var pruned = false;
   while(cfg.stickers.length > 0 && !rawSave(KEY.cfg, cfg)){
     cfg.stickers.pop();
@@ -1487,20 +1489,62 @@ function saveCfg(){
     cfg.taAvatar = "";
     pruned = true;
   }
-  var ok = rawSave(KEY.cfg, cfg);
+  var ok2 = rawSave(KEY.cfg, cfg);
+  if(ok2) rawSave("cheese.cfg.snap", settingsSnapshot());
   if(pruned){
     toast("空间不足，已清理部分表情包，字卡和名字已保住");
     if($("stkGridPage")) renderStkPage();
     updateStkCount();
-  }else if(!ok){
+  }else if(!ok2){
     toast("保存失败：浏览器存储空间不足，建议先导出备份");
   }
-  return ok;
+  return ok2;
+}
+/* 轻量设置快照：只存文字/数值类设置，不含图片，更新或清缓存后可回填 */
+function settingsSnapshot(){
+  var keep = ["name","myName","status","replyDelay","minReplies","maxReplies","startDate","taOffset",
+    "bubble","bubbleShape","callSize","callBgIdx","skinId","fontId","mood","coins","themePreset",
+    "replyChance","stickerChance","callPickChance","textChance","voiceChance","giftAskChance",
+    "proactiveOn","proactiveInterval","proactiveChance","quoteChance","partnerRpChance",
+    "proactiveCallChance","partnerPokeChance","jealousy","petName","pokes","pokeSymMe","pokeSymTa",
+    "pokeSymMeCustom","pokeSymTaCustom","spiritSeeded","conv","friends","groups"];
+  var o = {};
+  for(var i = 0; i < keep.length; i++){
+    var k = keep[i];
+    if(k === "friends"){
+      if(Array.isArray(cfg.friends)) o[k] = cfg.friends.map(function(f){ return { id:f.id, name:f.name, note:f.note || "" }; });
+      continue;
+    }
+    if(k === "groups"){
+      if(Array.isArray(cfg.groups)) o[k] = cfg.groups.map(function(g){ return { id:g.id, name:g.name, members:(g.members || []).slice() }; });
+      continue;
+    }
+    if(k === "conv"){
+      if(cfg.conv && cfg.conv.id) o[k] = { t:cfg.conv.t, id:cfg.conv.id };
+      continue;
+    }
+    if(cfg[k] === undefined || cfg[k] === null) continue;
+    o[k] = cfg[k];
+  }
+  return o;
 }
 
 var lib   = load(KEY.lib, null) || clone(DEFAULT_LIB);
-var cfg   = load(KEY.cfg, null) || load("cheese_cfg_bak", null) ||
+var savedCfg = load(KEY.cfg, null) || load("cheese_cfg_bak", null);
+var cfg   = savedCfg ||
             { name:"念念", myName:"我", status:"在你身边，一直都在", replyDelay:2, minReplies:1, maxReplies:2, taAvatar:"", myAvatar:"", favs:[], stickers:[] };
+/* 设置快照：更新版本 / 本地数据被清后，自动把设置补回来 */
+(function restoreSettingsSnapshot(){
+  var snap = load("cheese.cfg.snap", null);
+  if(!snap) return;
+  if(!savedCfg){
+    Object.keys(snap).forEach(function(k){ cfg[k] = snap[k]; });
+    return;
+  }
+  Object.keys(snap).forEach(function(k){
+    if(cfg[k] === undefined || cfg[k] === null) cfg[k] = snap[k];
+  });
+})();
 if(!cfg.favs) cfg.favs = [];
 if(!cfg.stickers) cfg.stickers = [];
 if(!Array.isArray(cfg.stickers)) cfg.stickers = (cfg.stickers.me || []).concat(cfg.stickers.ta || []);
@@ -1521,6 +1565,7 @@ if(!cfg.mood) cfg.mood = 0;
 /* ---- 金币与自定义礼物 ---- */
 if(cfg.coins == null) cfg.coins = 60;
 if(!cfg.gifts || !Array.isArray(cfg.gifts)) cfg.gifts = [];
+if(!cfg.groupAvatars || typeof cfg.groupAvatars !== "object") cfg.groupAvatars = {}; /* 每个群的自定义头像 */
 /* ---- 主题与背景 ---- */
 if(!cfg.chatBg) cfg.chatBg = "";    /* 聊天页背景图 dataURL（全局兜底） */
 if(!cfg.appBg) cfg.appBg = "";      /* 整体背景图 dataURL */
@@ -1611,6 +1656,8 @@ function friendAvatarHtml(f){
 function convAvatarHtml(){
   var g = activeGroup();
   if(!g) return friendAvatarHtml(friendById(cfg.conv.id) || mainFriend());
+  var custom = cfg.groupAvatars && cfg.groupAvatars[g.id];
+  if(custom) return '<span class="conv-av"><img src="' + custom + '" alt=""></span>';
   var a = friendById(g.members[0]), b = friendById(g.members[1]);
   var ah = friendAvatarHtml(a), bh = friendAvatarHtml(b);
   return '<span class="conv-av stack">' + ah + bh + '</span>';
@@ -4712,7 +4759,16 @@ function renderSettings(){
   $("setMax").value = cfg.maxReplies;
   if($("setPetName")) $("setPetName").value = cfg.petName || "";
   if($("setProactiveGap")) $("setProactiveGap").value = cfg.proactiveInterval;
-  if($("taAvPreview")) $("taAvPreview").innerHTML = friendAvatarHtml(mainFriend());
+  if(isGroup()){
+    var gAv = (cfg.groupAvatars || {})[cfg.conv.id];
+    $("taAvBtn").textContent = "群头像";
+    if($("taAvPreview")) $("taAvPreview").innerHTML = gAv ? '<img src="' + gAv + '" alt="">' : "🫂";
+    $("myAvBtn").textContent = "我的头像";
+  }else{
+    $("taAvBtn").textContent = "ta 的头像";
+    if($("taAvPreview")) $("taAvPreview").innerHTML = friendAvatarHtml(mainFriend());
+    $("myAvBtn").textContent = "我的头像";
+  }
   paintAvatar($("myAvPreview"), "me");
   if($("stkCount")) $("stkCount").textContent = cfg.stickers.length;
   renderSpirit();
@@ -4829,9 +4885,12 @@ function openConvSheet(){
     html += convRow("friend", f.id, f.name, f.id === "main" ? "主好友 · 一对一" : "好友 · 一对一", friendAvatarHtml(f), f.id === "main" ? "单聊" : "");
   });
   cfg.groups.forEach(function(g){
-    var av = (friendById(g.members[0]) && friendById(g.members[0]).avatar && friendById(g.members[1]) && friendById(g.members[1]).avatar)
-      ? '<span class="stack"><img src="' + friendById(g.members[0]).avatar + '" alt=""><img src="' + friendById(g.members[1]).avatar + '" alt=""></span>'
-      : "🫂";
+    var customAv = cfg.groupAvatars && cfg.groupAvatars[g.id];
+    var av = customAv
+      ? '<span class="conv-av"><img src="' + customAv + '" alt=""></span>'
+      : ((friendById(g.members[0]) && friendById(g.members[0]).avatar && friendById(g.members[1]) && friendById(g.members[1]).avatar)
+        ? '<span class="stack"><img src="' + friendById(g.members[0]).avatar + '" alt=""><img src="' + friendById(g.members[1]).avatar + '" alt=""></span>'
+        : "🫂");
     html += convRow("group", g.id, g.name, g.members.length + " 人 · " + g.members.map(function(m){ var f = friendById(m); return f ? f.name : ""; }).join("、"), av, "群聊");
   });
   html += '<div style="display:flex;gap:8px;margin-top:12px">' +
@@ -5070,7 +5129,6 @@ $("setMax").addEventListener("change", function(){ saveCfg(); renderSettings(); 
 var avatarTarget = "them";
 $("taAvBtn").onclick = function(){ avatarTarget = "them"; $("avatarInput").click(); };
 $("myAvBtn").onclick = function(){
-  if(isGroup()){ toast("群聊中不能改自己的头像哦 ♡"); return; }
   avatarTarget = "me"; $("avatarInput").click();
 };
 $("avatarInput").onchange = function(e){
@@ -5087,11 +5145,17 @@ $("avatarInput").onchange = function(e){
       var side = Math.min(img.width, img.height);
       ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, s, s);
       var data = cv.toDataURL("image/jpeg", 0.8);
-      if(avatarTarget === "me") cfg.myAvatar = data;
-      else cfg.taAvatar = data;
+      if(avatarTarget === "me"){
+        cfg.myAvatar = data;
+      }else if(isGroup()){
+        /* 群聊：改的是这个群的头像 */
+        cfg.groupAvatars[cfg.conv.id] = data;
+      }else{
+        cfg.taAvatar = data;
+      }
       saveCfg();
       applyCfg(); renderSettings(); renderAll();
-      toast("头像换好啦 ♡");
+      toast(isGroup() && avatarTarget !== "me" ? "群头像换好啦 ♡" : "头像换好啦 ♡");
     };
     img.src = ev.target.result;
   };
