@@ -315,6 +315,16 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 .sheet-grid .ic{width:38px;height:38px;border-radius:14px;background:linear-gradient(135deg,#FFEFF5,#FDE0EA);display:flex;align-items:center;justify-content:center;font-size:19px;line-height:1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.9),0 3px 8px rgba(232,127,164,.12)}
 .sheet-list button{width:100%;border:none;background:rgba(255,255,255,.85);border-radius:14px;padding:14px;font-size:14px;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:10px;box-shadow:0 3px 12px rgba(232,127,164,.08);text-align:left}
 .sheet-list button.danger{color:#E8698F}
+/* 消息长按 popover（微信风格） */
+.msg-pop{position:fixed;z-index:1000;background:rgba(255,255,255,.97);backdrop-filter:blur(10px);border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.15);border:1px solid rgba(0,0,0,.06);padding:6px 0;min-width:160px;animation:popIn .18s ease-out;pointer-events:auto}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.msg-pop button{display:flex;align-items:center;gap:10px;width:100%;border:none;background:transparent;padding:10px 16px;font-size:13px;color:#444;text-align:left;cursor:pointer}
+.msg-pop button:active{background:rgba(0,0,0,.05)}
+.msg-pop button .mp-ic{font-size:16px}
+.msg-pop button.danger{color:#E8698F}
+.msg-pop::before{content:"";position:absolute;width:10px;height:10px;background:rgba(255,255,255,.97);border:1px solid rgba(0,0,0,.06);transform:rotate(45deg)}
+.msg-pop.below::before{top:-6px;left:20px;border-right:none;border-bottom:none}
+.msg-pop.above::before{bottom:-6px;left:20px;border-left:none;border-top:none}
 .emoji-row{display:flex;flex-wrap:wrap;gap:8px}
 .emoji-row button{width:40px;height:40px;border-radius:12px;border:none;background:rgba(255,255,255,.85);font-size:19px;box-shadow:0 2px 8px rgba(232,127,164,.1)}
 .modal{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:28px;background:rgba(107,74,86,.28);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .28s}
@@ -1542,28 +1552,62 @@ function bindLongPress(el){
   el.addEventListener("touchmove", function(){ clearTimeout(timer); });
   el.addEventListener("contextmenu", function(e){ e.preventDefault(); openMsgActions(el.dataset.id); });
 }
+/* 当前 popover 关闭标记 */
+var _msgPopEl = null;
+function closeMsgPop(){ if(_msgPopEl && _msgPopEl.parentNode){ _msgPopEl.parentNode.removeChild(_msgPopEl); } _msgPopEl = null; document.removeEventListener("click", closeMsgPop, true); document.removeEventListener("touchstart", closeMsgPop, true); }
 function openMsgActions(id){
   var m = chat.filter(function(x){ return x.id === id; })[0];
   if(!m || m.sys) return;
-  var html = '<div class="sheet-title">' + (m.type === "img" ? "图片消息" : m.type === "sticker" ? "表情" : "这条消息") + "</div><div class='sheet-list'>";
+  closeMsgPop();
+  var rowEl = chatEl.querySelector('[data-id="' + id + '"]');
+  if(!rowEl) return;
+  var rect = rowEl.getBoundingClientRect();
+  var pop = document.createElement("div");
+  pop.className = "msg-pop";
+  var btns = [];
   if(!m.recalled){
-    html += '<button data-act="quote">💬 引用回复</button>';
-    html += '<button data-act="fav">' + (isFav(m) ? "💗 取消收藏" : "🤍 收藏这句") + "</button>";
+    btns.push({ a:"quote", ic:"💬", t:"引用回复" });
+    btns.push({ a:"fav",   ic: isFav(m) ? "💗" : "🤍", t: isFav(m) ? "取消收藏" : "收藏" });
   }
-  if(m.who === "me" && !m.recalled) html += '<button data-act="recall" class="danger">↩ 撤回</button>';
-  html += '<button data-act="del" class="danger">🗑 删除</button>';
-  html += "</div>";
-  showSheet(html);
-  document.querySelectorAll("#sheetBody [data-act]").forEach(function(btn){
-    btn.onclick = function(){
-      var act = btn.dataset.act;
-      hideSheet();
-      if(act === "quote"){ startQuote(m); }
-      if(act === "fav"){ toggleFav(m); }
-      if(act === "recall"){ recallMsg(m); }
-      if(act === "del"){ deleteMsg(m); }
+  if(m.who === "me" && !m.recalled) btns.push({ a:"recall", ic:"↩", t:"撤回", danger:true });
+  btns.push({ a:"del", ic:"🗑", t:"删除", danger:true });
+  /* 文字消息可以复制 */
+  if(m.type === "text" && m.text) btns.push({ a:"copy", ic:"📋", t:"复制" });
+  pop.innerHTML = btns.map(function(b){
+    return '<button data-act="' + b.a + '"' + (b.danger ? ' class="danger"' : '') + '><span class="mp-ic">' + b.ic + '</span>' + b.t + '</button>';
+  }).join("");
+  document.body.appendChild(pop);
+  /* 定位：尽量放在消息右边，下面放不下就放上面 */
+  var popH = 36 * btns.length + 12;
+  var popW = 170;
+  var isBelow = (rect.bottom + popH + 10) < window.innerHeight;
+  var top = isBelow ? rect.bottom + 8 : rect.top - popH - 8;
+  var left = Math.max(10, Math.min(window.innerWidth - popW - 10, rect.right - popW + 10));
+  pop.style.top = top + "px";
+  pop.style.left = left + "px";
+  pop.className += isBelow ? " below" : " above";
+  _msgPopEl = pop;
+  pop.querySelectorAll("button").forEach(function(btn){
+    btn.onclick = function(e){
+      e.stopPropagation();
+      var act = btn.getAttribute("data-act");
+      closeMsgPop();
+      if(act === "quote") startQuote(m);
+      else if(act === "fav") toggleFav(m);
+      else if(act === "recall") recallMsg(m);
+      else if(act === "del") deleteMsg(m);
+      else if(act === "copy"){
+        var t = m.text || "";
+        if(navigator.clipboard) navigator.clipboard.writeText(t).then(function(){ toast("已复制"); });
+        else toast("复制失败");
+      }
     };
   });
+  /* 点击外面关闭 */
+  setTimeout(function(){
+    document.addEventListener("click", closeMsgPop, true);
+    document.addEventListener("touchstart", closeMsgPop, true);
+  }, 10);
 }
 function startQuote(m){
   quoting = m;
@@ -3791,14 +3835,26 @@ document.querySelectorAll(".tab-item").forEach(function(t){
 })();
 
 /* ================= 字卡库 ================= */
+var libSearchQ = "";  /* 字卡库搜索词 */
+var libCollapsed = {}; /* 分组折叠状态 */
+
 function renderLib(){
   var chips = $("chips");
   chips.innerHTML = "";
   Object.keys(lib).forEach(function(g){
     var c = document.createElement("button");
-    c.className = "chip" + (g === curGroup ? " on" : "");
+    c.className = "chip" + (g === curGroup ? " on" : "") + (libCollapsed[g] ? " folded" : "");
     c.textContent = g + " " + lib[g].length;
-    c.onclick = function(){ curGroup = g; renderLib(); };
+    c.onclick = function(){
+      if(g === curGroup){
+        /* 再点一次：折叠/展开当前组 */
+        libCollapsed[g] = !libCollapsed[g];
+      }else{
+        curGroup = g;
+        libCollapsed[g] = false;
+      }
+      renderLib();
+    };
     chips.appendChild(c);
   });
   var add = document.createElement("button");
@@ -3811,28 +3867,56 @@ function renderLib(){
 
   var list = $("cardList");
   list.innerHTML = "";
-  var arr = lib[curGroup] || [];
-  arr.forEach(function(text, i){
-    var item = document.createElement("div");
-    item.className = "card-item";
-    var p = document.createElement("p");
-    p.textContent = text;
-    var del = document.createElement("button");
-    del.className = "del";
-    del.textContent = "✕";
-    del.onclick = function(){
-      lib[curGroup].splice(i,1);
-      save(KEY.lib, lib);
-      renderLib(); renderStats();
-      toast("已删除");
-    };
-    item.appendChild(p); item.appendChild(del);
-    list.appendChild(item);
+
+  /* 搜索框 */
+  var sr = document.createElement("div");
+  sr.style.cssText = "display:flex;gap:6px;margin-bottom:10px";
+  sr.innerHTML = '<input id="libSearch" placeholder="🔍 搜索字卡…" style="flex:1;padding:8px 12px;border-radius:10px;border:1px solid rgba(232,127,164,.25);font-size:13px;background:#fff">';
+  list.appendChild(sr);
+  var searchInput = $("libSearch");
+  searchInput.value = libSearchQ;
+  searchInput.oninput = function(){ libSearchQ = searchInput.value.trim(); renderLib(); };
+
+  /* 全部分组按搜索过滤 */
+  var totalShown = 0;
+  Object.keys(lib).forEach(function(g){
+    var arr = lib[g] || [];
+    var filtered = libSearchQ ? arr.filter(function(t){ return t.indexOf(libSearchQ) >= 0; }) : arr;
+    /* 折叠逻辑：只有当前组展开（且没有搜索词时折叠也没关系，有搜索时全部展开） */
+    var collapsed = libCollapsed[g] && !libSearchQ && g !== curGroup;
+    var header = document.createElement("div");
+    header.style.cssText = "display:flex;justify-content:space-between;align-items:center;margin:12px 2px 6px;padding-bottom:4px;border-bottom:1px dashed rgba(232,127,164,.15)";
+    header.innerHTML = '<b style="font-size:12.5px;color:#A07785">' + esc(g) + ' · ' + arr.length + ' 张</b>' +
+      (collapsed ? '<span style="font-size:11px;color:#C49BAA">🔽 折叠（点分组展开）</span>' : '');
+    list.appendChild(header);
+    if(collapsed){ totalShown += filtered.length; return; }
+    filtered.forEach(function(text, fi){
+      /* 找原始索引以便删除 */
+      var i = arr.indexOf(text);
+      var item = document.createElement("div");
+      item.className = "card-item";
+      var p = document.createElement("p");
+      p.textContent = text;
+      var del = document.createElement("button");
+      del.className = "del";
+      del.textContent = "✕";
+      del.onclick = function(){
+        lib[g].splice(i,1);
+        save(KEY.lib, lib);
+        renderLib(); renderStats();
+        toast("已删除");
+      };
+      item.appendChild(p); item.appendChild(del);
+      list.appendChild(item);
+      totalShown++;
+    });
   });
-  if(arr.length === 0){
+
+  /* 空结果提示 */
+  if(totalShown === 0){
     var em = document.createElement("p");
     em.className = "hint";
-    em.textContent = "这个分组还空着，写第一张字卡吧 ♡";
+    em.textContent = libSearchQ ? "没有找到包含「" + libSearchQ + "」的字卡" : "分组还空着，写第一张字卡吧 ♡";
     list.appendChild(em);
   }
   renderStats();
@@ -3843,15 +3927,83 @@ function addCard(){
   var inp = $("newCard"), t = inp.value.trim();
   if(!t) return;
   if(!lib[curGroup]) lib[curGroup] = [];
+  /* 去重：同组里已经有的就不加 */
+  if(lib[curGroup].indexOf(t) >= 0){
+    toast("这张已经有啦 ♡");
+    inp.value = "";
+    return;
+  }
   lib[curGroup].push(t);
   save(KEY.lib, lib);
   inp.value = "";
   renderLib();
   toast("字卡已放入 ♡");
 }
+/* 批量/文件导入（自动去重） */
 $("bulkBtn").onclick = function(){
-  openModal("bulkCard", "批量导入字卡", "一行一张，全部加进「" + curGroup + "」分组。", "今天辛苦啦\n抱抱你\n我一直都在");
+  showSheet(
+    '<div class="sheet-title">批量导入字卡</div>' +
+    '<div class="section-label" style="padding-left:0;margin-top:4px">文本批量</div>' +
+    '<textarea id="bulkCardInp" rows="6" placeholder="一行一张字卡..." style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(232,127,164,.25);font-size:13px;background:#fff;resize:vertical">今天辛苦啦\n抱抱你\n我一直都在</textarea>' +
+    '<div style="display:flex;gap:8px;margin-top:10px">' +
+      '<button type="button" class="primary" id="bulkAddBtn" style="flex:1;margin:0">加入「' + esc(curGroup) + '」</button>' +
+    '</div>' +
+    '<div class="section-label" style="padding-left:0;margin-top:14px">📁 从文件导入（.txt / .json）</div>' +
+    '<input type="file" id="libFileInput" accept=".txt,.json" style="width:100%;font-size:12px">'
+  );
+  $("bulkAddBtn").onclick = function(){
+    var txt = $("bulkCardInp").value || "";
+    var arr = txt.split(/\n+/).map(function(s){ return s.trim(); }).filter(Boolean);
+    libBulkAdd(arr);
+  };
+  $("libFileInput").onchange = function(e){
+    var f = e.target.files[0];
+    if(!f) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      var content = ev.target.result;
+      var arr = [];
+      try{
+        /* 尝试 JSON：{"分组": ["卡片1","卡片2"], ...} 或 ["卡片1","卡片2"] */
+        var j = JSON.parse(content);
+        if(Array.isArray(j)) arr = j.map(function(s){ return String(s).trim(); }).filter(Boolean);
+        else if(typeof j === "object" && j){
+          Object.keys(j).forEach(function(g){
+            if(Array.isArray(j[g])){
+              if(!lib[g]) lib[g] = [];
+              var added = 0;
+              j[g].forEach(function(t){
+                var tv = String(t).trim();
+                if(tv && lib[g].indexOf(tv) < 0){ lib[g].push(tv); added++; }
+              });
+              if(added) toast("「" + g + "」加了 " + added + " 张");
+            }
+          });
+        }
+      }catch(err){
+        /* 不是 JSON：按 TXT 一行一张 */
+        arr = content.split(/\n+/).map(function(s){ return s.trim(); }).filter(Boolean);
+      }
+      if(arr.length > 0) libBulkAdd(arr);
+      save(KEY.lib, lib);
+      renderLib(); renderStats();
+      toast("导入完成");
+      hideSheet();
+    };
+    reader.readAsText(f);
+  };
 };
+function libBulkAdd(arr){
+  var added = 0;
+  arr.forEach(function(t){
+    if(!t) return;
+    if(!lib[curGroup]) lib[curGroup] = [];
+    if(lib[curGroup].indexOf(t) < 0){ lib[curGroup].push(t); added++; }
+  });
+  save(KEY.lib, lib);
+  renderLib(); renderStats();
+  toast("加了 " + added + " 张" + (added < arr.length ? "（" + (arr.length - added) + " 张重复跳过）" : ""));
+}
 
 /* ================= 手账 ================= */
 var viewMonth = new Date();
