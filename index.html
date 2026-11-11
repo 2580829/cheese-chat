@@ -800,16 +800,9 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
             <button class="hm-app" data-go="page-lib"><span class="ic">🗂️</span>字卡库</button>
             <button class="hm-app" data-go="page-diary"><span class="ic">📖</span>手账</button>
             <button class="hm-app" data-go="page-me"><span class="ic">👤</span>我的</button>
-            <button class="hm-app sm" data-act="gift"><span class="ic">🎁</span>礼物</button>
             <button class="hm-app sm" data-act="coin"><span class="ic">🪙</span>金币</button>
-            <button class="hm-app sm" data-act="bubble"><span class="ic">🫧</span>气泡</button>
             <button class="hm-app sm" data-act="timer"><span class="ic">⏰</span>计时</button>
-          </div>
-          <div class="hm-apps-page">
-            <button class="hm-app sm" data-act="call"><span class="ic">🎧</span>陪伴</button>
-            <button class="hm-app sm" data-act="stk"><span class="ic">🧸</span>表情</button>
-            <button class="hm-app sm" data-act="rp"><span class="ic">🧧</span>红包</button>
-            <button class="hm-app sm" data-act="say"><span class="ic">✨</span>换一句</button>
+                      <button class="hm-app sm" data-act="say"><span class="ic">✨</span>换一句</button>
           </div>
         </div>
         <div class="hm-apps-pager" id="hmAppsPager"><span class="dot on"></span><span class="dot"></span></div>
@@ -1021,6 +1014,11 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
           <div class="slider-row">
             <label>视频接听概率</label>
             <input type="range" id="sCall" min="0" max="100" value="80"><span id="vCall">80%</span>
+          </div>
+          <div class="slider-row">
+            <label>对方主动送礼物</label>
+            <input type="range" id="sGift" min="0" max="30" value="3"><span id="vGift">3%</span>
+            <div class="hint">设成 10% 就是每 10 条回复里有 1 条是礼物，最多 30%</div>
           </div>
         </div>
 
@@ -1297,6 +1295,7 @@ if(cfg.stickerChance == null) cfg.stickerChance = 35; /* 对方发表情包概�
 if(cfg.callPickChance == null) cfg.callPickChance = 80; /* 通话接听概率 0-100 */
 if(cfg.textChance == null) cfg.textChance = 60;    /* 对方发文字概率 0-100 */
 if(cfg.voiceChance == null) cfg.voiceChance = 15;  /* 对方发语音概率 0-100 */
+if(cfg.giftAskChance == null) cfg.giftAskChance = 3; /* 对方主动送礼物概率 0-100 */
 /* ---- 挂件可配置化 ---- */
 if(!Array.isArray(cfg.widgets)) cfg.widgets = ["contract","cards","note"];
 cfg.widgets = cfg.widgets.map(function(w){
@@ -1498,11 +1497,14 @@ function paintMsg(m){
     });
   }else if(m.type === "gift"){
     /* 礼物消息：完整自定义行 */
+    var gbIcon = m.giftImg
+      ? '<img src="' + esc(m.giftImg) + '" class="gb-emoji" style="width:48px;height:48px;object-fit:contain;border-radius:8px;filter:none">'
+      : '<div class="gb-emoji">' + esc(m.giftEmoji || "🎁") + '</div>';
     chatEl.insertAdjacentHTML("beforeend",
       '<div class="row ' + (m.who === "me" ? "me" : "them") + '">' +
       '<div class="m-avatar ' + (m.who === "me" ? "me" : "them") + '">' + (m.who === "me" ? "我" : friendAvatarHtml(senderFriend(m.mid))) + '</div>' +
       '<div class="msg gift"><div class="gift-bubble">' +
-      '<div class="gb-emoji">' + esc(m.giftEmoji || "🎁") + '</div>' +
+      gbIcon +
       '<div class="gb-info"><b>' + esc(m.giftName || "礼物") + '</b>' +
       '<i>' + (m.who === "me" ? "送给 " + esc(convName()) : esc(senderName(m.mid)) + " 送了") + '</i>' +
       '<span>🪙 ' + esc(String(m.giftPrice || "")) + '</span></div>' +
@@ -1834,6 +1836,7 @@ function reply(){
         var roll = Math.random() * 100;
         var stickerP = cfg.stickerChance || 35;
         var voiceP = cfg.voiceChance || 15;
+        var giftP = cfg.giftAskChance || 3;
         if(roll < stickerP){
           var sk = pickStk();
           if(sk) pushMsg({ who:"them", mid:randMember(), type:"sticker", src:sk.src, t:Date.now() });
@@ -1843,7 +1846,15 @@ function reply(){
           }
         }else if(roll < stickerP + voiceP){
           pushMsg({ who:"them", mid:randMember(), type:"voice", dur: 2 + Math.floor(Math.random() * 5), t:Date.now() });
-        }else if(roll < stickerP + voiceP + 5){
+        }else if(roll < stickerP + voiceP + giftP){
+          /* 对方主动送礼物给我 */
+          var giftList = GIFT_DATA.concat((cfg.gifts || []).map(function(g, i){
+            return { id:"c"+i, cat:"custom", emoji:g.emoji || "🎁", name:g.name, price:g.price || 10, img:g.img || "" };
+          }));
+          var gift = giftList[Math.floor(Math.random() * giftList.length)];
+          setTimeout(function(){ fireworksFx(); }, 300);
+          pushMsg({ who:"them", mid:randMember(), type:"gift", giftId:gift.id, giftEmoji:gift.emoji || "🎁", giftName:gift.name, giftPrice:gift.price, giftImg:gift.img || "", t:Date.now() });
+        }else if(roll < stickerP + voiceP + giftP + 5){
           taSendRedPacket();
         }else{
           var text = pickCard();
@@ -4636,7 +4647,8 @@ document.documentElement.style.setProperty("--chatfont", fontCss(cfg.fontId));
     ["sReply", "replyChance", "vReply"],
     ["sSticker", "stickerChance", "vSticker"],
     ["sVoice", "voiceChance", "vVoice"],
-    ["sCall", "callPickChance", "vCall"]
+    ["sCall", "callPickChance", "vCall"],
+    ["sGift", "giftAskChance", "vGift"]
   ];
   pairs.forEach(function(p){
     var slider = $(p[0]);
