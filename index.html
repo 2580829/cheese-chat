@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#F7C8D8">
 <title>奶酪信笺 · 字卡传讯</title>
+<script src="bubbles.js" defer></script>
 <script>
 (function(){
   try{
@@ -768,9 +769,30 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
 .gc-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.8);margin-bottom:7px;font-size:13px;color:var(--ink)}
 .gc-item input{width:17px;height:17px;accent-color:#E87FA4}
 .gc-name{width:100%;padding:10px 13px;border-radius:12px;border:1px solid rgba(247,200,216,.6);background:rgba(255,255,255,.9);font-size:13px;margin:6px 0 10px}
+/* === 开场动画 splash === */
+#splash{position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#FFE0EC 0%,#FFD0D0 45%,#FFE8D6 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .7s cubic-bezier(.2,.8,.2,1),transform .7s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+#splash.hidden{opacity:0;transform:scale(1.08)}
+#splash-logo{font-size:72px;filter:drop-shadow(0 8px 24px rgba(232,127,164,.28));animation:splashPop 1.1s cubic-bezier(.2,.8,.3,1) both}
+#splash-title{font-size:22px;font-weight:800;color:#8B4A5D;letter-spacing:.08em;animation:splashFade 1.2s .2s both}
+#splash-sub{font-size:13px;color:#B77C92;letter-spacing:.1em;animation:splashFade 1.2s .4s both}
+#splash-heart{font-size:14px;color:#E87FA4;animation:splashHeart 1.3s .5s both}
+@keyframes splashPop{0%{transform:scale(.4) rotate(-15deg);opacity:0}60%{transform:scale(1.1) rotate(4deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes splashFade{0%{transform:translateY(12px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes splashHeart{0%{opacity:0;transform:scale(.6)}50%{transform:scale(1.3)}100%{opacity:1;transform:scale(1)}}
+/* 跳过按钮（调试用） */
+#splash-skip{position:absolute;bottom:24px;right:24px;font-size:11px;color:rgba(139,74,93,.45);background:rgba(255,255,255,.5);border:none;padding:4px 12px;border-radius:999px;pointer-events:auto}
 </style>
 </head>
 <body>
+
+<!-- 开场动画（仅首次或版本更新时显示） -->
+<div id="splash">
+  <div id="splash-logo">🧀</div>
+  <div id="splash-title">奶酪信笺</div>
+  <div id="splash-sub">字卡传讯 · 一直陪着你</div>
+  <div id="splash-heart">♥</div>
+  <button type="button" id="splash-skip">跳过</button>
+</div>
 
 <div class="bg"></div>
 <div class="grain"></div>
@@ -802,7 +824,8 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
             <button class="hm-app" data-go="page-me"><span class="ic">👤</span>我的</button>
             <button class="hm-app sm" data-act="coin"><span class="ic">🪙</span>金币</button>
             <button class="hm-app sm" data-act="timer"><span class="ic">⏰</span>计时</button>
-                      <button class="hm-app sm" data-act="say"><span class="ic">✨</span>换一句</button>
+            <button class="hm-app sm" data-act="say"><span class="ic">✨</span>换一句</button>
+            <button class="hm-app sm" data-act="gift"><span class="ic">🎁</span>礼物</button>
           </div>
         </div>
         <div class="hm-apps-pager" id="hmAppsPager"><span class="dot on"></span><span class="dot"></span></div>
@@ -1286,8 +1309,9 @@ if(!cfg.mood) cfg.mood = 0;
 if(cfg.coins == null) cfg.coins = 60;
 if(!cfg.gifts || !Array.isArray(cfg.gifts)) cfg.gifts = [];
 /* ---- 主题与背景 ---- */
-if(!cfg.chatBg) cfg.chatBg = "";    /* 聊天页背景图 dataURL */
+if(!cfg.chatBg) cfg.chatBg = "";    /* 聊天页背景图 dataURL（全局兜底） */
 if(!cfg.appBg) cfg.appBg = "";      /* 整体背景图 dataURL */
+if(!cfg.convBgs || typeof cfg.convBgs !== "object") cfg.convBgs = {}; /* 每会话独立背景：{ [chatKey]: dataURL } */
 if(!cfg.themePreset) cfg.themePreset = "pink"; /* 主题色 */
 /* ---- AI 回复概率参数（设置里可调） ---- */
 if(cfg.replyChance == null) cfg.replyChance = 100;   /* 回复触发概率 0-100 */
@@ -3400,16 +3424,20 @@ function openHomeEdit(){
   });
   var addHtml = rest.length ? '<div class="section-label" style="padding-left:0;margin-top:14px">可以加回来</div>' +
     rest.map(function(k){ return '<button type="button" class="ghost-btn" data-add="' + k + '">+ ' + HM_WIDGETS[k].n + '</button>'; }).join("") : "";
+  /* 当前会话信息 + 它是否已有背景 */
+  var curChatBg = (cfg.convBgs && cfg.convBgs[chatKey()]) || "";
+  var curName   = convName() || "念念";
   showSheet('<div class="sheet-title">桌面挂件</div>' +
     '<p class="hint">✎ 改标题文字 · 🖼 换背景图 · ↑↓ 调顺序 · ✕ 收起</p>' + rows + addHtml +
     '<div class="section-label" style="padding-left:0;margin-top:14px">整体背景</div>' +
     '<div style="display:flex;gap:8px">' +
     '<button type="button" class="ghost-btn" id="pickAppBg" style="flex:1;margin:0">📷 网站主背景</button>' +
-    '<button type="button" class="ghost-btn" id="pickChatBg" style="flex:1;margin:0">💌 聊天背景</button></div>' +
-    (cfg.appBg || cfg.chatBg ? '<div style="display:flex;gap:8px;margin-top:8px">' +
+    '<button type="button" class="ghost-btn" id="pickChatBg" style="flex:1;margin:0">💌 当前：' + esc(curName) + ' 的背景</button></div>' +
+    '<div style="display:flex;gap:8px;margin-top:8px">' +
       (cfg.appBg ? '<button type="button" class="ghost-btn" id="clrAppBg" style="flex:1;margin:0">清主背景</button>' : '') +
-      (cfg.chatBg ? '<button type="button" class="ghost-btn" id="clrChatBg" style="flex:1;margin:0">清聊天背景</button>' : '') +
-    '</div>' : '') +
+      (curChatBg ? '<button type="button" class="ghost-btn" id="clrChatBg" style="flex:1;margin:0">清「' + esc(curName) + '」的背景</button>' : '') +
+      (!curChatBg && cfg.chatBg ? '<button type="button" class="ghost-btn" id="clrChatBg" style="flex:1;margin:0">清全局聊天背景</button>' : '') +
+    '</div>' +
     '<input type="file" id="wgBgFile" accept="image/*" style="display:none">' +
     '<input type="file" id="appBgFile" accept="image/*" style="display:none">' +
     '<input type="file" id="chatBgFile" accept="image/*" style="display:none">');
@@ -3496,12 +3524,18 @@ function openHomeEdit(){
       var f = e.target.files[0];
       if(!f) return;
       var reader = new FileReader();
-      reader.onload = function(ev){ cfg.chatBg = ev.target.result; saveCfg(); applyCfg(); openHomeEdit(); };
+      reader.onload = function(ev){
+        cfg.convBgs[chatKey()] = ev.target.result; saveCfg(); applyCfg(); openHomeEdit();
+      };
       reader.readAsDataURL(f);
       chatBgFile.value = "";
     };
     if($("pickChatBg")) $("pickChatBg").onclick = function(){ $("chatBgFile").click(); };
-    if($("clrChatBg")) $("clrChatBg").onclick = function(){ cfg.chatBg = ""; saveCfg(); applyCfg(); openHomeEdit(); };
+    if($("clrChatBg")) $("clrChatBg").onclick = function(){
+      if(cfg.convBgs[chatKey()]){ delete cfg.convBgs[chatKey()]; saveCfg(); }
+      else if(cfg.chatBg){ cfg.chatBg = ""; saveCfg(); }
+      applyCfg(); openHomeEdit();
+    };
   }
 }
 if($("hmSay")) $("hmSay").textContent = "";
@@ -3788,7 +3822,10 @@ function openCharSheet(){
   paintAvatar($("csTaAv"), "them");
   paintAvatar($("csMyAv"), "me");
   $("csTaAv").onclick = function(){ avatarTarget = "them"; $("avatarInput").click(); };
-  $("csMyAv").onclick = function(){ avatarTarget = "me"; $("avatarInput").click(); };
+  $("csMyAv").onclick = function(){
+    if(isGroup()){ toast("群聊中不能改自己的头像哦 ♡"); return; }
+    avatarTarget = "me"; $("avatarInput").click();
+  };
   $("csName").oninput = function(){
     cfg.name = this.value.trim() || "念念";
     saveCfg(); applyCfg(); renderHome();
@@ -4439,17 +4476,16 @@ function applyCfg(){
   /* 整体背景 */
   var bg = cfg.appBg || "";
   document.querySelector(".bg").style.cssText = bg ? "background-image:url('" + bg + "');background-size:cover;background-position:center;background-attachment:fixed" : "";
-  /* 聊天页背景 */
+  /* 聊天页背景：当前会话优先，其次全局兜底 */
   var chatBgEl = document.getElementById("chat");
   if(chatBgEl){
-    if(cfg.chatBg){
-      chatBgEl.style.backgroundImage = "url('" + cfg.chatBg + "')";
-      chatBgEl.style.backgroundSize = "cover";
-      chatBgEl.style.backgroundPosition = "center";
-      chatBgEl.style.backgroundAttachment = "local";
-    }else{
-      chatBgEl.style.backgroundImage = "";
-    }
+    var curBg = (cfg.convBgs && cfg.convBgs[chatKey()]) || cfg.chatBg || "";
+    chatBgEl.style.backgroundImage = curBg ? "url('" + curBg + "')" : "";
+    chatBgEl.style.backgroundSize = curBg ? "cover" : "";
+    chatBgEl.style.backgroundPosition = curBg ? "center" : "";
+    chatBgEl.style.backgroundAttachment = curBg ? "local" : "";
+    /* 同时用 CSS variable 防止 CSS 背景层叠加 */
+    chatBgEl.style.setProperty("--cur-conv-bg", curBg ? "url('" + curBg + "')" : "");
   }
 }
 $("setName").addEventListener("input", function(e){
@@ -4495,7 +4531,10 @@ $("setMax").addEventListener("change", function(){ saveCfg(); renderSettings(); 
 /* 头像上传 */
 var avatarTarget = "them";
 $("taAvBtn").onclick = function(){ avatarTarget = "them"; $("avatarInput").click(); };
-$("myAvBtn").onclick = function(){ avatarTarget = "me"; $("avatarInput").click(); };
+$("myAvBtn").onclick = function(){
+  if(isGroup()){ toast("群聊中不能改自己的头像哦 ♡"); return; }
+  avatarTarget = "me"; $("avatarInput").click();
+};
 $("avatarInput").onchange = function(e){
   var f = e.target.files && e.target.files[0];
   if(!f) return;
@@ -4638,7 +4677,30 @@ updateTabDot();
 sayRandom();
 document.body.dataset.bubble = String(cfg.bubble || 0);
 document.body.dataset.bshape = cfg.bubbleShape || "standard";
-setSkin(cfg.skinId || "");
+/* 气泡皮肤：等 bubbles.js 加载好后注入 CSS 并应用（防止异步丢失） */
+(function waitBubbles(){
+  if(window.MILK_BUBBLES){ injectSkinStyle(); setSkin(cfg.skinId || ""); return; }
+  setTimeout(waitBubbles, 40);
+})();
+/* === 开场动画控制 === */
+(function(){
+  var sp = document.getElementById("splash");
+  if(!sp) return;
+  var lastVer = load("cheese.splash.v", "");
+  var curVer  = window.APP_VER || "2026.11.15-fullfix";
+  var show = !lastVer || lastVer !== curVer;
+  if(!show){ sp.style.display = "none"; return; }
+  /* 跳过按钮 */
+  var sk = document.getElementById("splash-skip");
+  if(sk) sk.onclick = function(){ hideSplash(); };
+  function hideSplash(){
+    if(sp.classList.contains("hidden")) return;
+    sp.classList.add("hidden");
+    save("cheese.splash.v", curVer);
+    setTimeout(function(){ if(sp.parentNode) sp.parentNode.removeChild(sp); }, 800);
+  }
+  setTimeout(hideSplash, 1800);
+})();
 document.documentElement.style.setProperty("--chatfont", fontCss(cfg.fontId));
 
 /* 高级概率 slider 绑定 */
