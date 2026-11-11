@@ -272,6 +272,10 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 /* 设置面板 */
 .panel{background:rgba(255,255,255,.8);border-radius:19px;padding:2px 14px;border:1px solid rgba(255,255,255,.95);box-shadow:0 6px 22px rgba(232,127,164,.09);margin-bottom:11px;backdrop-filter:blur(10px)}
 .panel-title{font-size:10.5px;font-weight:700;color:#BD8FA0;letter-spacing:.16em;padding:13px 0 3px}
+.slider-row{margin:10px 0 4px}
+.slider-row label{display:block;font-size:12px;color:#8B4A5D;font-weight:600;margin-bottom:4px}
+.slider-row input[type=range]{width:calc(100% - 52px);accent-color:#E87FA4}
+.slider-row > span{display:inline-block;width:46px;font-size:12px;color:#E87FA4;font-weight:700;text-align:right}
 .field-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid rgba(247,200,216,.32)}
 .field-row label{font-size:13px;color:var(--ink);white-space:nowrap;letter-spacing:.02em}
 .field-row input[type=text],.field-row input[type=number]{width:54%;text-align:right;border:none;outline:none;background:transparent;font-size:13.5px;color:var(--ink-soft);font-family:inherit}
@@ -998,6 +1002,28 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
         <div class="section-label">收藏</div>
         <div id="favList"></div>
 
+        <div class="section-label">高级设定 · 概率</div>
+        <div class="panel">
+          <div class="panel-title">更真实的聊天</div>
+          <div class="slider-row">
+            <label>回复触发</label>
+            <input type="range" id="sReply" min="0" max="100" value="100"><span id="vReply">100%</span>
+            <div class="hint">设成 80% 就是每 5 句有 1 句他会假装没看到</div>
+          </div>
+          <div class="slider-row">
+            <label>发 emoji 概率</label>
+            <input type="range" id="sSticker" min="0" max="100" value="35"><span id="vSticker">35%</span>
+          </div>
+          <div class="slider-row">
+            <label>发语音概率</label>
+            <input type="range" id="sVoice" min="0" max="100" value="15"><span id="vVoice">15%</span>
+          </div>
+          <div class="slider-row">
+            <label>视频接听概率</label>
+            <input type="range" id="sCall" min="0" max="100" value="80"><span id="vCall">80%</span>
+          </div>
+        </div>
+
         <div class="section-label">数据</div>
         <button class="ghost-btn" id="exportBtn">导出备份</button>
         <button class="ghost-btn" id="importBtn">导入备份</button>
@@ -1265,6 +1291,12 @@ if(!cfg.gifts || !Array.isArray(cfg.gifts)) cfg.gifts = [];
 if(!cfg.chatBg) cfg.chatBg = "";    /* 聊天页背景图 dataURL */
 if(!cfg.appBg) cfg.appBg = "";      /* 整体背景图 dataURL */
 if(!cfg.themePreset) cfg.themePreset = "pink"; /* 主题色 */
+/* ---- AI 回复概率参数（设置里可调） ---- */
+if(cfg.replyChance == null) cfg.replyChance = 100;   /* 回复触发概率 0-100 */
+if(cfg.stickerChance == null) cfg.stickerChance = 35; /* 对方发表情包概率 0-100 */
+if(cfg.callPickChance == null) cfg.callPickChance = 80; /* 通话接听概率 0-100 */
+if(cfg.textChance == null) cfg.textChance = 60;    /* 对方发文字概率 0-100 */
+if(cfg.voiceChance == null) cfg.voiceChance = 15;  /* 对方发语音概率 0-100 */
 /* ---- 挂件可配置化 ---- */
 if(!Array.isArray(cfg.widgets)) cfg.widgets = ["contract","cards","note"];
 cfg.widgets = cfg.widgets.map(function(w){
@@ -1309,8 +1341,13 @@ function senderFriend(mid){
 function senderName(mid){ return senderFriend(mid).name; }
 function randMember(){
   var g = activeGroup();
-  if(!g) return null;
+  if(!g || !g.members || g.members.length === 0) return cfg.conv.id;
   return g.members[Math.floor(Math.random() * g.members.length)];
+}
+function randMemberSafe(){
+  var m = randMember();
+  if(!m) return mainFriend().id;
+  return m;
 }
 function friendAvatarHtml(f){
   if(!f) return "🌷";
@@ -1789,17 +1826,24 @@ function reply(){
     (function(i){
       replyTimers.push(setTimeout(function(){
         hideTyping();
-        var r = Math.random();
-        if(r < 0.26){
+        /* 回复触发概率 */
+        if(Math.random() * 100 >= (cfg.replyChance || 100)){
+          if(i < total - 1) showTyping(); else return;
+        }
+        /* 按概率加权随机决定消息类型 */
+        var roll = Math.random() * 100;
+        var stickerP = cfg.stickerChance || 35;
+        var voiceP = cfg.voiceChance || 15;
+        if(roll < stickerP){
           var sk = pickStk();
           if(sk) pushMsg({ who:"them", mid:randMember(), type:"sticker", src:sk.src, t:Date.now() });
           else {
             var tx = pickCard();
             if(tx) pushMsg({ who:"them", mid:randMember(), type:"text", text:tx, t:Date.now() });
           }
-        }else if(r < 0.38){
+        }else if(roll < stickerP + voiceP){
           pushMsg({ who:"them", mid:randMember(), type:"voice", dur: 2 + Math.floor(Math.random() * 5), t:Date.now() });
-        }else if(r < 0.43){
+        }else if(roll < stickerP + voiceP + 5){
           taSendRedPacket();
         }else{
           var text = pickCard();
@@ -2432,7 +2476,7 @@ function startCall(isPartner){
   $("immBtn").textContent = "👁️";
   applyCallBg();
   w.classList.add("open");
-  if(!isPartner && Math.random() < 0.35){
+  if(!isPartner && Math.random() * 100 >= (cfg.callPickChance || 80)){
     callConnectT = setTimeout(function(){
       if(!callActive) return;
       var labels = [
@@ -3022,9 +3066,13 @@ function openGiftShop(){
     '<div id="giftGrid" style="max-height:46vh;overflow-y:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:4px 0 12px"></div>' +
     '<div id="giftCustomBar" style="display:none;padding:10px;background:rgba(255,243,247,.8);border-radius:12px;margin:4px 0">' +
       '<div style="font-size:12px;color:#A07785;margin-bottom:6px">自定义价格（金币）</div>' +
-      '<div style="display:flex;gap:6px;align-items:center">' +
+      '<div style="display:flex;gap:6px;align-items:center;margin-bottom:10px">' +
         '<input type="number" id="giftCustomPrice" min="1" max="9999" value="10" style="flex:1;padding:8px 10px;border:1px solid rgba(232,127,164,.25);border-radius:10px;font-size:14px;background:#fff">' +
-        '<button class="ghost-btn" id="giftCustomOk" style="margin:0;padding:8px 12px">确定</button>' +
+      '</div>' +
+      '<div style="font-size:12px;color:#A07785;margin-bottom:6px">自定义图标（可选）</div>' +
+      '<div style="display:flex;gap:6px;align-items:center">' +
+        '<input type="file" id="giftImgFile" accept="image/*" style="flex:1;font-size:11px">' +
+        '<button class="ghost-btn" id="giftCustomOk" style="margin:0;padding:8px 12px">保存礼物</button>' +
       '</div>' +
     '</div>' +
     '<div id="giftSelBar" style="display:none;padding-top:10px;border-top:1px solid rgba(232,127,164,.15)">' +
@@ -3084,18 +3132,32 @@ function renderGiftShop(){
   if(list.length > 0){
     $("giftGrid").innerHTML = list.map(function(g){
       var on = GIFT_SEL && GIFT_SEL.id === g.id && !GIFT_CUSTOM_PRICE;
-      return '<div data-gift="' + g.id + '" style="padding:12px 6px;border-radius:14px;background:' + (on ? "linear-gradient(135deg,#FFE3F0,#FFF0E4);border:1.5px solid #E87FA4" : "#fff;border:1px solid rgba(247,200,216,.3)") + ';display:flex;flex-direction:column;align-items:center;gap:5px;box-shadow:0 3px 10px rgba(232,127,164,.08);cursor:pointer;transition:transform .12s">' +
-        '<span style="font-size:32px;line-height:1">' + g.emoji + '</span>' +
-        '<span style="font-size:11px;color:#8B4A5D;font-weight:600">' + g.name + '</span>' +
+      var icHtml = g.img
+        ? '<img src="' + g.img + '" style="width:48px;height:48px;object-fit:contain;border-radius:6px;display:block;margin:0 auto">'
+        : '<span style="font-size:32px;line-height:1">' + (g.emoji || "🎁") + '</span>';
+      var delBtn = GIFT_CUR_CAT === "custom" && g.id && g.id.charAt(0) === "u"
+        ? '<span style="font-size:9px;color:#E8698F;position:absolute;top:3px;right:4px">×</span>' : "";
+      return '<div data-gift="' + g.id + '" style="padding:12px 6px;border-radius:14px;background:' + (on ? "linear-gradient(135deg,#FFE3F0,#FFF0E4);border:1.5px solid #E87FA4" : "#fff;border:1px solid rgba(247,200,216,.3)") + ';display:flex;flex-direction:column;align-items:center;gap:5px;box-shadow:0 3px 10px rgba(232,127,164,.08);cursor:pointer;transition:transform .12s;position:relative">' +
+        delBtn + icHtml +
+        '<span style="font-size:11px;color:#8B4A5D;font-weight:600">' + esc(g.name) + '</span>' +
         '<span style="font-size:10px;color:#E87FA4">🪙 ' + g.price + '</span></div>';
     }).join("");
     $("giftGrid").querySelectorAll("[data-gift]").forEach(function(b){
-      b.onclick = function(){
+      b.onclick = function(e){
+        /* 点自定义礼物的×删除 */
         var gid = b.getAttribute("data-gift");
-        if(GIFT_CUR_CAT === "custom"){
+        if(gid && gid.charAt(0) === "u"){
           var idx = Number(gid.substring(1));
-          var c = cfg.gifts[idx];
-          GIFT_SEL = { id:"c"+idx, emoji:c.emoji, name:c.name, price:c.price };
+          var g = cfg.gifts[idx];
+          /* 点击右上角删除 */
+          var xBtn = e.target.closest('[style*="position:absolute"]');
+          if(xBtn){
+            cfg.gifts.splice(idx, 1);
+            saveCfg();
+            renderGiftShop();
+            return;
+          }
+          GIFT_SEL = { id:"c"+idx, emoji:g.emoji || "", name:g.name, price:g.price, img:g.img || "" };
         }else{
           GIFT_SEL = GIFT_DATA.find(function(g){ return g.id === gid; });
         }
@@ -3106,15 +3168,30 @@ function renderGiftShop(){
   }
   /* 自定义价格按钮 */
   if(GIFT_CUR_CAT === "custom" && $("giftCustomOk")){
+    var giftImgFile = $("giftImgFile");
+    if(giftImgFile){
+      giftImgFile.onchange = function(e){
+        var f = e.target.files[0];
+        if(!f) return;
+        var reader = new FileReader();
+        reader.onload = function(ev){
+          giftImgFile._img = ev.target.result;
+          toast("图标已选：" + f.name);
+        };
+        reader.readAsDataURL(f);
+        giftImgFile.value = "";
+      };
+    }
     $("giftCustomOk").onclick = function(){
-      var emoji = prompt("选个 emoji（直接粘贴或用文字描述）：", "🎁");
-      if(!emoji) return;
+      var emoji = prompt("选个 emoji（直接粘贴），如果已经上传了图片可以留空：", "🎁");
       var name = prompt("礼物名字：", "我最喜欢的礼物");
       if(!name) return;
       var price = Number($("giftCustomPrice").value) || 10;
+      var img = giftImgFile && giftImgFile._img ? giftImgFile._img : "";
       cfg.gifts = cfg.gifts || [];
-      cfg.gifts.push({ emoji:emoji, name:name, price:price });
+      cfg.gifts.push({ emoji: emoji || "", name: name.trim(), price: price, img: img });
       saveCfg();
+      if(giftImgFile) giftImgFile._img = "";
       toast("礼物已添加 ♡");
       renderGiftShop();
     };
@@ -4552,6 +4629,28 @@ document.body.dataset.bubble = String(cfg.bubble || 0);
 document.body.dataset.bshape = cfg.bubbleShape || "standard";
 setSkin(cfg.skinId || "");
 document.documentElement.style.setProperty("--chatfont", fontCss(cfg.fontId));
+
+/* 高级概率 slider 绑定 */
+(function(){
+  var pairs = [
+    ["sReply", "replyChance", "vReply"],
+    ["sSticker", "stickerChance", "vSticker"],
+    ["sVoice", "voiceChance", "vVoice"],
+    ["sCall", "callPickChance", "vCall"]
+  ];
+  pairs.forEach(function(p){
+    var slider = $(p[0]);
+    if(!slider) return;
+    slider.value = cfg[p[1]];
+    var label = $(p[2]);
+    label.textContent = cfg[p[1]] + "%";
+    slider.oninput = function(){
+      cfg[p[1]] = +slider.value;
+      label.textContent = cfg[p[1]] + "%";
+      saveCfg();
+    };
+  });
+})();
 
 /* 输入法/弹层退出后，避免整页被顶出可视区 */
 document.addEventListener("focusout", function(){ setTimeout(function(){ window.scrollTo(0,0); }, 80); });
