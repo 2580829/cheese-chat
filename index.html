@@ -498,9 +498,9 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 .hm-say .hm-say-t{font-size:13px;line-height:1.8;color:#7A5160;margin-top:8px;letter-spacing:.02em}
 /* ================= 挂件栏（可左右滑动翻页） ================= */
 .hm-apps{margin-top:14px;position:relative}
-.hm-apps-track{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.hm-apps-track{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;touch-action:pan-x}
 .hm-apps-track::-webkit-scrollbar{display:none}
-.hm-apps-page{flex:0 0 calc(100% - 2px);scroll-snap-align:start;display:grid;grid-template-columns:repeat(4,1fr);gap:16px 10px}
+.hm-apps-page{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;display:grid;grid-template-columns:repeat(4,1fr);gap:16px 10px;min-width:0}
 .hm-app{border:none;background:transparent;display:flex;flex-direction:column;align-items:center;gap:7px;font-size:10.5px;letter-spacing:.04em;color:#8E6675;padding:0;cursor:pointer;transition:transform .15s}
 .hm-app:active{transform:scale(.92)}
 .hm-app .ic{width:52px;height:52px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(232,127,164,.22),inset 0 1px 0 rgba(255,255,255,.6);transition:transform .15s;position:relative;overflow:hidden}
@@ -853,6 +853,8 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
             <button class="hm-app" data-go="page-lib"><span class="ic">🗂️</span>字卡库</button>
             <button class="hm-app" data-go="page-diary"><span class="ic">📖</span>手账</button>
             <button class="hm-app" data-go="page-me"><span class="ic">👤</span>我的</button>
+          </div>
+          <div class="hm-apps-page">
             <button class="hm-app sm" data-act="coin"><span class="ic">🪙</span>金币</button>
             <button class="hm-app sm" data-act="timer"><span class="ic">⏰</span>计时</button>
             <button class="hm-app sm" data-act="say"><span class="ic">✨</span>换一句</button>
@@ -3921,7 +3923,10 @@ document.querySelectorAll(".tab-item").forEach(function(t){
   }
   function canStart(target){
     if(layerOpen()) return false;
-    if(target && target.closest && target.closest("input,textarea,select,.chips,.stk-grid,.msg img")) return false;
+    if(target && target.closest){
+      if(target.closest("input,textarea,select,.chips,.stk-grid,.msg img")) return false;
+      if(target.closest("#hmAppsTrack,.hm-apps-track,.hm-app")) return false; /* 挂件栏自己处理水平翻页 */
+    }
     return !hScrollable(target);
   }
   function begin(x, y){
