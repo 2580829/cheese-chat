@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.11-poke3";
+  var V = "2026.11.11-poke4";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -5296,6 +5296,7 @@ document.documentElement.style.setProperty("--chatfont", fontCss(cfg.fontId));
   document.querySelectorAll('input[type="range"]').forEach(function(r){
     r.setAttribute("inputmode", "none");
     r.setAttribute("tabindex", "-1");
+    r.addEventListener("focus", function(){ try{ r.blur(); }catch(e){} });
     r.addEventListener("touchstart", function(e){ e.stopPropagation(); }, {passive:true});
     r.addEventListener("pointerdown", function(e){ e.stopPropagation(); }, {passive:true});
   });
