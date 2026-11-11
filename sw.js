@@ -7,6 +7,8 @@
    升级时改 CACHE 版本号即可清掉旧缓存
    ================================================================ */
 const CACHE = 'CHEESE_V4';
+/* 与页面 version.json 保持一致；激活时用它把旧页面强制带到新地址 */
+const VERSION = '2026.11.11-poke2';
 const PRECACHE = [
   './',
   './index.html',
@@ -32,6 +34,19 @@ self.addEventListener('activate', (e) => {
     caches.keys().then((keys) =>
       Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
     ).then(() => self.clients.claim())
+    .then(() => self.clients.matchAll({type:'window'}))
+    .then((list) => {
+      /* 旧页面自己不会刷新：直接把窗口导航到带新版本号的地址 */
+      list.forEach((c) => {
+        try {
+          const u = new URL(c.url);
+          if (u.searchParams.get('v') !== VERSION) {
+            u.searchParams.set('v', VERSION);
+            c.navigate(u.toString());
+          }
+        } catch (err) {}
+      });
+    })
   );
 });
 
