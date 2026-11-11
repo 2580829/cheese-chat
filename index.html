@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.11-shop1";
+  var V = "2026.11.11-shop2";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -1605,7 +1605,7 @@ function settingsSnapshot(){
     "replyChance","stickerChance","callPickChance","textChance","voiceChance","giftAskChance",
     "proactiveOn","proactiveInterval","proactiveChance","quoteChance","partnerRpChance",
     "proactiveCallChance","partnerPokeChance","jealousy","petName","pokes","pokeSymMe","pokeSymTa",
-    "pokeSymMeCustom","pokeSymTaCustom","spiritSeeded","conv","friends","groups"];
+    "pokeSymMeCustom","pokeSymTaCustom","spiritSeeded","conv","friends","groups","gifts"];
   var o = {};
   for(var i = 0; i < keep.length; i++){
     var k = keep[i];
