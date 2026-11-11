@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.11-group2";
+  var V = "2026.11.11-four1";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -938,6 +938,70 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
 .gift-to-item.all{background:rgba(247,200,216,.32);color:#A65477}
 .gift-to-av{width:32px;height:32px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#F9B8D0,#FFE9D6);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
 .gift-to-av img{width:100%;height:100%;object-fit:cover}
+/* ===== 朋友圈 ===== */
+.moments{position:fixed;inset:0;z-index:45;max-width:520px;margin:0 auto;background:linear-gradient(170deg,#FFF6F0,#FDEAF1 50%,#F9DCE8);display:flex;flex-direction:column;transform:translateY(102%);transition:transform .32s cubic-bezier(.22,.8,.3,1);visibility:hidden;box-shadow:0 0 60px rgba(232,127,164,.18)}
+.moments.on{transform:none;visibility:visible}
+.mo-head{flex-shrink:0;padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 10px;display:flex;align-items:center;gap:10px;background:rgba(255,250,246,.86);backdrop-filter:blur(16px);border-bottom:1px solid rgba(247,200,216,.4)}
+.mo-head b{flex:1;font-size:15px;color:#7A4A5A;letter-spacing:.06em}
+.mo-head button{border:none;background:rgba(247,200,216,.4);color:#A65477;border-radius:999px;padding:7px 13px;font-size:12px;font-weight:600}
+.mo-list{flex:1;overflow-y:auto;padding:14px 14px 50px}
+.mo-card{background:rgba(255,255,255,.9);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 6px 22px rgba(232,127,164,.12);border:1px solid rgba(255,255,255,.9)}
+.mo-top{display:flex;gap:9px;align-items:center}
+.mo-av{width:38px;height:38px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#F9B8D0,#FFE9D6);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.mo-av img{width:100%;height:100%;object-fit:cover}
+.mo-name{font-weight:700;font-size:13px;color:#7A4A5A}
+.mo-time{font-size:10px;color:#B79AA5;margin-top:2px}
+.mo-text{font-size:13px;line-height:1.68;margin:10px 2px 0;color:#6B4A56;white-space:pre-wrap;word-break:break-word}
+.mo-img{margin-top:10px;border-radius:14px;overflow:hidden;max-height:320px;background:#FDEAF1}
+.mo-img img{width:100%;display:block;object-fit:cover}
+.mo-act{display:flex;gap:16px;margin-top:10px;align-items:center}
+.mo-act button{border:none;background:none;font-size:11.5px;color:#A07785;padding:0;display:flex;align-items:center;gap:4px}
+.mo-act button.on{color:#E8698F}
+.mo-cmts{margin-top:8px;background:rgba(247,200,216,.2);border-radius:11px;padding:8px 10px;font-size:11.5px;line-height:1.75;color:#6B4A56}
+.mo-cmts b{color:#A65477;font-weight:600}
+.mo-cmt-row{display:flex;gap:8px;margin-top:9px}
+.mo-cmt-row input{flex:1;min-width:0;border:none;background:rgba(247,200,216,.24);border-radius:999px;padding:8px 12px;font-size:12px;color:#6B4A56;outline:none}
+.mo-cmt-row button{border:none;background:#F7C8D8;color:#7A3F55;border-radius:999px;padding:0 14px;font-size:12px;font-weight:600}
+.mo-empty{text-align:center;color:#B79AA5;font-size:12px;padding:50px 0;line-height:1.9}
+/* ===== 群公告 ===== */
+.group-notice{flex-shrink:0;margin:6px 14px 0;padding:7px 12px;border-radius:11px;background:rgba(247,200,216,.32);color:#8B4A5D;font-size:11px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid rgba(247,200,216,.55)}
+/* ===== 聊天搜索 ===== */
+.ms-list{max-height:44vh;overflow-y:auto;margin-top:9px}
+.ms-item{width:100%;text-align:left;border:none;background:rgba(255,255,255,.92);border-radius:12px;padding:10px 12px;margin-bottom:7px}
+.ms-item b{font-size:10.5px;color:#A65477;font-weight:600}
+.ms-item span{display:block;font-size:12px;color:#6B4A56;margin-top:3px;line-height:1.5;word-break:break-all}
+.ms-empty{text-align:center;color:#B79AA5;font-size:12px;padding:22px 0}
+.row.flash{animation:flashRow 1.6s ease}
+@keyframes flashRow{0%,40%{background:rgba(247,200,216,.55)}100%{background:transparent}}
+/* ===== 置顶 / 免打扰 ===== */
+.ct-row{display:flex;align-items:center;gap:7px;padding:7px 2px;border-bottom:1px solid rgba(247,200,216,.25)}
+.ct-name{flex:1;min-width:0;font-size:12px;color:#6B4A56;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ct-btn{border:none;border-radius:9px;padding:5px 8px;font-size:10.5px;background:rgba(247,200,216,.24);color:#A07785}
+.ct-btn.on{background:#F7C8D8;color:#7A3F55}
+/* ===== 礼物墙 / 图鉴 ===== */
+.gw{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:4px 0 12px}
+.gw-item{background:rgba(255,255,255,.86);border-radius:12px;padding:8px 4px 5px;text-align:center;font-size:19px;border:1px solid rgba(255,255,255,.9)}
+.gw-item i{display:block;font-size:9px;color:#A07785;font-style:normal;margin-top:1px}
+.ga-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+.ga-item{background:rgba(255,255,255,.9);border-radius:13px;padding:10px 4px 8px;text-align:center;font-size:24px;border:1px solid rgba(247,200,216,.4);position:relative}
+.ga-item.lock{opacity:.35;filter:grayscale(1)}
+.ga-item span{display:block;font-size:9.5px;color:#6B4A56;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ga-item i{display:block;font-size:8.5px;color:#E8698F;font-style:normal}
+/* ===== 恋爱养成 ===== */
+.grow-entry{width:100%;border:none;background:linear-gradient(135deg,rgba(255,240,247,.96),rgba(255,246,236,.96));border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:12px;box-shadow:0 5px 18px rgba(232,127,164,.12);border:1px solid rgba(255,255,255,.9)}
+.grow-entry span{font-size:13px;font-weight:600;color:#8B4A5D}
+.grow-entry i{margin-left:auto;font-size:10.5px;color:#C49BAA;font-style:normal}
+.gr-hero{background:linear-gradient(135deg,#FFF0F6,#FFF6EC);border-radius:16px;padding:14px;text-align:center;margin-bottom:10px}
+.gr-hero b{display:block;font-size:24px;color:#E8698F;font-weight:700;letter-spacing:.02em}
+.gr-hero span{font-size:11px;color:#A07785}
+.gr-bar{height:7px;border-radius:99px;background:rgba(247,200,216,.4);overflow:hidden;margin:10px 0 4px}
+.gr-bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#F7C8D8,#E8698F)}
+.gr-row{display:flex;align-items:center;gap:9px;padding:8px 2px;font-size:12px;color:#6B4A56;border-bottom:1px solid rgba(247,200,216,.22)}
+.gr-row .ico{font-size:17px;width:22px;text-align:center}
+.gr-row.lock{opacity:.45}
+.gr-row .r{margin-left:auto;font-size:10.5px;color:#B79AA5}
+.gr-sign{width:100%;border:none;border-radius:14px;padding:12px;font-size:13px;font-weight:700;color:#7A3F55;background:linear-gradient(135deg,#FBD3E2,#FFE4CC);margin-top:10px}
+.gr-sign.done{background:rgba(247,200,216,.35);color:#A07785}
 .msg.share{background:none!important;box-shadow:none!important;padding:0!important;border:none!important}
 .sd-top{display:flex;gap:12px;align-items:center;margin-bottom:10px}
 .sd-ico{width:62px;height:62px;border-radius:14px;background:linear-gradient(135deg,#FFF2F7,#FFF6EC);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;flex-shrink:0}
@@ -999,6 +1063,7 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
             <button class="hm-app" data-go="page-lib"><span class="ic">🗂️</span>字卡库</button>
             <button class="hm-app" data-go="page-diary"><span class="ic">📖</span>手账</button>
             <button class="hm-app" data-go="page-me"><span class="ic">👤</span>我的</button>
+            <button class="hm-app" data-act="moments"><span class="ic">🌸</span>动态</button>
           </div>
           <div class="hm-apps-page">
             <button class="hm-app sm" data-act="coin"><span class="ic">🪙</span>金币</button>
@@ -1006,6 +1071,7 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
             <button class="hm-app sm" data-act="say"><span class="ic">✨</span>换一句</button>
             <button class="hm-app sm" data-act="gift"><span class="ic">🎁</span>礼物</button>
             <button class="hm-app sm" data-act="shop"><span class="ic">🏬</span>商城</button>
+            <button class="hm-app sm" data-act="grow"><span class="ic">🌱</span>养成</button>
           </div>
         </div>
         <div class="hm-apps-pager" id="hmAppsPager"><span class="dot on"></span><span class="dot"></span></div>
@@ -1021,6 +1087,9 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
           <div class="name" id="nameEl">念念</div>
           <div class="status" id="statusEl">在你身边，一直都在</div>
         </div>
+        <button class="icon-btn" id="searchBtn" title="搜索聊天记录">
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.4"/><path d="m16 16 4 4"/></svg>
+        </button>
         <button class="icon-btn" id="convBtn" title="会话与群聊">
           <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="3"/><path d="M3.6 19a5.4 5.4 0 0 1 10.8 0"/><path d="M16 7.2a3 3 0 0 1 0 5.6"/><path d="M17.4 14.4A5 5 0 0 1 21 19"/></svg>
         </button>
@@ -1028,6 +1097,7 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
           <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.4" r="3.4"/><path d="M5.4 19.4a6.6 6.6 0 0 1 13.2 0"/></svg>
         </button>
       </header>
+      <div class="group-notice" id="groupNotice" style="display:none"></div>
       <main class="chat" id="chat"></main>
       <footer class="inputbar">
         <div class="quote-bar" id="quoteBar">
@@ -1107,6 +1177,7 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
         <p>把今天的心情，轻轻放进来</p>
       </div>
       <div class="scroll">
+        <button type="button" class="grow-entry" id="growEntry"><span>🌱 恋爱养成</span><i id="growEntrySub">在一起的第 1 天</i></button>
         <div class="cal-head">
           <button id="prevMonth">‹</button>
           <div class="m" id="diaryTitle">2026年11月</div>
@@ -2178,6 +2249,7 @@ function isChatVisible(){
 }
 function notifyNewMsg(m){
   if(isChatVisible()) return;
+  if(isMutedConv()) return;
   $("newMsgAv").innerHTML = avatarHtml("them", m.mid);
   $("newMsgName").textContent = senderName(m.mid);
   var txt = m.type === "text" ? m.text : m.type === "sticker" ? "[表情包]" : m.type === "img" ? "[图片]" : m.type === "redpacket" ? "[红包] ¥" + (m.amount || "") : m.type === "gift" ? "[礼物] " + (m.giftName || "") : m.type === "share" ? "[好物] " + (m.shareName || "") : "新消息";
@@ -3617,6 +3689,8 @@ function runHmAct(act){
   else if(act === "call") startCall(false);
   else if(act === "rp") openRedPacket();
   else if(act === "say") toast(PATS[Math.floor(Math.random()*PATS.length)]);
+  else if(act === "moments") openMoments();
+  else if(act === "grow") openGrow();
 }
 
 /* 礼物商店弹窗（完整版） */
@@ -4438,6 +4512,7 @@ function goPage(id){
   if(id === "page-diary") renderDiary();
   if(id === "page-me"){ renderSettings(); renderFavs(); renderStats(); renderBubbles(); renderFonts(); }
   syncTypingUI();
+  syncChatChrome();
 }
 document.querySelectorAll(".tab-item").forEach(function(t){
   t.onclick = function(){ goPage(t.dataset.page); };
@@ -5003,10 +5078,14 @@ function convRow(t, id, name, sub, avatar, tag){
 }
 function openConvSheet(){
   var html = '<div class="sheet-title">会话</div><p class="hint">单聊随时切换，群聊至少需要 2 位好友</p>';
-  allFriends().forEach(function(f){
+  allFriends().slice().sort(function(a, b){
+    return pinRank("friend", a.id) - pinRank("friend", b.id);
+  }).forEach(function(f){
     html += convRow("friend", f.id, f.name, f.id === "main" ? "主好友 · 一对一" : "好友 · 一对一", friendAvatarHtml(f), f.id === "main" ? "单聊" : "");
   });
-  cfg.groups.forEach(function(g){
+  cfg.groups.slice().sort(function(a, b){
+    return pinRank("group", a.id) - pinRank("group", b.id);
+  }).forEach(function(g){
     var customAv = cfg.groupAvatars && cfg.groupAvatars[g.id];
     var av = customAv
       ? '<span class="conv-av"><img src="' + customAv + '" alt=""></span>'
@@ -5019,11 +5098,26 @@ function openConvSheet(){
     '<button type="button" class="ghost-btn" id="gcCreate" style="flex:1;margin:0">＋ 创建群聊</button>' +
     '<button type="button" class="ghost-btn" id="gcAdd" style="flex:1;margin:0">＋ 添加好友</button></div>' +
     (isGroup() ? '<button type="button" class="ghost-btn" id="gcSet" style="margin-top:8px">群设置 · 改名 / 成员</button>' : '') +
-    '<button type="button" class="ghost-btn" id="gcFriends" style="margin-top:8px">好友管理</button>';
+    '<button type="button" class="ghost-btn" id="gcFriends" style="margin-top:8px">好友管理</button>' +
+    '<div class="sheet-title" style="font-size:13px;margin-top:16px">置顶 / 免打扰</div>' +
+    convToolsHtml();
   if(allFriends().length < 2) html += '<p class="hint" style="margin-top:8px">现在只有 1 位好友，先在「好友管理」里添加一位，才能建群</p>';
   showSheet(html);
   document.querySelectorAll("#sheetBody .conv-row").forEach(function(b){
     b.onclick = function(){ openConv({ t:b.getAttribute("data-t"), id:b.getAttribute("data-id") }); };
+  });
+  document.querySelectorAll("#sheetBody [data-ct]").forEach(function(b){
+    b.onclick = function(ev){
+      ev.stopPropagation();
+      var key = b.getAttribute("data-key");
+      if(b.getAttribute("data-ct") === "pin"){
+        cfg.pinned = cfg.pinned.indexOf(key) >= 0 ? cfg.pinned.filter(function(k){ return k !== key; }) : cfg.pinned.concat([key]);
+      }else{
+        cfg.muted = cfg.muted.indexOf(key) >= 0 ? cfg.muted.filter(function(k){ return k !== key; }) : cfg.muted.concat([key]);
+      }
+      saveCfg();
+      openConvSheet();
+    };
   });
   $("gcCreate").onclick = openGroupCreate;
   $("gcAdd").onclick = function(){ openModal("nf", "添加好友", "给新好友取个名字", "比如：阿橘", ""); };
@@ -5036,6 +5130,7 @@ function openGroupSettings(){
   var fs = allFriends();
   var html = '<div class="sheet-title">群设置</div>' +
     '<input class="gc-name" id="gsName" maxlength="12" value="' + esc(g.name) + '" placeholder="群名字">' +
+    '<input class="gc-name" id="gsNotice" maxlength="60" style="margin-top:8px" value="' + esc(g.notice || "") + '" placeholder="群公告（显示在聊天顶部，可不填）">' +
     '<p class="hint">群成员（至少 2 位）</p>' +
     '<div class="gc-list">' + fs.map(function(f){
       return '<label class="gc-item"><input type="checkbox" value="' + f.id + '"' + (g.members.indexOf(f.id) >= 0 ? " checked" : "") + '>' +
@@ -5056,6 +5151,7 @@ function openGroupSettings(){
     document.querySelectorAll("#sheetBody .gc-item input").forEach(function(cb){ if(cb.checked) ms.push(cb.value); });
     if(ms.length < 2){ toast("群聊至少需要 2 位好友"); return; }
     g.name = name;
+    g.notice = ($("gsNotice").value || "").trim().slice(0, 60);
     g.members = ms;
     var go = groupOpts(g.id);
     go.avatar = $("gsAv").checked;
@@ -5204,6 +5300,7 @@ function applyCfg(){
     /* 同时用 CSS variable 防止 CSS 背景层叠加 */
     chatBgEl.style.setProperty("--cur-conv-bg", curBg ? "url('" + curBg + "')" : "");
   }
+  syncChatChrome();
 }
 $("setName").addEventListener("input", function(e){
   cfg.name = e.target.value.trim() || "念念";
@@ -5787,6 +5884,8 @@ function shopClick(e){
   if(card){ openShopProduct(card.getAttribute("data-pid")); return; }
   var cact = t.closest("[data-cact]");
   if(cact){ shopCartAct(cact.getAttribute("data-cact"), cact.getAttribute("data-idx")); return; }
+  var atlas = t.closest("[data-atlas]");
+  if(atlas){ openGiftAtlas(); return; }
   var ofil = t.closest("[data-ofil]");
   if(ofil){ shopOF = ofil.getAttribute("data-ofil"); renderShop(); return; }
   var oact = t.closest("[data-oact]");
@@ -5920,8 +6019,13 @@ function shopOrdersHtml(){
   return html + list.map(function(o){
     var st = o.status === "completed" ? '<span class="od-tag done">已完成</span>' : (o.status === "pending" ? '<span class="od-tag pending">待送达</span>' : '<span class="od-tag cancel">已取消</span>');
     var tg = o.target === "ta" ? '<span class="od-tag">送 TA</span>' : '<span class="od-tag">自己</span>';
+    var dlv = "";
+    if(o.status === "pending" && o.deliverAt){
+      var left = Math.ceil((o.deliverAt - Date.now()) / 60000);
+      dlv = '<div class="od-time" style="color:#E8698F">配送中，预计 ' + (left <= 0 ? "马上" : left + " 分钟后") + '送达</div>';
+    }
     return '<div class="od-item"><div class="od-top"><div class="cart-ico">' + shopThumb(o) + '</div><div style="flex:1;min-width:0"><b>' + esc(o.name) + '</b>' + st + tg +
-      '<div class="od-time">' + shopTime(o.time) + ' · ¥' + o.price + ' × ' + (o.qty || 1) + (o.specs ? ' · ' + esc(o.specs) : '') + '</div></div></div>' +
+      '<div class="od-time">' + shopTime(o.time) + ' · ¥' + o.price + ' × ' + (o.qty || 1) + (o.specs ? ' · ' + esc(o.specs) : '') + '</div>' + dlv + '</div></div>' +
       (o.status === "pending" ? '<div class="od-act"><button data-oact="cancel" data-oid="' + esc(o.id) + '">取消并退款</button></div>' : '') + '</div>';
   }).join("");
 }
@@ -5939,8 +6043,18 @@ function shopOrderAct(act, oid){
 }
 function shopCabinetHtml(){
   var s = shopS();
-  if(!s.cabinet.length) return '<div class="shop-empty">礼物柜还是空的<br>去商城给 TA 买份礼物吧 ♡</div>';
-  return s.cabinet.map(function(g, i){
+  var counts = {}, order = [];
+  s.cabinet.forEach(function(g){
+    if(counts[g.name] == null){ counts[g.name] = 0; order.push(g); }
+    counts[g.name] += (Number(g.qty) || 1);
+  });
+  var wall = order.length ? '<div class="gw">' + order.slice(0, 10).map(function(g){
+    return '<div class="gw-item">' + shopThumb(g) + '<i>' + esc(g.name) + '</i></div>';
+  }).join("") + '</div>' : "";
+  var head = '<div style="display:flex;align-items:center;margin:2px 2px 8px"><b style="font-size:12.5px;color:#8B4A5D">已收到的礼物</b>' +
+    '<button type="button" data-atlas="1" style="margin-left:auto;border:none;background:rgba(247,200,216,.5);color:#A65477;font-size:11px;padding:5px 11px;border-radius:99px">礼物图鉴 ›</button></div>' + wall;
+  if(!s.cabinet.length) return head + '<div class="shop-empty">礼物柜还是空的<br>去商城给 TA 买份礼物吧 ♡</div>';
+  return head + s.cabinet.map(function(g, i){
     var reps = g.replies || [];
     var shown = g._open ? reps : reps.slice(0, 1);
     return '<div class="cab-item"><div class="cab-top"><div class="cart-ico">' + shopThumb(g) + '</div><div style="flex:1;min-width:0"><b style="font-size:12.5px">' + esc(g.name) + '</b>' +
@@ -6153,6 +6267,417 @@ function shopAutoBuy(){
 setTimeout(shopAutoLoop, 5000);
 
 /* 原来的「礼物商城」入口全部换成新的商城（礼物页签） */
+/* ================= 新模块：朋友圈 / 恋爱养成 / 聊天增强 / 商城进阶 ================= */
+if(!Array.isArray(cfg.moments)) cfg.moments = [];
+if(!Array.isArray(cfg.pinned)) cfg.pinned = [];
+if(!Array.isArray(cfg.muted)) cfg.muted = [];
+if(!cfg.checkin || typeof cfg.checkin !== "object") cfg.checkin = { last:"", days:0 };
+if(cfg.autoGiftOn == null) cfg.autoGiftOn = true;
+
+function dayKey(d){
+  function p2(n){ return n < 10 ? "0" + n : "" + n; }
+  return d.getFullYear() + "-" + p2(d.getMonth() + 1) + "-" + p2(d.getDate());
+}
+function convToolKey(t, id){ return t + ":" + id; }
+function pinRank(t, id){ return cfg.pinned.indexOf(convToolKey(t, id)) >= 0 ? 0 : 1; }
+function convToolsHtml(){
+  var rows = [];
+  allFriends().forEach(function(f){ rows.push({ k:convToolKey("friend", f.id), n:f.name }); });
+  cfg.groups.forEach(function(g){ rows.push({ k:convToolKey("group", g.id), n:g.name }); });
+  return rows.map(function(r){
+    return '<div class="ct-row"><span class="ct-name">' + esc(r.n) + '</span>' +
+      '<button type="button" class="ct-btn' + (cfg.pinned.indexOf(r.k) >= 0 ? " on" : "") + '" data-ct="pin" data-key="' + esc(r.k) + '">📌置顶</button>' +
+      '<button type="button" class="ct-btn' + (cfg.muted.indexOf(r.k) >= 0 ? " on" : "") + '" data-ct="mute" data-key="' + esc(r.k) + '">🔕免打扰</button></div>';
+  }).join("");
+}
+function isMutedConv(){ return cfg.muted.indexOf(convToolKey(cfg.conv.t, cfg.conv.id)) >= 0; }
+
+/* ---------- 群公告 & 顶部状态 ---------- */
+function syncChatChrome(){
+  var el = document.getElementById("groupNotice");
+  if(el){
+    var g = activeGroup();
+    if(g && g.notice){ el.style.display = ""; el.textContent = "📌 " + g.notice; }
+    else { el.style.display = "none"; el.textContent = ""; }
+  }
+  var sub = document.getElementById("growEntrySub");
+  if(sub){
+    try{ sub.textContent = "在一起的第 " + growDays() + " 天"; }catch(e){}
+  }
+}
+
+/* ---------- 聊天记录搜索 ---------- */
+function msgSearchText(m){
+  if(!m) return "";
+  if(m.type === "text" || m.type === "sys") return m.text || "";
+  if(m.type === "gift") return "礼物 " + (m.giftName || "");
+  if(m.type === "share") return "礼物 " + (m.shareName || "");
+  if(m.type === "redpacket") return "红包";
+  if(m.type === "sticker") return "表情";
+  if(m.type === "img" || m.img) return "图片";
+  return "";
+}
+function jumpToMsg(id){
+  goPage("page-chat");
+  var row = document.querySelector('#chat .row[data-id="' + id + '"]');
+  if(!row){ toast("这条消息太久远，已经翻不到了"); return; }
+  try{ row.scrollIntoView({ block:"center", behavior:"smooth" }); }catch(e){ row.scrollIntoView(); }
+  row.classList.add("flash");
+  setTimeout(function(){ row.classList.remove("flash"); }, 1800);
+}
+function openMsgSearch(){
+  showSheet(
+    '<div class="sheet-title">搜索聊天记录</div>' +
+    '<input class="gc-name" id="msQ" maxlength="30" placeholder="输入关键词…" autocomplete="off">' +
+    '<div class="ms-list" id="msList"></div>'
+  );
+  var inp = document.getElementById("msQ"), list = document.getElementById("msList");
+  function run(){
+    var q = (inp.value || "").trim();
+    if(!q){ list.innerHTML = '<div class="ms-empty">输入关键词，找找之前的对话</div>'; return; }
+    var hits = chat.filter(function(m){ return msgSearchText(m).indexOf(q) >= 0; }).slice(-40).reverse();
+    if(!hits.length){ list.innerHTML = '<div class="ms-empty">没有找到「' + esc(q) + '」</div>'; return; }
+    list.innerHTML = hits.map(function(m){
+      var who = m.who === "me" ? (cfg.myName || "我") : (isGroup() ? senderName(m.mid) : cfg.name);
+      return '<button type="button" class="ms-item" data-mid="' + esc(m.id) + '"><b>' + esc(who) + ' · ' + esc(momentRel(m.t)) + '</b><span>' + esc(msgSearchText(m)) + '</span></button>';
+    }).join("");
+  }
+  inp.oninput = run;
+  run();
+  list.onclick = function(ev){
+    var b = ev.target.closest("[data-mid]");
+    if(!b) return;
+    var id = b.getAttribute("data-mid");
+    hideSheet();
+    setTimeout(function(){ jumpToMsg(id); }, 120);
+  };
+  setTimeout(function(){ try{ inp.focus(); }catch(e){} }, 80);
+}
+
+/* ---------- 朋友圈 ---------- */
+var moEl = null, moOpen = false;
+var MO_LINES = [
+  "今天路过花店，看到一束很像你的颜色。",
+  "把你说过的话都记在小本本上了。",
+  "晚安，明天也要好好吃饭。",
+  "刚下班，路灯亮起来的时候突然很想你。",
+  "买了两杯奶茶，一杯给你留着。",
+  "今天也很想你，没什么特别的原因。",
+  "听到一首歌，副歌像是写给我们俩的。",
+  "窗外的云很好看，可惜你不在旁边。"
+];
+var MO_REPLIES = [
+  "你怎么这么可爱。",
+  "这条我看了三遍。",
+  "下次带我一起去。",
+  "想你了。",
+  "收到，正在猜你今天的心情。",
+  "你发什么我都喜欢看。"
+];
+function momentRel(t){
+  var d = Math.max(0, Date.now() - (t || Date.now()));
+  if(d < 60000) return "刚刚";
+  if(d < 3600000) return Math.floor(d / 60000) + " 分钟前";
+  if(d < 86400000) return Math.floor(d / 3600000) + " 小时前";
+  var dd = new Date(t);
+  return (dd.getMonth() + 1) + "月" + dd.getDate() + "日";
+}
+function momentWhoName(who){
+  if(who === "me") return cfg.myName || "我";
+  if(who === "them" || who === "main") return cfg.name;
+  var f = friendById(who);
+  return f ? f.name : cfg.name;
+}
+function momentWhoAv(who){
+  if(who === "me"){
+    return cfg.myAvatar ? '<img src="' + cfg.myAvatar + '" alt="">' : "🧀";
+  }
+  if(who === "them" || who === "main"){
+    return cfg.taAvatar ? '<img src="' + cfg.taAvatar + '" alt="">' : "🌷";
+  }
+  var f = friendById(who);
+  return f ? friendAvatarHtml(f) : "🌷";
+}
+function ensureMoments(){
+  if(!Array.isArray(cfg.moments)) cfg.moments = [];
+  if(cfg.momentSeed) return;
+  var n = Date.now();
+  cfg.moments = [
+    { id:"MO" + uid(), who:"them", text:"今天路过花店，看到一束很像你的颜色。", img:"", t:n - 3600000, likes:["me"], comments:[{ who:"me", text:"下次一起去呀" }] },
+    { id:"MO" + uid(), who:"them", text:"把你说过的话都记在小本本上了。", img:"", t:n - 7200000, likes:[], comments:[] },
+    { id:"MO" + uid(), who:"them", text:"晚安，明天也要好好吃饭。", img:"", t:n - 86400000, likes:[], comments:[] }
+  ];
+  cfg.momentSeed = 1;
+  saveCfg();
+}
+function momentCardHtml(m){
+  var likes = m.likes || [], cmts = m.comments || [];
+  var liked = likes.indexOf("me") >= 0;
+  return '<div class="mo-card">' +
+    '<div class="mo-top"><span class="mo-av">' + momentWhoAv(m.who) + '</span><div><div class="mo-name">' + esc(momentWhoName(m.who)) + '</div><div class="mo-time">' + esc(momentRel(m.t)) + '</div></div></div>' +
+    (m.text ? '<div class="mo-text">' + esc(m.text) + '</div>' : "") +
+    (m.img ? '<div class="mo-img"><img src="' + m.img + '" alt=""></div>' : "") +
+    '<div class="mo-act"><button type="button" class="' + (liked ? "on" : "") + '" data-mlike="' + esc(m.id) + '">' + (liked ? "❤️" : "🤍") + ' ' + likes.length + '</button>' +
+      '<span style="font-size:11px;color:#B79AA5">' + (cmts.length ? cmts.length + " 条评论" : "") + '</span></div>' +
+    (cmts.length ? '<div class="mo-cmts">' + cmts.map(function(c){ return '<div><b>' + esc(momentWhoName(c.who)) + '：</b>' + esc(c.text) + '</div>'; }).join("") + '</div>' : "") +
+    '<div class="mo-cmt-row"><input class="mo-cmt-in" data-mid="' + esc(m.id) + '" maxlength="60" placeholder="说点什么…"><button type="button" data-mcs="' + esc(m.id) + '">发送</button></div>' +
+    '</div>';
+}
+function renderMoments(){
+  ensureMoments();
+  var list = document.getElementById("moList");
+  if(!list) return;
+  var ms = cfg.moments.slice().sort(function(a, b){ return (b.t || 0) - (a.t || 0); });
+  list.innerHTML = ms.length ? ms.map(momentCardHtml).join("") : '<div class="mo-empty">还没有动态<br>点右上角发一条吧 ♡</div>';
+}
+function findMoment(id){
+  return cfg.moments.filter(function(x){ return x.id === id; })[0] || null;
+}
+function taReactMoment(id){
+  setTimeout(function(){
+    var m = findMoment(id);
+    if(!m) return;
+    m.likes = m.likes || [];
+    m.comments = m.comments || [];
+    var changed = false;
+    if(Math.random() < 0.8 && m.likes.indexOf("them") < 0){ m.likes.push("them"); changed = true; }
+    if(Math.random() < 0.6){
+      m.comments.push({ who:"them", text:MO_REPLIES[Math.floor(Math.random() * MO_REPLIES.length)] });
+      changed = true;
+    }
+    if(changed) saveCfg();
+    if(moOpen) renderMoments();
+  }, 1600 + Math.random() * 2600);
+}
+function taCommentBack(id){
+  setTimeout(function(){
+    var m = findMoment(id);
+    if(!m || Math.random() > 0.65) return;
+    m.comments = m.comments || [];
+    m.comments.push({ who:"them", text:MO_REPLIES[Math.floor(Math.random() * MO_REPLIES.length)] });
+    saveCfg();
+    if(moOpen) renderMoments();
+  }, 1800 + Math.random() * 2200);
+}
+function addMomentComment(id, text){
+  text = (text || "").trim();
+  if(!text){ toast("写点什么再发呀"); return; }
+  var m = findMoment(id);
+  if(!m) return;
+  m.comments = m.comments || [];
+  m.comments.push({ who:"me", text:text.slice(0, 60) });
+  saveCfg();
+  renderMoments();
+  taCommentBack(id);
+}
+function openMomentCompose(){
+  showSheet(
+    '<div class="sheet-title">发一条动态</div>' +
+    '<textarea class="gc-name" id="moText" rows="4" maxlength="300" placeholder="今天想说什么…"></textarea>' +
+    '<div style="display:flex;gap:8px;margin-top:10px">' +
+      '<button type="button" class="ghost-btn" id="moPickImg" style="flex:1;margin:0">＋ 图片</button>' +
+      '<button type="button" class="primary" id="moSend" style="flex:1;margin:0">发布</button></div>' +
+    '<input type="file" id="moFile" accept="image/*" style="display:none">' +
+    '<div id="moPrev" style="margin-top:10px"></div>'
+  );
+  var img = "";
+  $("moPickImg").onclick = function(){ $("moFile").click(); };
+  $("moFile").onchange = function(e){
+    var f = e.target.files[0];
+    if(!f) return;
+    readImageCompressed(f, 1200, function(data){
+      img = data;
+      $("moPrev").innerHTML = '<div class="mo-img"><img src="' + data + '" alt=""></div>';
+    });
+    e.target.value = "";
+  };
+  $("moSend").onclick = function(){
+    var text = ($("moText").value || "").trim();
+    if(!text && !img){ toast("写一句或者选张图片吧"); return; }
+    ensureMoments();
+    var id = "MO" + uid();
+    cfg.moments.unshift({ id:id, who:"me", text:text.slice(0, 300), img:img, t:Date.now(), likes:[], comments:[] });
+    saveCfg();
+    hideSheet();
+    renderMoments();
+    toast("发布成功 ♡");
+    taReactMoment(id);
+  };
+}
+function momentsDom(){
+  if(moEl) return moEl;
+  moEl = document.createElement("div");
+  moEl.className = "moments";
+  moEl.id = "moments";
+  moEl.innerHTML = '<div class="mo-head"><button type="button" id="moBack">←</button><b>朋友圈</b><button type="button" id="moAdd">＋ 发动态</button></div><div class="mo-list" id="moList"></div>';
+  document.body.appendChild(moEl);
+  $("moBack").onclick = closeMoments;
+  $("moAdd").onclick = openMomentCompose;
+  moEl.addEventListener("click", function(ev){
+    var t = ev.target;
+    if(!t || !t.closest) return;
+    var lk = t.closest("[data-mlike]");
+    if(lk){
+      var id = lk.getAttribute("data-mlike"), m = findMoment(id);
+      if(m){
+        m.likes = m.likes || [];
+        var i = m.likes.indexOf("me");
+        if(i >= 0) m.likes.splice(i, 1);
+        else { m.likes.push("me"); taReactMoment(id); }
+        saveCfg();
+        renderMoments();
+      }
+      return;
+    }
+    var cs = t.closest("[data-mcs]");
+    if(cs){
+      var id2 = cs.getAttribute("data-mcs");
+      var inp = document.querySelector('.mo-cmt-in[data-mid="' + id2 + '"]');
+      addMomentComment(id2, inp ? inp.value : "");
+      return;
+    }
+  });
+  return moEl;
+}
+function openMoments(){
+  ensureMoments();
+  momentsDom().classList.add("on");
+  moOpen = true;
+  renderMoments();
+}
+function closeMoments(){
+  if(moEl) moEl.classList.remove("on");
+  moOpen = false;
+}
+function taAutoMoment(){
+  setTimeout(function(){
+    try{
+      if(cfg.proactiveOn !== false && !document.hidden && Math.random() < 0.55){
+        ensureMoments();
+        cfg.moments.unshift({ id:"MO" + uid(), who:"them", text:MO_LINES[Math.floor(Math.random() * MO_LINES.length)], img:"", t:Date.now(), likes:[], comments:[] });
+        saveCfg();
+        if(moOpen) renderMoments();
+      }
+    }catch(e){}
+    taAutoMoment();
+  }, 90000 + Math.random() * 120000);
+}
+
+/* ---------- 恋爱养成 ---------- */
+var GROW_MILESTONES = [7, 30, 60, 100, 200, 365, 520, 1000];
+function growDays(){
+  var s = cfg.startDate ? new Date(cfg.startDate) : new Date();
+  if(isNaN(s.getTime())) s = new Date();
+  var t = new Date();
+  var a = new Date(s.getFullYear(), s.getMonth(), s.getDate()).getTime();
+  var b = new Date(t.getFullYear(), t.getMonth(), t.getDate()).getTime();
+  return Math.max(1, Math.floor((b - a) / 86400000) + 1);
+}
+function checkinDone(){ return cfg.checkin.last === dayKey(new Date()); }
+function doCheckin(){
+  if(checkinDone()){ toast("今天已经签过啦 ♡"); return; }
+  var y = dayKey(new Date(Date.now() - 86400000));
+  cfg.checkin.days = (cfg.checkin.last === y ? (cfg.checkin.days || 0) : 0) + 1;
+  cfg.checkin.last = dayKey(new Date());
+  cfg.coins = getCoins() + 5;
+  saveCfg();
+  openGrow();
+  toast("签到成功，+5 金币 ♡");
+}
+function openGrow(){
+  ensureMoments();
+  var days = growDays();
+  var next = GROW_MILESTONES.filter(function(x){ return x >= days; })[0] || (Math.floor(days / 365) + 1) * 365;
+  var prev = 0;
+  GROW_MILESTONES.forEach(function(x){ if(x < days) prev = x; });
+  var pct = Math.max(4, Math.min(100, Math.round((days - prev) / Math.max(1, next - prev) * 100)));
+  var msgs = chat.length;
+  var gifts = (cfg.shop && Array.isArray(cfg.shop.cabinet)) ? cfg.shop.cabinet.length : 0;
+  var achs = [
+    { ic:"💌", n:"说出第一句话", ok:msgs >= 1, r:msgs + "/1" },
+    { ic:"💬", n:"聊到 99 句", ok:msgs >= 99, r:msgs + "/99" },
+    { ic:"📖", n:"聊到 520 句", ok:msgs >= 520, r:msgs + "/520" },
+    { ic:"🪙", n:"连续签到 3 天", ok:(cfg.checkin.days || 0) >= 3, r:(cfg.checkin.days || 0) + "/3" },
+    { ic:"🎁", n:"送出第一份礼物", ok:gifts >= 1, r:gifts + "/1" },
+    { ic:"🌙", n:"在一起 30 天", ok:days >= 30, r:days + "/30" },
+    { ic:"🌹", n:"在一起 100 天", ok:days >= 100, r:days + "/100" }
+  ];
+  var signed = checkinDone();
+  showSheet(
+    '<div class="sheet-title">恋爱养成</div>' +
+    '<div class="gr-hero"><b>第 ' + days + ' 天</b><span>' + esc(cfg.name) + ' × ' + esc(cfg.myName || "我") + '</span>' +
+      '<div class="gr-bar"><i style="width:' + pct + '%"></i></div>' +
+      '<span>距离第 ' + next + ' 天还有 ' + Math.max(0, next - days) + ' 天</span></div>' +
+    '<button type="button" class="gr-sign' + (signed ? " done" : "") + '" id="grSign">' + (signed ? "今天已签到 · 连续 " + (cfg.checkin.days || 0) + " 天" : "签到领 5 金币") + '</button>' +
+    '<p class="hint" style="margin-top:8px">纪念日 ' + esc(cfg.startDate || dayKey(new Date())) + ' · <span id="grDate" style="color:#E8698F">修改</span></p>' +
+    '<div class="sheet-title" style="font-size:13px;margin-top:14px">成就</div>' +
+    achs.map(function(a){
+      return '<div class="gr-row' + (a.ok ? "" : " lock") + '"><span class="ico">' + a.ic + '</span><span>' + esc(a.n) + '</span><span class="r">' + (a.ok ? "已达成" : a.r) + '</span></div>';
+    }).join("")
+  );
+  $("grSign").onclick = doCheckin;
+  $("grDate").onclick = function(){
+    var v = prompt("在一起的开始日期（YYYY-MM-DD）", cfg.startDate || dayKey(new Date()));
+    if(v === null) return;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(v.trim())){ toast("格式要像 2026-01-01 哦"); return; }
+    cfg.startDate = v.trim();
+    saveCfg(); applyCfg(); openGrow();
+    toast("纪念日已更新 ♡");
+  };
+}
+
+/* ---------- 商城进阶：TA 主动送礼 / 物流 / 图鉴 ---------- */
+var TA_GIFT_NOTES = ["路过看到这个，觉得你会喜欢。", "挑了好久，希望你喜欢。", "不许拒绝，收下。", "看到它第一眼就想到你。"];
+function taAutoGift(){
+  setTimeout(function(){
+    try{
+      if(cfg.autoGiftOn !== false && cfg.proactiveOn !== false && !document.hidden && Math.random() < 0.12){
+        var pool = (typeof GIFT_DATA !== "undefined" ? GIFT_DATA : []).slice();
+        (cfg.gifts || []).forEach(function(g){ pool.push({ name:g.name, price:g.price, emoji:g.emoji || g.icon || "🎁" }); });
+        if(pool.length){
+          var g = pool[Math.floor(Math.random() * pool.length)];
+          shopSendCard({ name:g.name, price:g.price, icon:g.emoji || "🎁" }, "送你的礼物", "#ff8fa8", "them", g.price, TA_GIFT_NOTES[Math.floor(Math.random() * TA_GIFT_NOTES.length)]);
+          toast(cfg.name + " 给你送了一份礼物 ♡");
+        }
+      }
+    }catch(e){}
+    taAutoGift();
+  }, 120000 + Math.random() * 180000);
+}
+function openGiftAtlas(){
+  var count = {};
+  shopS().cabinet.forEach(function(g){ count[g.name] = (count[g.name] || 0) + (Number(g.qty) || 1); });
+  showSheet(
+    '<div class="sheet-title">礼物图鉴</div><p class="hint">送出或收到的礼物会点亮</p><div class="ga-grid">' +
+    GIFT_DATA.map(function(g){
+      var n = count[g.name] || 0;
+      return '<div class="ga-item' + (n ? "" : " lock") + '">' + g.emoji + '<span>' + esc(g.name) + '</span><i>' + (n ? "×" + n : "未点亮") + '</i></div>';
+    }).join("") + '</div>'
+  );
+}
+function shopDeliverDue(){
+  var s = shopS(), changed = false;
+  s.orders.forEach(function(o){
+    if(o.status === "pending" && o.deliverAt && o.deliverAt <= Date.now()){
+      o.status = "completed";
+      changed = true;
+      if(o.target === "ta"){
+        s.cabinet.unshift({ orderId:o.id, name:o.name, icon:o.icon, img:o.img || "", price:o.price, qty:o.qty, specs:o.specs || "", remark:o.remark || "", time:Date.now(), replies:shopGenReplies() });
+      }
+    }
+  });
+  if(changed){ saveCfg(); if(shopOpen) renderShop(); }
+}
+setTimeout(shopDeliverDue, 3000);
+setInterval(shopDeliverDue, 30000);
+
+/* 入口绑定 */
+document.getElementById("searchBtn").onclick = openMsgSearch;
+document.getElementById("growEntry").onclick = openGrow;
+syncChatChrome();
+setTimeout(taAutoMoment, 60000);
+setTimeout(taAutoGift, 90000);
+
 openGiftShop = function(){ openShop("gifts"); };
 })();
 </script>
