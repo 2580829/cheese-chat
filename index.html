@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.12-stopreply1";
+  var V = "2026.11.12-replyguard1";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -2485,6 +2485,28 @@ function reply(){
         if(i < total - 1) showTyping(midAt(i + 1));
       }, delay * (i + 1));
     })(i);
+  }
+  /* 兜底：无论排队的回复因异常、概率跳过还是被中途打断而一条都没发出来，
+     都保证对方至少回一句，绝不出现「聊着聊着突然不回」的沉默 */
+  if(N(cfg.replyChance, 100) > 0){
+    var startIdx = chat.length;
+    var myEp = chatEpoch;
+    setTimeout(function(){
+      if(myEp !== chatEpoch) return;
+      for(var k = startIdx; k < chat.length; k++){ if(chat[k].who === "them") return; }
+      if(typingState && Date.now() - (typingState.at || 0) < 15000) return;
+      if(typingState) hideTyping();
+      var gmid = isGroup() ? randMember() : null;
+      showTyping(gmid);
+      setTimeout(function(){
+        if(myEp !== chatEpoch){ hideTyping(); return; }
+        hideTyping();
+        var mid = isGroup() ? randMember() : null;
+        var tx = nightCard() || pickCard();
+        if(tx) pushThemText(tx, mid, maybeQuote());
+        else pushMsg({ who:"them", mid:mid, type:"text", text:"……", t:Date.now() });
+      }, 1400);
+    }, delay * Math.min(total, 3) + 12000);
   }
 }
 
