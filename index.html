@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.12-bugfix2";
+  var V = "2026.11.12-bgreply1";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -2291,6 +2291,16 @@ function hideTyping(){
   hideTypingNotify();
   setGlobalTyping(false);
 }
+/* 回到聊天页时，如果对方还在「输入中」，把冒泡补回来 */
+function restoreTypingRow(){
+  if(!typingState) return;
+  /* 超过 90 秒的旧状态不再恢复（避免遗留一个永远转圈的气泡） */
+  if(typingState.at && Date.now() - typingState.at > 90000){ hideTyping(); return; }
+  if(typingRow && typingRow.parentNode === chatEl){ scrollBottom(); return; }
+  var tm = typingState;
+  typingState = null;
+  showTyping(tm.mid);
+}
 /* 跨页面也保持「正在输入」：切到别的页面时用顶部新消息条显示，回到聊天恢复气泡 */
 var typingState = null;
 function syncTypingUI(){
@@ -2756,8 +2766,9 @@ function sendPoke(action){
   pushMsg({ sys:true, text: myPokeText(action), t:Date.now() });
   renderStats();
   if(allCards().length === 0) return;
-  if(Math.random() * 100 < Math.max(35, N(cfg.partnerPokeChance, 0))){
-    clearReplies();
+  /* 对方正在回复中：拍完就等它回，不打断也不插队 */
+  if(replyTimers.length || typingState) return;
+  if(Math.random() * 100 < Math.max(0, N(cfg.partnerPokeChance, 0))){
     showTyping();
     scheduleReply(function(){
       hideTyping();
@@ -3405,6 +3416,8 @@ function proactiveTick(){
   var gap = Math.max(0.5, N(cfg.proactiveInterval, 6)) * 60 * 1000;
   if(Date.now() - lastProactiveAt < gap) return;
   if(callActive || rpIncoming) return;
+  /* 对方还在回复/输入中：这一轮主动消息直接跳过，绝不打断 */
+  if(replyTimers.length || typingState) return;
   lastProactiveAt = Date.now();
   if(Math.random() * 100 >= N(cfg.proactiveChance, 0)) return;
   proactiveSend();
@@ -3420,7 +3433,6 @@ function proactiveSend(){
   if(roll < callP + pokeP){ partnerPoke(); return; }
   if(roll < callP + pokeP + rpP){ taSendRedPacket(); return; }
   if(allCards().length === 0) return;
-  clearReplies();
   var inGroup = isGroup();
   var total0 = 1 + (Math.random() < 0.35 ? 1 : 0);
   var mids = inGroup ? pickSpeakers(total0) : [];
@@ -3768,7 +3780,8 @@ function setupHomeWidgets(){
       var go = b.getAttribute("data-go");
       var act = b.getAttribute("data-act");
       if(go){
-        if(go === "page-chat"){ clearReplies(); clearQuote(); }
+        /* 只是回到聊天页，不打断对方正在进行的回复 */
+        if(go === "page-chat"){ clearQuote(); }
         goPage(go);
       }else if(act){
         runHmAct(act);
@@ -4604,7 +4617,7 @@ $("charBtn").onclick = openCharSheet;
 function goPage(id){
   document.querySelectorAll(".page").forEach(function(p){ p.classList.toggle("active", p.id === id); });
   document.querySelectorAll(".tab-item").forEach(function(t){ t.classList.toggle("on", t.dataset.page === id); });
-  if(id === "page-chat"){ $("newMsgBar").classList.remove("show"); markRead(cfg.conv); }
+  if(id === "page-chat"){ $("newMsgBar").classList.remove("show"); markRead(cfg.conv); restoreTypingRow(); }
   if(id === "page-home") renderHome();
   if(id === "page-lib") renderLib();
   if(id === "page-diary") renderDiary();
@@ -5152,7 +5165,11 @@ function convPreview(t, id){
 function openConv(conv){
   if(conv.t === "group" && !cfg.groups.some(function(g){ return g.id === conv.id; })) return;
   if(conv.t === "friend" && !friendById(conv.id)) return;
-  clearReplies(); clearQuote();
+  /* 只有真正切换到「别的会话」才作废正在排队的回复；
+     重复打开当前会话（点首页传讯、点会话列表）不应打断对方回消息 */
+  var same = cfg.conv && cfg.conv.t === conv.t && cfg.conv.id === conv.id;
+  if(!same) clearReplies();
+  clearQuote();
   cfg.conv = conv;
   markRead(conv);
   saveCfg();
