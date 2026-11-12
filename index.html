@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.13-decide1";
+  var V = "2026.11.13-decide2";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -2249,7 +2249,7 @@ function paintMsg(m){
       ? '<img src="' + esc(m.giftImg) + '" alt="">'
       : esc(m.giftEmoji || "🎁");
     var gbLine = m.who === "me"
-      ? "你送给 " + esc(convName()) + " "
+      ? "你送给 " + esc(m.mid ? senderName(m.mid) : convName()) + " "
       : esc(m.mname || senderName(m.mid)) + " 送给你 ";
     chatEl.insertAdjacentHTML("beforeend",
       '<div class="row giftrow" data-id="' + m.id + '">' +
@@ -6074,7 +6074,7 @@ document.body.dataset.bshape = cfg.bubbleShape || "standard";
   var sp = document.getElementById("splash");
   if(!sp) return;
   var lastVer = load("cheese.splash.v", "");
-  var curVer  = window.APP_VER || "2026.11.13-decide1";
+  var curVer  = window.APP_VER || "2026.11.13-decide2";
   var show = !lastVer || lastVer !== curVer;
   if(!show){ sp.style.display = "none"; return; }
   /* 跳过按钮 */
@@ -6363,6 +6363,20 @@ function shopSendCard(p, tag, color, who, price, note, toName, mid){
   if(mid) m.mid = mid;
   if(who === "them" && !m.mid && isGroup()) m.mid = randMember();
   pushMsg(m);
+}
+/* 商城买给 TA：只发一行无气泡的礼物文字，不再用大卡片遮头像 */
+function shopGiftLine(p, qty, toName, mid, who){
+  pushMsg({
+    who: who || "me",
+    mid: mid || undefined,
+    type: "gift",
+    giftId: p.id || ("s" + uid()),
+    giftEmoji: p.icon || "🎁",
+    giftName: p.name + (qty > 1 ? " ×" + qty : ""),
+    giftPrice: (p.price || 0) * (qty || 1),
+    giftImg: p.img || "",
+    t: Date.now()
+  });
 }
 function shopTaReply(delay, mid){
   var who = mid || (isGroup() ? randMember() : null);
@@ -6762,7 +6776,7 @@ function doShopBuy(target, remark){
       cur.status = "completed";
       s.cabinet.unshift({ orderId:bo.id, name:p.name, icon:p.icon, img:p.img || "", price:p.price, qty:qty, specs:specs.join(" | "), remark:remark || "", time:Date.now(), replies:shopGenReplies() });
       saveCfg();
-      shopSendCard(p, "已送达", "#ff9aa8", "them", null, "", d.toName || "", d.toMid || "");
+      shopGiftLine(p, qty, d.toName || "", d.toMid || null, "them");
       shopTaReply(600, d.toMid);
       if(shopOpen) renderShop();
       toast("预订的礼物送到啦 ♡");
@@ -6774,7 +6788,7 @@ function doShopBuy(target, remark){
     s.orders.unshift(o);
     s.cabinet.unshift({ orderId:o.id, name:p.name, icon:p.icon, img:p.img || "", price:p.price, qty:qty, specs:specs.join(" | "), remark:remark || "", time:Date.now(), replies:shopGenReplies() });
     saveCfg(); hideSheet(); renderShop();
-    shopSendCard(p, "已送达", "#ff9aa8", "me", null, "", d.toName || "", d.toMid || "");
+    shopGiftLine(p, qty, d.toName || "", d.toMid || null, "me");
     toast(d.toName ? "礼物已经送到 " + d.toName + " 手里啦 ♡" : "礼物已经送到 TA 手里啦 ♡");
     shopTaReply(1400, d.toMid);
     return;
@@ -6811,7 +6825,7 @@ function shopAutoBuy(){
   s.myCabinet.unshift({ name:it.name, icon:it.icon, img:it.img || "", price:it.price, qty:q, source:"自动购买", orderId:o.id, time:Date.now() });
   s.cart.splice(idx, 1);
   saveCfg();
-  shopSendCard(it, "已自动下单", "#ff9a56", "them");
+  shopGiftLine(it, q, "", null, "them");
   (function(_ep){ setTimeout(function(){ if(_ep !== chatEpoch) return; pushMsg({ who:"them", type:"text", text:"你的购物车我帮你清了一件，惊喜吗？", t:Date.now() }); }, 1200); })(chatEpoch);
   if(shopOpen){ renderShop(); }
 }
@@ -7188,7 +7202,7 @@ function taAutoGift(){
         (cfg.gifts || []).forEach(function(g){ pool.push({ name:g.name, price:g.price, emoji:g.emoji || g.icon || "🎁" }); });
         if(pool.length){
           var g = pool[Math.floor(Math.random() * pool.length)];
-          shopSendCard({ name:g.name, price:g.price, icon:g.emoji || "🎁" }, "送你的礼物", "#ff8fa8", "them", g.price, TA_GIFT_NOTES[Math.floor(Math.random() * TA_GIFT_NOTES.length)]);
+          shopGiftLine({ name:g.name, price:g.price, icon:g.emoji || "🎁", img:"" }, 1, "", null, "them");
           toast(cfg.name + " 给你送了一份礼物 ♡");
         }
       }
