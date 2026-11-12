@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.11-four1";
+  var V = "2026.11.12-bugfix1";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -1653,7 +1653,8 @@ function settingsSnapshot(){
     "replyChance","stickerChance","callPickChance","textChance","voiceChance","giftAskChance",
     "proactiveOn","proactiveInterval","proactiveChance","quoteChance","partnerRpChance",
     "proactiveCallChance","partnerPokeChance","jealousy","petName","pokes","pokeSymMe","pokeSymTa",
-    "pokeSymMeCustom","pokeSymTaCustom","spiritSeeded","conv","friends","groups","gifts"];
+    "pokeSymMeCustom","pokeSymTaCustom","spiritSeeded","conv","friends","groups","gifts",
+    "groupAvatars","chatBg","appBg","convBgs","autoGiftOn","pinned","muted","checkin","moments"];
   var o = {};
   for(var i = 0; i < keep.length; i++){
     var k = keep[i];
@@ -1662,7 +1663,7 @@ function settingsSnapshot(){
       continue;
     }
     if(k === "groups"){
-      if(Array.isArray(cfg.groups)) o[k] = cfg.groups.map(function(g){ return { id:g.id, name:g.name, members:(g.members || []).slice() }; });
+      if(Array.isArray(cfg.groups)) o[k] = cfg.groups.map(function(g){ return { id:g.id, name:g.name, members:(g.members || []).slice(), notice:g.notice || "" }; });
       continue;
     }
     if(k === "conv"){
@@ -1755,6 +1756,11 @@ if(!Array.isArray(cfg.groups)) cfg.groups = [];
 cfg.friends = cfg.friends.filter(function(f){ return f && f.id && f.name; });
 cfg.groups = cfg.groups.filter(function(g){ return g && g.id && g.name && Array.isArray(g.members) && g.members.length; });
 if(!cfg.conv || !cfg.conv.t || !cfg.conv.id) cfg.conv = { t:"friend", id:"main" };
+if(cfg.conv.t === "group"){
+  var _still = false;
+  for(var _gi = 0; _gi < cfg.groups.length; _gi++){ if(cfg.groups[_gi].id === cfg.conv.id){ _still = true; break; } }
+  if(!_still) cfg.conv = { t:"friend", id:"main" };
+}
 function mainFriend(){ return { id:"main", name:cfg.name, avatar:cfg.taAvatar || "", status:cfg.status || "" }; }
 function allFriends(){ return [mainFriend()].concat(cfg.friends); }
 function friendById(id){
@@ -1847,16 +1853,34 @@ function scrollBottom(){ requestAnimationFrame(function(){ chatEl.scrollTop = ch
 /* ================= 消息渲染 ================= */
 function renderAll(){
   chatEl.innerHTML = "";
-  var d = new Date();
-  var pill = document.createElement("div");
-  pill.className = "date-pill";
-  pill.textContent = (d.getMonth()+1) + "月" + d.getDate() + "日 · 今天";
-  chatEl.appendChild(pill);
+  /* 按自然日分组，跨天的每段前插一个日期标签 */
+  function p2(n){ return n < 10 ? "0" + n : "" + n; }
+  function dayKey2(d){ return d.getFullYear() + "-" + p2(d.getMonth()+1) + "-" + p2(d.getDate()); }
+  var lastDay = null;
+  chat.forEach(function(m){
+    var d = new Date(m.t || Date.now());
+    var k = dayKey2(d);
+    if(k !== lastDay){
+      var pill = document.createElement("div");
+      pill.className = "date-pill";
+      var now = new Date();
+      var nowK = dayKey2(now);
+      var yest = new Date(now.getTime() - 86400000);
+      var yestK = dayKey2(yest);
+      var label;
+      if(k === nowK) label = (d.getMonth()+1) + "月" + d.getDate() + "日 · 今天";
+      else if(k === yestK) label = (d.getMonth()+1) + "月" + d.getDate() + "日 · 昨天";
+      else label = (d.getMonth()+1) + "月" + d.getDate() + "日";
+      pill.textContent = label;
+      chatEl.appendChild(pill);
+      lastDay = k;
+    }
+    paintMsg(m);
+  });
 
   if(chat.length === 0){
     paintEmpty();
   }
-  chat.forEach(function(m){ paintMsg(m); });
   if(typingState){ var tm = typingState; typingState = null; showTyping(tm.mid); }
   scrollBottom();
 }
@@ -1889,17 +1913,31 @@ function quoteHtml(q){
   return '<div class="quote">' + nm + esc(q.text) + "</div>";
 }
 function msgLabel(m){
+  if(!m) return "";
   if(m.type === "img") return "[图片]";
   if(m.type === "sticker") return "[表情]";
   if(m.type === "redpacket") return "[红包] ¥" + (m.amount || "0.00");
-  return m.text;
+  if(m.type === "gift") return "[礼物] " + (m.giftName || "");
+  if(m.type === "share") return "[好物] " + (m.shareName || "");
+  if(m.type === "voice") return "[语音]";
+  if(m.text == null) return "[消息]";
+  return m.text || "";
 }
 function paintMsg(m){
+  if(!m) return;
   if(m.sys){
     var s = document.createElement("div");
     s.className = "sys";
     s.textContent = m.text;
     chatEl.appendChild(s);
+    return;
+  }
+  /* 语音已于 group2 移除；旧备份里的语音消息降级为系统提示，避免 undefined 气泡 */
+  if(m.type === "voice"){
+    var vs = document.createElement("div");
+    vs.className = "sys";
+    vs.textContent = (m.who === "me" ? "你" : senderName(m.mid)) + " 发送了一条旧语音（已下线）";
+    chatEl.appendChild(vs);
     return;
   }
   var row = document.createElement("div");
@@ -2178,7 +2216,15 @@ function renderFavs(){
 }
 
 /* ================= 回复 ================= */
-var typingRow = null, replyTimers = [];
+var typingRow = null, replyTimers = [], chatEpoch = 0;
+/* 所有异步回复必须通过 scheduleReply：捕获 chatEpoch，切会话后自动作废 */
+function scheduleReply(fn, delay){
+  var ep = chatEpoch;
+  replyTimers.push(setTimeout(function(){
+    if(ep !== chatEpoch) return;
+    try{ fn(); }catch(e){}
+  }, delay));
+}
 function allCards(){
   var out = [];
   Object.keys(lib).forEach(function(g){ out = out.concat(lib[g]); });
@@ -2271,6 +2317,7 @@ function replyDelayMs(){
 function clearReplies(){
   replyTimers.forEach(function(t){ clearTimeout(t); });
   replyTimers = [];
+  chatEpoch++; /* 让所有旧的 scheduleReply 到期自动作废 */
   hideTyping();
 }
 function pickCard(){
@@ -2351,7 +2398,7 @@ function reply(){
   showTyping(midAt(0));
   for(var i = 0; i < total; i++){
     (function(i){
-      replyTimers.push(setTimeout(function(){
+      scheduleReply(function(){
         hideTyping();
         var mid = midAt(i);
         /* 第一句：先吃个醋 */
@@ -2391,18 +2438,24 @@ function reply(){
           pushThemText(nightCard() || pickCard(), mid);
         }
         if(i < total - 1) showTyping(midAt(i + 1));
-      }, delay * (i + 1)));
+      }, delay * (i + 1));
     })(i);
   }
 }
 
 /* ================= 发送 ================= */
 var lastSendAt = 0;
+function makeQuote(m){
+  if(!m) return null;
+  var who = m.who;
+  var name = who === "me" ? (cfg.myName || "我") : senderName(m.mid);
+  return { who:who, name:name, text: msgLabel(m), mid:m.mid, id:m.id };
+}
 function send(){
   var t = field.value.trim();
   if(!t) return;
   lastSendAt = Date.now();
-  pushMsg({ who:"me", type:"text", text:t, quote: quoting ? {who:quoting.who, text: msgLabel(quoting)} : null, t:Date.now() });
+  pushMsg({ who:"me", type:"text", text:t, quote: makeQuote(quoting), t:Date.now() });
   field.value = "";
   autoGrow();
   clearQuote();
@@ -2428,7 +2481,7 @@ $("imgInput").onchange = function(e){
   var files = Array.prototype.slice.call(e.target.files || []);
   e.target.value = "";
   if(!files.length) return;
-  var q = quoting ? {who:quoting.who, text: msgLabel(quoting)} : null;
+  var q = quoting ? makeQuote(quoting) : null;
   var sent = 0;
   function readNext(){
     if(!files.length){
@@ -2535,7 +2588,7 @@ function sendSticker(src){
   lastStkSend = Date.now();
   hideSheet();
   lastSendAt = Date.now();
-  pushMsg({ who:"me", type:"sticker", src:src, quote: quoting ? {who:quoting.who, text: msgLabel(quoting)} : null, t:Date.now() });
+  pushMsg({ who:"me", type:"sticker", src:src, quote: quoting ? makeQuote(quoting) : null, t:Date.now() });
   clearQuote();
   renderStats();
   reply();
@@ -2547,7 +2600,7 @@ function sendBuiltin(e){
   lastStkSend = Date.now();
   hideSheet();
   lastSendAt = Date.now();
-  pushMsg({ who:"me", type:"sticker", emoji:e, quote: quoting ? {who:quoting.who, text: msgLabel(quoting)} : null, t:Date.now() });
+  pushMsg({ who:"me", type:"sticker", emoji:e, quote: quoting ? makeQuote(quoting) : null, t:Date.now() });
   clearQuote();
   renderStats();
   reply();
@@ -2674,11 +2727,12 @@ function sendPoke(action){
   if(Math.random() * 100 < Math.max(35, Number(cfg.partnerPokeChance) || 0)){
     clearReplies();
     showTyping();
-    replyTimers.push(setTimeout(function(){
+    scheduleReply(function(){
       hideTyping();
       partnerPoke();
       if(Math.random() < 0.5) pushThemText(nightCard() || pickCard());
-    }, Math.max(700, replyDelayMs())));
+    }, Math.max(700, replyDelayMs()));
+
   }else{
     reply();
   }
@@ -2734,7 +2788,7 @@ function pingThem(){
   showTyping(midAt(0));
   for(var i = 0; i < total; i++){
     (function(i){
-      replyTimers.push(setTimeout(function(){
+      scheduleReply(function(){
         hideTyping();
         var mid = midAt(i);
         var r = Math.random();
@@ -2751,7 +2805,8 @@ function pingThem(){
           pushThemText(nightCard() || pickCard(), mid);
         }
         if(i < total - 1) showTyping(midAt(i + 1));
-      }, delay * (i + 1)));
+      }, delay * (i + 1));
+
     })(i);
   }
 }
@@ -2824,7 +2879,7 @@ function continueTalk(){
   if(allCards().length === 0){ toast("字卡库是空的，先写几张吧"); return; }
   clearReplies();
   showTyping();
-  replyTimers.push(setTimeout(function(){
+  scheduleReply(function(){
     hideTyping();
     var stk = pickStk();
     var r = Math.random();
@@ -2833,7 +2888,7 @@ function continueTalk(){
     }else{
       pushThemText(nightCard() || pickCard());
     }
-  }, Math.min(2400, Math.max(600, replyDelayMs()))));
+  }, Math.min(2400, Math.max(600, replyDelayMs())));
 }
 
 /* 红包 */
@@ -2883,11 +2938,11 @@ function scheduleRpReaction(m){
     if(r < 0.68){
       setRpStatus(m, "opened");
       pushMsg({ sys:true, text:senderName(m.mid) + " 领取了你的红包 ¥" + m.amount, t:Date.now() });
-      setTimeout(function(){ pushMsg({ who:"them", mid:m.mid, type:"text", text:pickRnd(RP_THANKS), t:Date.now() }); }, 900);
+      (function(_ep){ setTimeout(function(){ if(_ep !== chatEpoch) return; pushMsg({ who:"them", mid:m.mid, type:"text", text:pickRnd(RP_THANKS), t:Date.now() }); }, 900); })(chatEpoch);
     }else if(r < 0.9){
       setRpStatus(m, "refunded");
       pushMsg({ sys:true, text:senderName(m.mid) + " 退回了你的红包", t:Date.now() });
-      setTimeout(function(){ pushMsg({ who:"them", mid:m.mid, type:"text", text:pickRnd(RP_REFUNDS), t:Date.now() }); }, 900);
+      (function(_ep){ setTimeout(function(){ if(_ep !== chatEpoch) return; pushMsg({ who:"them", mid:m.mid, type:"text", text:pickRnd(RP_REFUNDS), t:Date.now() }); }, 900); })(chatEpoch);
     }else{
       setRpStatus(m, "opened");
       pushMsg({ sys:true, text:senderName(m.mid) + " 领取了你的红包 ¥" + m.amount, t:Date.now() });
@@ -2943,7 +2998,7 @@ $("rpOpenBtn").onclick = function(){
       saveChat();
       renderAll();
       pushMsg({ sys:true, text:"你领取了 " + senderName(m.mid) + " 的红包 ¥" + m.amount, t:Date.now() });
-      setTimeout(function(){ pushMsg({ who:"them", mid:randMember(), type:"text", text:pickRnd(RP_RECEIVE), t:Date.now() }); }, 800);
+      (function(_ep){ setTimeout(function(){ if(_ep !== chatEpoch) return; pushMsg({ who:"them", mid:randMember(), type:"text", text:pickRnd(RP_RECEIVE), t:Date.now() }); }, 800); })(chatEpoch);
     }
   }, 780);
 };
@@ -2987,9 +3042,7 @@ function throwItem(it, byMe){
     setTimeout(function(){ av.classList.remove("shake"); }, 620);
   }, 760);
   if(byMe && Math.random() < 0.5){
-    setTimeout(function(){
-      pushMsg({ who:"them", mid:randMember(), type:"text", text:pickRnd(THROW_LINES), t:Date.now() });
-    }, 950);
+    (function(_ep){ setTimeout(function(){ if(_ep !== chatEpoch) return; pushMsg({ who:"them", mid:randMember(), type:"text", text:pickRnd(THROW_LINES), t:Date.now() }); }, 950); })(chatEpoch);
   }
   if(byMe && Math.random() < 0.45){
     setTimeout(function(){
@@ -3097,9 +3150,7 @@ function endCall(label){
   }
   if(dur >= 2){
     pushMsg({ sys:true, text:"视频通话已结束 · " + fmtSec(dur), t: Date.now() });
-    setTimeout(function(){
-      pushMsg({ who:"them", mid:randMember(), type:"text", text:pickRnd(CALL_LINES), t:Date.now() });
-    }, 700);
+    (function(_ep){ setTimeout(function(){ if(_ep !== chatEpoch) return; pushMsg({ who:"them", mid:randMember(), type:"text", text:pickRnd(CALL_LINES), t:Date.now() }); }, 700); })(chatEpoch);
   }else if(dur > 0){
     pushMsg({ sys:true, text:"通话已挂断 · " + fmtSec(dur), t: Date.now() });
   }else{
@@ -3332,7 +3383,7 @@ function proactiveSend(){
   var total = total0;
   for(var i = 0; i < total; i++){
     (function(i){
-      replyTimers.push(setTimeout(function(){
+      scheduleReply(function(){
         hideTyping();
         var mid = midAt(i);
         var r = Math.random() * 100;
@@ -3343,7 +3394,8 @@ function proactiveSend(){
           pushThemText(nightCard() || pickCard(), mid);
         }
         if(i < total - 1) showTyping(midAt(i + 1));
-      }, 700 + i * Math.max(900, replyDelayMs())));
+      }, 700 + i * Math.max(900, replyDelayMs()));
+
     })(i);
   }
 }
@@ -5468,8 +5520,17 @@ $("importInput").onchange = function(e){
       if(cfg.bubble == null) cfg.bubble = 0;
       if(!Array.isArray(cfg.friends)) cfg.friends = [];
       if(!Array.isArray(cfg.groups)) cfg.groups = [];
+      cfg.groups = cfg.groups.filter(function(g){ return g && g.id && g.name && Array.isArray(g.members) && g.members.length; });
       if(!cfg.conv || !cfg.conv.t || !cfg.conv.id) cfg.conv = { t:"friend", id:"main" };
-      if(d.chat) chat = d.chat;
+      /* 旧备份的 conv 可能是 group 但 groups 里已经没有了 → 退回主好友 */
+      if(cfg.conv.t === "group"){
+        var stillExists = false;
+        for(var _gi = 0; _gi < cfg.groups.length; _gi++){ if(cfg.groups[_gi].id === cfg.conv.id){ stillExists = true; break; } }
+        if(!stillExists) cfg.conv = { t:"friend", id:"main" };
+      }
+      /* 旧备份的好友列表去重 + 主好友必在 */
+      if(!cfg.friends.some(function(f){ return f && f.id === "main"; })) cfg.friends = [{ id:"main", name:cfg.name || "念念", avatar:"", note:"主好友" }].concat(cfg.friends || []);
+      if(d.chat) chat = d.chat.filter(function(m){ return m && m.type !== "voice"; });
       if(d.diary) diary = d.diary;
       if(d.convs && typeof d.convs === "object"){
         Object.keys(d.convs).forEach(function(k){ save(k, d.convs[k]); });
@@ -6241,7 +6302,9 @@ function doShopBuy(target, remark){
 function shopAutoLoop(){
   if(!shopAutoStarted) return;
   setTimeout(function(){
-    try{ shopAutoBuy(); }catch(e){}
+    try{
+      if(cfg.proactiveOn !== false && !document.hidden) shopAutoBuy();
+    }catch(e){}
     shopAutoLoop();
   }, 10000 + Math.random() * 50000);
 }
@@ -6261,7 +6324,7 @@ function shopAutoBuy(){
   s.cart.splice(idx, 1);
   saveCfg();
   shopSendCard(it, "已自动下单", "#ff9a56", "them");
-  setTimeout(function(){ pushMsg({ who:"them", type:"text", text:"你的购物车我帮你清了一件，惊喜吗？", t:Date.now() }); }, 1200);
+  (function(_ep){ setTimeout(function(){ if(_ep !== chatEpoch) return; pushMsg({ who:"them", type:"text", text:"你的购物车我帮你清了一件，惊喜吗？", t:Date.now() }); }, 1200); })(chatEpoch);
   if(shopOpen){ renderShop(); }
 }
 setTimeout(shopAutoLoop, 5000);
