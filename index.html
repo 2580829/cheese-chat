@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.12-runbg1";
+  var V = "2026.11.12-giftsm1";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -563,16 +563,16 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 .hm-app[data-act="call"] .ic{background:linear-gradient(135deg,#B8E5D5,#81C7A8);color:#fff}
 .hm-app[data-act="say"] .ic{background:linear-gradient(135deg,#D7E8B3,#AED581);color:#5C7B3E}
 .hm-app[data-act="bubble"] .ic{background:linear-gradient(135deg,#FCE4EC,#F8BBD0);color:#8B4A5D}
-/* 礼物消息：无气泡，居中卡片，不压头像 */
+/* 礼物消息：无气泡，居中卡片，紧凑尺寸，不挡消息 */
 .row.giftrow{justify-content:center;padding:2px 0}
-.gift-card{display:flex;align-items:center;gap:10px;max-width:68%;padding:10px 15px;border-radius:15px;background:linear-gradient(135deg,rgba(255,240,247,.96),rgba(255,246,236,.96));box-shadow:0 5px 18px rgba(232,127,164,.16);border:1px solid rgba(255,255,255,.9);animation:giftPop .4s cubic-bezier(.22,.8,.3,1)}
+.gift-card{display:flex;align-items:center;gap:8px;max-width:68%;padding:8px 12px;border-radius:14px;background:linear-gradient(135deg,rgba(255,240,247,.96),rgba(255,246,236,.96));box-shadow:0 4px 14px rgba(232,127,164,.14);border:1px solid rgba(255,255,255,.9);animation:giftPop .4s cubic-bezier(.22,.8,.3,1);width:max-content;max-width:min(68%,280px)}
 @keyframes giftPop{from{transform:scale(.9);opacity:0}to{transform:none;opacity:1}}
-.gift-card .gc-ico{font-size:34px;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(232,127,164,.22))}
-.gift-card .gc-ico img{width:40px;height:40px;object-fit:contain;border-radius:8px;display:block}
-.gift-card .gc-info{flex:1;min-width:0}
-.gift-card .gc-info b{display:block;font-size:13px;color:#8B4A5D;font-weight:700}
-.gift-card .gc-info i{display:block;font-size:11px;color:#A07785;font-style:normal;margin-top:2px}
-.gift-card .gc-price{font-size:11px;color:#E87FA4;background:rgba(247,200,216,.35);padding:2px 8px;border-radius:999px;flex-shrink:0}
+.gift-card .gc-ico{font-size:26px;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(232,127,164,.22))}
+.gift-card .gc-ico img{width:32px;height:32px;object-fit:contain;border-radius:8px;display:block}
+.gift-card .gc-info{flex:0 1 auto;min-width:0;max-width:140px}
+.gift-card .gc-info b{display:block;font-size:12.5px;color:#8B4A5D;font-weight:700}
+.gift-card .gc-info i{display:block;font-size:10.5px;color:#A07785;font-style:normal;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+.gift-card .gc-price{font-size:10.5px;color:#E87FA4;background:rgba(247,200,216,.35);padding:2px 7px;border-radius:999px;flex-shrink:0}
 /* 点一下出菜单：关掉浏览器的长按复制/选择弹窗 */
 .row .msg,.row .m-body{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 /* 烟花特效 */
