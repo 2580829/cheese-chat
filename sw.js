@@ -6,9 +6,9 @@
    - 图片 / 图标 / 静态脚本：cache-first
    升级时改 CACHE 版本号即可清掉旧缓存
    ================================================================ */
-const CACHE = 'CHEESE_V15';
+const CACHE = 'CHEESE_V16';
 /* 与页面 version.json 保持一致；激活时用它把旧页面强制带到新地址 */
-const VERSION = '2026.11.12-bugfix2';
+const VERSION = '2026.11.12-bgreply1';
 const PRECACHE = [
   './',
   './index.html',
