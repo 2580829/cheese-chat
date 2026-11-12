@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.12-giftchip1";
+  var V = "2026.11.12-stopreply1";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -2837,6 +2837,7 @@ function pingThem(){
       scheduleReply(function(){
         hideTyping();
         var mid = midAt(i);
+        var thisQuote = maybeQuote();
         var r = Math.random();
         if(r < 0.2){
           var sk = pickStk();
@@ -3448,6 +3449,7 @@ function proactiveSend(){
         hideTyping();
         var mid = midAt(i);
         var r = Math.random() * 100;
+        var thisQuote = maybeQuote();
         var stkP = N(cfg.stickerChance, 35) * 0.5;
         if(r < stkP && cfg.stickers.length){
           pushMsg({ who:"them", mid:mid, type:"sticker", src:pickStk().src, t:Date.now() });
