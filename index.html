@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.12-giftsm1";
+  var V = "2026.11.12-bugfix2";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -1866,7 +1866,13 @@ function esc(s){
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
 function pad(n){ return n < 10 ? "0" + n : "" + n; }
 function dayKey(d){ return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()); }
-function scrollBottom(){ requestAnimationFrame(function(){ chatEl.scrollTop = chatEl.scrollHeight; }); }
+function scrollBottom(){
+  requestAnimationFrame(function(){
+    chatEl.scrollTop = chatEl.scrollHeight;
+    requestAnimationFrame(function(){ chatEl.scrollTop = chatEl.scrollHeight; });
+  });
+  setTimeout(function(){ chatEl.scrollTop = chatEl.scrollHeight; }, 320); /* 兜底：过 280ms 页面过渡动画结束后再滚一次 */
+}
 
 /* ================= 消息渲染 ================= */
 function renderAll(){
