@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.12-bugfix1";
+  var V = "2026.11.12-fullfix1";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -95,6 +95,7 @@ if('serviceWorker' in navigator){
   --shadow:0 8px 30px rgba(232,127,164,.16);
   --chatfont:"Quicksand","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   --serif:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
+  --chat-msg-fs:14.5px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;position:fixed;inset:0;width:100%}
@@ -168,7 +169,7 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 .m-avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.9)}
 .m-avatar.them{background:linear-gradient(135deg,#F9B8D0,#FCE4EC 60%,#FFE9D6)}
 .m-avatar.me{background:linear-gradient(135deg,#FFE3C2,#FFF3E4)}
-.msg{max-width:68%;padding:10px 14px;font-size:14.5px;line-height:1.7;letter-spacing:.01em;position:relative;word-break:break-word;transition:transform .25s,box-shadow .25s}
+.msg{max-width:68%;padding:10px 14px;font-size:var(--chat-msg-fs);line-height:1.7;letter-spacing:.01em;position:relative;word-break:break-word;transition:transform .25s,box-shadow .25s}
 .row.them .msg{background:linear-gradient(180deg,#FFFEFD,#FFF8F6);border-radius:4px 18px 18px 18px;box-shadow:0 6px 22px rgba(213,146,170,.14);border:1px solid rgba(247,200,216,.5)}
 .row.me .msg{background:linear-gradient(135deg,#F8C2D4,#ED97B7);color:#fff;border-radius:18px 4px 18px 18px;box-shadow:0 6px 20px rgba(232,127,164,.32),inset 0 1px 0 rgba(255,255,255,.35)}
 @media (hover:hover){.msg:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(232,127,164,.28)}}
@@ -1350,6 +1351,15 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
         <div class="section-label">收藏</div>
         <div id="favList"></div>
 
+        <div class="section-label">外观</div>
+        <div class="panel">
+          <div class="panel-title">聊天气泡</div>
+          <div class="slider-row">
+            <label>聊天字号</label>
+            <input type="range" id="sFontSize" min="11" max="18" step="0.5" value="14.5"><span id="vFontSize">14.5px</span>
+          </div>
+        </div>
+
         <div class="section-label">高级设定 · 概率</div>
         <div class="panel">
           <div class="panel-title">更真实的聊天</div>
@@ -1650,7 +1660,7 @@ function saveCfg(){
 function settingsSnapshot(){
   var keep = ["name","myName","status","replyDelay","minReplies","maxReplies","startDate","taOffset",
     "bubble","bubbleShape","callSize","callBgIdx","skinId","fontId","mood","coins","themePreset",
-    "replyChance","stickerChance","callPickChance","textChance","voiceChance","giftAskChance",
+    "replyChance","stickerChance","callPickChance","giftAskChance","fontSize",
     "proactiveOn","proactiveInterval","proactiveChance","quoteChance","partnerRpChance",
     "proactiveCallChance","partnerPokeChance","jealousy","petName","pokes","pokeSymMe","pokeSymTa",
     "pokeSymMeCustom","pokeSymTaCustom","spiritSeeded","conv","friends","groups","gifts",
@@ -1722,11 +1732,19 @@ if(!cfg.themePreset) cfg.themePreset = "pink"; /* 主题色 */
 if(cfg.replyChance == null) cfg.replyChance = 100;   /* 回复触发概率 0-100 */
 if(cfg.stickerChance == null) cfg.stickerChance = 35; /* 对方发表情包概率 0-100 */
 if(cfg.callPickChance == null) cfg.callPickChance = 80; /* 通话接听概率 0-100 */
-if(cfg.textChance == null) cfg.textChance = 60;    /* 对方发文字概率 0-100 */
-if(cfg.voiceChance == null) cfg.voiceChance = 0;  /* 语音已下线，恒为 0 */
 if(cfg.giftAskChance == null) cfg.giftAskChance = 3; /* 对方主动送礼物概率 0-100 */
+if(cfg.fontSize == null) cfg.fontSize = 14.5;      /* 聊天消息字号 px */
 /* ---- 主动 / 引用 / 红包 / 拍一拍 / 占有欲 ---- */
 if(cfg.proactiveOn == null) cfg.proactiveOn = true;
+
+/* 统一数值读取：?? 兜 null/undefined，Number 兜字符串，不再吃掉 0 */
+function N(x, d){ var v = (x == null) ? d : Number(x); return isNaN(v) ? d : v; }
+function boolOn(x, d){ /* 统一开关：布尔化，falsy（0/false/""/null/undefined）都视为关 */
+  if(x == null) return d;
+  if(x === true || x === false) return x;
+  return !!(Number(x) || (typeof x === "string" && x.toLowerCase() !== "false" && x !== ""));
+}
+
 if(cfg.proactiveInterval == null) cfg.proactiveInterval = 6;  /* 主动间隔：分钟 */
 if(cfg.proactiveChance == null) cfg.proactiveChance = 45;     /* 每轮主动概率 0-100 */
 if(cfg.quoteChance == null) cfg.quoteChance = 28;             /* 引用我消息的概率 0-100 */
@@ -1762,7 +1780,7 @@ if(cfg.conv.t === "group"){
   if(!_still) cfg.conv = { t:"friend", id:"main" };
 }
 function mainFriend(){ return { id:"main", name:cfg.name, avatar:cfg.taAvatar || "", status:cfg.status || "" }; }
-function allFriends(){ return [mainFriend()].concat(cfg.friends); }
+function allFriends(){ return [mainFriend()].concat(cfg.friends.filter(function(f){ return f && f.id !== "main"; })); }
 function friendById(id){
   if(id === "main" || !id) return mainFriend();
   for(var i = 0; i < cfg.friends.length; i++){ if(cfg.friends[i].id === id) return cfg.friends[i]; }
@@ -1853,11 +1871,12 @@ function scrollBottom(){ requestAnimationFrame(function(){ chatEl.scrollTop = ch
 /* ================= 消息渲染 ================= */
 function renderAll(){
   chatEl.innerHTML = "";
-  /* 按自然日分组，跨天的每段前插一个日期标签 */
+  /* 先按时间戳排序（防止串会话写入、乱序备份导致日期标签倒退） */
+  var sorted = chat.slice().sort(function(a, b){ return (a.t || 0) - (b.t || 0); });
   function p2(n){ return n < 10 ? "0" + n : "" + n; }
   function dayKey2(d){ return d.getFullYear() + "-" + p2(d.getMonth()+1) + "-" + p2(d.getDate()); }
   var lastDay = null;
-  chat.forEach(function(m){
+  sorted.forEach(function(m){
     var d = new Date(m.t || Date.now());
     var k = dayKey2(d);
     if(k !== lastDay){
@@ -2218,11 +2237,12 @@ function renderFavs(){
 /* ================= 回复 ================= */
 var typingRow = null, replyTimers = [], chatEpoch = 0;
 /* 所有异步回复必须通过 scheduleReply：捕获 chatEpoch，切会话后自动作废 */
-function scheduleReply(fn, delay){
+function scheduleReply(fn, delay, owner){
   var ep = chatEpoch;
+  var own = owner || "default";
   replyTimers.push(setTimeout(function(){
     if(ep !== chatEpoch) return;
-    try{ fn(); }catch(e){}
+    try{ fn(); }catch(e){ console.error("[奶酪信笺] scheduleReply(" + own + ") 异常:", e); }
   }, delay));
 }
 function allCards(){
@@ -2336,16 +2356,16 @@ function recentMine(n){
 }
 /* 对方有概率引用我的一句话 */
 function maybeQuote(){
-  if(Math.random() * 100 >= (Number(cfg.quoteChance) || 0)) return null;
+  if(Math.random() * 100 >= N(cfg.quoteChance, 0)) return null;
   var pool = recentMine(15);
   if(!pool.length) return null;
   var m = pool[Math.floor(Math.random() * pool.length)];
   return { who:"me", name: cfg.myName || "我", text: m.text, id: m.id };
 }
-function pushThemText(text, mid){
+function pushThemText(text, mid, quote){
   if(!text) return false;
   if(cfg.petName && Math.random() < 0.15 && text.indexOf(cfg.petName) < 0) text = cfg.petName + "，" + text;
-  pushMsg({ who:"them", mid: mid || randMember(), type:"text", text: text, quote: maybeQuote(), t: Date.now() });
+  pushMsg({ who:"them", mid: mid || randMember(), type:"text", text: text, quote: quote != null ? quote : maybeQuote(), t: Date.now() });
   return true;
 }
 /* 深夜优先抽「深夜 / 亲密」分组 */
@@ -2359,7 +2379,7 @@ function nightCard(){
 }
 /* 占有欲：我提到别人时，ta 可能会吃醋 */
 function jealousyLine(){
-  if(Math.random() * 100 >= (Number(cfg.jealousy) || 0)) return null;
+  if(Math.random() * 100 >= N(cfg.jealousy, 0)) return null;
   var mine = recentMine(1)[0];
   if(!mine) return null;
   if(!/(别人|朋友|同事|同学|前任|聚会|加班|约会|出去玩|他|她)/.test(mine.text)) return null;
@@ -2384,8 +2404,11 @@ function pickSpeakers(n){
   return out;
 }
 /* 按用户设定：间隔精确到毫秒，条数落在 [最少, 最多] 区间 */
+/* 合并窗口：连发消息 700ms 内只触发一次 reply()，不会互相清掉 */
+var replyMergeTimer = null;
 function reply(){
   if(allCards().length === 0){ toast("字卡库是空的，先写几张吧"); return; }
+  if(replyMergeTimer){ clearTimeout(replyMergeTimer); replyMergeTimer = null; }
   clearReplies();
   var delay = replyDelayMs();
   var min = Math.max(1, Math.min(10, parseInt(cfg.minReplies, 10) || 1));
@@ -2401,6 +2424,7 @@ function reply(){
       scheduleReply(function(){
         hideTyping();
         var mid = midAt(i);
+        var thisQuote = maybeQuote();
         /* 第一句：先吃个醋 */
         if(i === 0 && jealous){
           pushMsg({ who:"them", mid:mid, type:"text", text:jealous.text, quote:jealous.quote, t:Date.now() });
@@ -2408,21 +2432,23 @@ function reply(){
           return;
         }
         /* 回复触发概率 */
-        if(Math.random() * 100 >= (cfg.replyChance || 100)){
+        if(Math.random() * 100 >= N(cfg.replyChance, 100)){
           if(i < total - 1) showTyping(midAt(i + 1));
           return;
         }
-        /* 按概率加权随机决定消息类型 */
+                /* 按概率加权随机决定消息类型；区间自动归一，避免总和超 100 让文字分支消失 */
         var roll = Math.random() * 100;
-        var stickerP = cfg.stickerChance || 35;
-        var giftP = cfg.giftAskChance || 3;
-        var rpP = Math.max(0, Math.min(40, Number(cfg.partnerRpChance) || 0));
+        var stickerP = Math.max(0, Math.min(99, N(cfg.stickerChance, 35)));
+        var giftP = Math.max(0, Math.min(30, N(cfg.giftAskChance, 3)));
+        var rpP = Math.max(0, Math.min(40, N(cfg.partnerRpChance, 10)));
+        var _sumP = stickerP + giftP + rpP;
+        if(_sumP > 99.5){ stickerP *= 99 / _sumP; giftP *= 99 / _sumP; rpP *= 99 / _sumP; }
         if(roll < stickerP){
           var sk = pickStk();
-          if(sk) pushMsg({ who:"them", mid:mid, type:"sticker", src:sk.src, t:Date.now() });
+          if(sk) pushMsg({ who:"them", mid:mid, type:"sticker", src:sk.src, quote:thisQuote, t:Date.now() });
           else {
             var tx = pickCard();
-            if(tx) pushThemText(tx, mid);
+            if(tx) pushThemText(tx, mid, thisQuote);
           }
         }else if(roll < stickerP + giftP){
           /* 对方主动送礼物给我 */
@@ -2431,11 +2457,11 @@ function reply(){
           }));
           var gift = giftList[Math.floor(Math.random() * giftList.length)];
           setTimeout(function(){ fireworksFx(); }, 300);
-          pushMsg({ who:"them", mid:mid, type:"gift", giftId:gift.id, giftEmoji:gift.emoji || "🎁", giftName:gift.name, giftPrice:gift.price, giftImg:gift.img || "", t:Date.now() });
+          pushMsg({ who:"them", mid:mid, type:"gift", giftId:gift.id, giftEmoji:gift.emoji || "🎁", giftName:gift.name, giftPrice:gift.price, giftImg:gift.img || "", quote:thisQuote, t:Date.now() });
         }else if(roll < stickerP + giftP + rpP){
           taSendRedPacket(mid);
         }else{
-          pushThemText(nightCard() || pickCard(), mid);
+          pushThemText(nightCard() || pickCard(), mid, thisQuote);
         }
         if(i < total - 1) showTyping(midAt(i + 1));
       }, delay * (i + 1));
@@ -2724,7 +2750,7 @@ function sendPoke(action){
   pushMsg({ sys:true, text: myPokeText(action), t:Date.now() });
   renderStats();
   if(allCards().length === 0) return;
-  if(Math.random() * 100 < Math.max(35, Number(cfg.partnerPokeChance) || 0)){
+  if(Math.random() * 100 < Math.max(35, N(cfg.partnerPokeChance, 0))){
     clearReplies();
     showTyping();
     scheduleReply(function(){
@@ -2794,7 +2820,7 @@ function pingThem(){
         var r = Math.random();
         if(r < 0.2){
           var sk = pickStk();
-          if(sk) pushMsg({ who:"them", mid:mid, type:"sticker", src:sk.src, t:Date.now() });
+          if(sk) pushMsg({ who:"them", mid:mid, type:"sticker", src:sk.src, quote:thisQuote, t:Date.now() });
           else {
             var tx = pickCard();
             if(tx) pushMsg({ who:"them", mid:mid, type:"text", text:tx, t:Date.now() });
@@ -2802,7 +2828,7 @@ function pingThem(){
         }else if(i === 0 && r < 0.44){
           taSendRedPacket(mid);
         }else{
-          pushThemText(nightCard() || pickCard(), mid);
+          pushThemText(nightCard() || pickCard(), mid, thisQuote);
         }
         if(i < total - 1) showTyping(midAt(i + 1));
       }, delay * (i + 1));
@@ -3104,7 +3130,7 @@ function startCall(isPartner){
   $("immBtn").textContent = "👁️";
   applyCallBg();
   w.classList.add("open");
-  if(!isPartner && Math.random() * 100 >= (cfg.callPickChance || 80)){
+  if(!isPartner && Math.random() * 100 >= N(cfg.callPickChance, 80)){
     callConnectT = setTimeout(function(){
       if(!callActive) return;
       var labels = [
@@ -3339,13 +3365,28 @@ function incomingCall(){
 }
 function maybeIncomingCall(){
   if(callActive || rpIncoming) return;
-  if(Math.random() > 0.12) return;
-  setTimeout(function(){ if(!callActive) incomingCall(); }, 4000 + Math.random() * 8000);
+  if(!boolOn(cfg.proactiveOn, true)) return;
+  var callP = N(cfg.proactiveCallChance, 8);
+  if(Math.random() * 100 >= callP) return;
+  var _ep = chatEpoch;
+  var _ck = chatKey();
+  setTimeout(function(){
+    if(_ep !== chatEpoch) return;
+    if(_ck !== chatKey()) return;
+    if(!boolOn(cfg.proactiveOn, true)) return;
+    if(!callActive && !rpIncoming) incomingCall();
+  }, 4000 + Math.random() * 8000);
 }
 function scheduleRandomCall(){
   clearTimeout(window._randCallT);
   window._randCallT = setTimeout(function(){
-    if(!callActive && !rpIncoming && Math.random() < 0.25) incomingCall();
+    var _ep = chatEpoch;
+    if(boolOn(cfg.proactiveOn, true) && !document.hidden){
+      if(!callActive && !rpIncoming && Math.random() * 100 < N(cfg.proactiveCallChance, 8)){
+        var _ck = chatKey();
+        setTimeout(function(){ if(_ep === chatEpoch && _ck === chatKey() && !callActive && !rpIncoming) incomingCall(); }, 500);
+      }
+    }
     scheduleRandomCall();
   }, (15 + Math.random() * 45) * 60 * 1000);
 }
@@ -3354,21 +3395,21 @@ scheduleRandomCall();
 /* ================= 主动发消息（参考 milk 的 autoSend） ================= */
 var lastProactiveAt = Date.now(), ambientTimer = null;
 function proactiveTick(){
-  if(!cfg.proactiveOn) return;
+  if(!boolOn(cfg.proactiveOn, true)) return;
   if(document.hidden) return;
-  var gap = Math.max(0.5, Number(cfg.proactiveInterval) || 6) * 60 * 1000;
+  var gap = Math.max(0.5, N(cfg.proactiveInterval, 6)) * 60 * 1000;
   if(Date.now() - lastProactiveAt < gap) return;
   if(callActive || rpIncoming) return;
   lastProactiveAt = Date.now();
-  if(Math.random() * 100 >= (Number(cfg.proactiveChance) || 0)) return;
+  if(Math.random() * 100 >= N(cfg.proactiveChance, 0)) return;
   proactiveSend();
 }
 function proactiveSend(){
   if(allCards().length === 0 && !(cfg.pokes || []).length) return;
   var roll = Math.random() * 100;
-  var callP = Math.max(0, Number(cfg.proactiveCallChance) || 0);
-  var pokeP = Math.max(0, Number(cfg.partnerPokeChance) || 0);
-  var rpP = Math.max(0, Number(cfg.partnerRpChance) || 0);
+  var callP = Math.max(0, N(cfg.proactiveCallChance, 0));
+  var pokeP = Math.max(0, N(cfg.partnerPokeChance, 0));
+  var rpP = Math.max(0, N(cfg.partnerRpChance, 0));
   /* 来电 / 拍一拍 / 红包：偶发的惊喜 */
   if(roll < callP){ incomingCall(); return; }
   if(roll < callP + pokeP){ partnerPoke(); return; }
@@ -3387,11 +3428,11 @@ function proactiveSend(){
         hideTyping();
         var mid = midAt(i);
         var r = Math.random() * 100;
-        var stkP = (Number(cfg.stickerChance) || 35) * 0.5;
+        var stkP = N(cfg.stickerChance, 35) * 0.5;
         if(r < stkP && cfg.stickers.length){
           pushMsg({ who:"them", mid:mid, type:"sticker", src:pickStk().src, t:Date.now() });
         }else{
-          pushThemText(nightCard() || pickCard(), mid);
+          pushThemText(nightCard() || pickCard(), mid, thisQuote);
         }
         if(i < total - 1) showTyping(midAt(i + 1));
       }, 700 + i * Math.max(900, replyDelayMs()));
@@ -5332,6 +5373,10 @@ $("friendAvatarInput").onchange = function(e){
   e.target.value = "";
 };
 function applyCfg(){
+  /* 字号：兜底并应用 */
+  if(cfg.fontSize == null) cfg.fontSize = 14.5;
+  document.documentElement.style.setProperty("--chat-msg-fs", cfg.fontSize + "px");
+  document.documentElement.style.setProperty("--chatfont", fontCss(cfg.fontId));
   $("nameEl").textContent = convName();
   var g = activeGroup();
   $("statusEl").textContent = g ? (g.members.length + " 位好友 · 群聊") : cfg.status;
@@ -5616,6 +5661,21 @@ document.body.dataset.bshape = cfg.bubbleShape || "standard";
   setTimeout(hideSplash, 1800);
 })();
 document.documentElement.style.setProperty("--chatfont", fontCss(cfg.fontId));
+/* 聊天字号：独立滑块，显示 px 后缀 */
+(function(){
+  var s = document.getElementById("sFontSize");
+  if(!s) return;
+  s.value = cfg.fontSize;
+  var v = document.getElementById("vFontSize");
+  v.textContent = cfg.fontSize + "px";
+  s.oninput = function(){
+    cfg.fontSize = +s.value;
+    v.textContent = cfg.fontSize + "px";
+    document.documentElement.style.setProperty("--chat-msg-fs", cfg.fontSize + "px");
+    saveCfg();
+  };
+  document.documentElement.style.setProperty("--chat-msg-fs", cfg.fontSize + "px");
+})();
 
 /* 高级概率 slider 绑定 */
 (function(){
@@ -6303,7 +6363,7 @@ function shopAutoLoop(){
   if(!shopAutoStarted) return;
   setTimeout(function(){
     try{
-      if(cfg.proactiveOn !== false && !document.hidden) shopAutoBuy();
+      if(boolOn(cfg.proactiveOn, true) && !document.hidden) shopAutoBuy();
     }catch(e){}
     shopAutoLoop();
   }, 10000 + Math.random() * 50000);
@@ -6615,7 +6675,7 @@ function closeMoments(){
 function taAutoMoment(){
   setTimeout(function(){
     try{
-      if(cfg.proactiveOn !== false && !document.hidden && Math.random() < 0.55){
+      if(boolOn(cfg.proactiveOn, true) && !document.hidden && Math.random() < 0.55){
         ensureMoments();
         cfg.moments.unshift({ id:"MO" + uid(), who:"them", text:MO_LINES[Math.floor(Math.random() * MO_LINES.length)], img:"", t:Date.now(), likes:[], comments:[] });
         saveCfg();
@@ -6694,7 +6754,7 @@ var TA_GIFT_NOTES = ["路过看到这个，觉得你会喜欢。", "挑了好久
 function taAutoGift(){
   setTimeout(function(){
     try{
-      if(cfg.autoGiftOn !== false && cfg.proactiveOn !== false && !document.hidden && Math.random() < 0.12){
+      if(boolOn(cfg.autoGiftOn, true) && boolOn(cfg.proactiveOn, true) && !document.hidden && Math.random() < 0.12){
         var pool = (typeof GIFT_DATA !== "undefined" ? GIFT_DATA : []).slice();
         (cfg.gifts || []).forEach(function(g){ pool.push({ name:g.name, price:g.price, emoji:g.emoji || g.icon || "🎁" }); });
         if(pool.length){
