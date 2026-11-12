@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.12-fullfix1";
+  var V = "2026.11.12-runbg1";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -565,7 +565,7 @@ header::before{content:"";position:absolute;left:-34px;top:-70px;width:190px;hei
 .hm-app[data-act="bubble"] .ic{background:linear-gradient(135deg,#FCE4EC,#F8BBD0);color:#8B4A5D}
 /* 礼物消息：无气泡，居中卡片，不压头像 */
 .row.giftrow{justify-content:center;padding:2px 0}
-.gift-card{display:flex;align-items:center;gap:10px;max-width:80%;padding:10px 15px;border-radius:15px;background:linear-gradient(135deg,rgba(255,240,247,.96),rgba(255,246,236,.96));box-shadow:0 5px 18px rgba(232,127,164,.16);border:1px solid rgba(255,255,255,.9);animation:giftPop .4s cubic-bezier(.22,.8,.3,1)}
+.gift-card{display:flex;align-items:center;gap:10px;max-width:68%;padding:10px 15px;border-radius:15px;background:linear-gradient(135deg,rgba(255,240,247,.96),rgba(255,246,236,.96));box-shadow:0 5px 18px rgba(232,127,164,.16);border:1px solid rgba(255,255,255,.9);animation:giftPop .4s cubic-bezier(.22,.8,.3,1)}
 @keyframes giftPop{from{transform:scale(.9);opacity:0}to{transform:none;opacity:1}}
 .gift-card .gc-ico{font-size:34px;line-height:1;flex-shrink:0;filter:drop-shadow(0 2px 6px rgba(232,127,164,.22))}
 .gift-card .gc-ico img{width:40px;height:40px;object-fit:contain;border-radius:8px;display:block}
@@ -3381,7 +3381,7 @@ function scheduleRandomCall(){
   clearTimeout(window._randCallT);
   window._randCallT = setTimeout(function(){
     var _ep = chatEpoch;
-    if(boolOn(cfg.proactiveOn, true) && !document.hidden){
+    if(boolOn(cfg.proactiveOn, true)){
       if(!callActive && !rpIncoming && Math.random() * 100 < N(cfg.proactiveCallChance, 8)){
         var _ck = chatKey();
         setTimeout(function(){ if(_ep === chatEpoch && _ck === chatKey() && !callActive && !rpIncoming) incomingCall(); }, 500);
@@ -3396,7 +3396,6 @@ scheduleRandomCall();
 var lastProactiveAt = Date.now(), ambientTimer = null;
 function proactiveTick(){
   if(!boolOn(cfg.proactiveOn, true)) return;
-  if(document.hidden) return;
   var gap = Math.max(0.5, N(cfg.proactiveInterval, 6)) * 60 * 1000;
   if(Date.now() - lastProactiveAt < gap) return;
   if(callActive || rpIncoming) return;
@@ -6363,7 +6362,7 @@ function shopAutoLoop(){
   if(!shopAutoStarted) return;
   setTimeout(function(){
     try{
-      if(boolOn(cfg.proactiveOn, true) && !document.hidden) shopAutoBuy();
+      if(boolOn(cfg.proactiveOn, true)) shopAutoBuy();
     }catch(e){}
     shopAutoLoop();
   }, 10000 + Math.random() * 50000);
@@ -6675,7 +6674,7 @@ function closeMoments(){
 function taAutoMoment(){
   setTimeout(function(){
     try{
-      if(boolOn(cfg.proactiveOn, true) && !document.hidden && Math.random() < 0.55){
+      if(boolOn(cfg.proactiveOn, true) && Math.random() < 0.55){
         ensureMoments();
         cfg.moments.unshift({ id:"MO" + uid(), who:"them", text:MO_LINES[Math.floor(Math.random() * MO_LINES.length)], img:"", t:Date.now(), likes:[], comments:[] });
         saveCfg();
@@ -6754,7 +6753,7 @@ var TA_GIFT_NOTES = ["路过看到这个，觉得你会喜欢。", "挑了好久
 function taAutoGift(){
   setTimeout(function(){
     try{
-      if(boolOn(cfg.autoGiftOn, true) && boolOn(cfg.proactiveOn, true) && !document.hidden && Math.random() < 0.12){
+      if(boolOn(cfg.autoGiftOn, true) && boolOn(cfg.proactiveOn, true) && Math.random() < 0.12){
         var pool = (typeof GIFT_DATA !== "undefined" ? GIFT_DATA : []).slice();
         (cfg.gifts || []).forEach(function(g){ pool.push({ name:g.name, price:g.price, emoji:g.emoji || g.icon || "🎁" }); });
         if(pool.length){
