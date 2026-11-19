@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.19-tarot2";
+  var V = "2026.11.19-decide3";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -601,6 +601,18 @@ button.cc-opt:active{transform:scale(.98);background:#FFF0F5}
 .dp-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:12px 14px;border-radius:14px;border:1px solid rgba(247,200,216,.65);background:rgba(255,255,255,.88);color:#6B4A56;font-size:13px;line-height:1.5;font-family:inherit}
 .dp-item .dp-q{flex:1;min-width:0}
 .dp-item .dp-n{font-size:10.5px;color:#B77C92;flex-shrink:0}
+/* 决择 · 聊天内直接出题 */
+.dc-field{margin-top:12px}
+.dc-label{font-size:10.5px;color:#B77C92;letter-spacing:.1em;margin-bottom:6px}
+.dc-q{width:100%;border:1px solid rgba(247,200,216,.7);background:#fff;border-radius:13px;padding:10px 12px;font-size:13.5px;line-height:1.5;color:var(--ink);outline:none;resize:none;font-family:inherit;display:block}
+.dc-q:focus{border-color:var(--pink-deep);box-shadow:0 0 0 3px rgba(247,200,216,.3)}
+.dc-k{width:20px;height:20px;border-radius:50%;background:rgba(247,200,216,.42);color:#B05C7C;font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dc-times{display:flex;gap:7px;flex-wrap:wrap}
+.dc-time{border:1px solid rgba(247,200,216,.75);background:rgba(255,255,255,.86);color:#A07785;border-radius:999px;padding:7px 13px;font-size:11.5px;font-family:inherit;transition:background .18s,border-color .18s,color .18s}
+.dc-time.on{background:linear-gradient(135deg,#F7C8D8,#FCE4EC);border-color:#EE9EBB;color:#8B4A5D;font-weight:700}
+.dc-recent{display:flex;gap:6px;overflow-x:auto;padding:2px 0 4px;-webkit-overflow-scrolling:touch}
+.dc-recent::-webkit-scrollbar{display:none}
+.dc-recent-chip{flex-shrink:0;border:1px dashed rgba(238,158,187,.7);background:rgba(255,255,255,.7);color:#A07785;border-radius:999px;padding:6px 11px;font-size:11px;font-family:inherit;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* 点一下出菜单：关掉浏览器的长按复制/选择弹窗 */
 .row .msg,.row .m-body{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 /* 烟花特效 */
@@ -1475,8 +1487,8 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
 
         <div class="section-label">决择</div>
         <div class="panel" id="decideSec">
-          <div class="panel-title">给对方出一道选择题</div>
-          <p class="hint" style="margin:-2px 0 8px">每个好友 / 群都有自己的一套题，输入后会立即自动保存。</p>
+          <div class="panel-title">决择题库</div>
+          <p class="hint" style="margin:-2px 0 8px">平时直接在聊天里点 ⊕ → 决择 出题；这里用来管理历史题目，改动自动保存。</p>
           <select class="decide-sel" id="decideConv"></select>
           <div id="decideList"></div>
           <button class="ghost-btn" type="button" id="decideAdd" style="margin-top:10px">＋ 新增一条问题</button>
@@ -2339,67 +2351,141 @@ function tryDecide(mid){
   pushMsg({ who:"them", mid:mid, type:"choice", q:it.q, opts:it.opts.slice(), t:Date.now() });
   return true;
 }
-/* 我从 ⊕ 里主动出题：对方 / 群成员自动作答 */
-function sendDecide(it){
+/* 我从 ⊕ 里主动出题：对方 / 群成员在设定时间后作答 */
+function sendDecide(it, delaySec){
   if(!decideUsable(it)){ toast("这道题至少要有两个答案"); return; }
   var opts = it.opts.map(function(x){ return String(x).trim(); }).filter(function(x){ return x !== ""; });
   var m = { id:uid(), who:"me", type:"choice", q:String(it.q).trim(), opts:opts.slice(), t:Date.now() };
   pushMsg(m);
+  var delayMs = Math.max(0, (delaySec == null ? 30 : +delaySec) * 1000);
   scheduleReply(function(){
     if(m.picks || m.answerPick != null) return;
-    if(isGroup()){
-      var g = activeGroup();
-      if(!g) return;
-      var pool = g.members.slice();
-      var want = 1 + Math.floor(Math.random() * Math.min(3, pool.length));
-      var picks = [];
-      while(pool.length && picks.length < want){
-        var mi = Math.floor(Math.random() * pool.length);
-        var mmid = pool.splice(mi, 1)[0];
-        picks.push({ mid:mmid, idx:Math.floor(Math.random() * opts.length) });
-      }
-      m.picks = picks;
-      saveChat();
-      repaintChoice(m);
-    }else{
-      m.answerPick = Math.floor(Math.random() * opts.length);
-      saveChat();
-      repaintChoice(m);
-      showTyping(null);
-      scheduleReply(function(){
-        hideTyping();
+    showTyping(isGroup() ? randMember() : null);
+    scheduleReply(function(){
+      hideTyping();
+      if(m.picks || m.answerPick != null) return;
+      if(isGroup()){
+        var g = activeGroup();
+        if(!g) return;
+        var pool = g.members.slice();
+        var want = 1 + Math.floor(Math.random() * Math.min(3, pool.length));
+        var picks = [];
+        while(pool.length && picks.length < want){
+          var mi = Math.floor(Math.random() * pool.length);
+          var mmid = pool.splice(mi, 1)[0];
+          picks.push({ mid:mmid, idx:Math.floor(Math.random() * opts.length) });
+        }
+        m.picks = picks;
+        saveChat();
+        repaintChoice(m);
+      }else{
+        m.answerPick = Math.floor(Math.random() * opts.length);
+        saveChat();
+        repaintChoice(m);
         pushMsg({ who:"them", mid:null, type:"text", text:"我选「" + opts[m.answerPick] + "」。", t:Date.now() });
-      }, 800 + Math.random() * 500, "choice");
-    }
-  }, 1200 + Math.random() * 900, "choice");
+      }
+    }, 700 + Math.random() * 500, "choice");
+  }, delayMs, "choice");
+}
+/* 出过的题顺手存进这个会话的题库（对方也可能抽到它来问你） */
+function saveDecideBank(it){
+  var key = chatKey();
+  if(!Array.isArray(cfg.decide.items[key])) cfg.decide.items[key] = [];
+  var arr = cfg.decide.items[key];
+  var ex = null;
+  for(var i=0;i<arr.length;i++){ if(String(arr[i].q || "").trim() === it.q){ ex = arr[i]; break; } }
+  if(ex) ex.opts = it.opts.slice();
+  else arr.push({ id:uid(), q:it.q, opts:it.opts.slice() });
+  if(arr.length > 30) arr.splice(0, arr.length - 30);
+  saveCfg();
+  if($("decideList")) renderDecideList();
 }
 function scrollToDecide(){
   var el = $("decideSec");
   if(el && el.scrollIntoView) el.scrollIntoView({ block:"start", behavior:"smooth" });
 }
+/* ⊕ → 决择：聊天里直接写问题、答案、对方回复时间 */
 function openDecidePicker(){
-  var bank = decideBank().filter(decideUsable);
-  var html = '<div class="sheet-title">决择 · 出一道选择题</div>';
-  if(!bank.length){
-    html += '<p class="hint" style="text-align:center;line-height:1.9">这个对话还没有题目<br>去「我的 → 决择」里写几道吧</p>' +
-      '<button type="button" class="primary" id="dpGo" style="width:100%;margin-top:10px">去写题目</button>';
-    showSheet(html);
-    $("dpGo").onclick = function(){ hideSheet(); goPage("page-me"); setTimeout(scrollToDecide, 260); };
-    return;
+  var key = chatKey();
+  var bank = decideBank(key).filter(decideUsable).slice(-6).reverse();
+  var target = convName();
+  var opts = ["", ""];
+  var delay = 30;
+  var TIMES = [[0,"立即"],[10,"10 秒"],[30,"30 秒"],[60,"1 分钟"],[180,"3 分钟"]];
+  var html = '<div class="sheet-title">✦ 决择</div>' +
+    '<p class="hint" style="text-align:center;margin:-2px 0 8px">出一道选择题，让 ' + esc(target) + ' 自己选一个答案</p>';
+  if(bank.length){
+    html += '<div class="dc-recent" id="dcRecent">' + bank.map(function(it, i){
+      return '<button type="button" class="dc-recent-chip" data-r="' + i + '">' + esc(String(it.q).length > 16 ? String(it.q).slice(0,16) + "…" : it.q) + '</button>';
+    }).join("") + '</div>';
   }
-  html += '<p class="hint" style="text-align:center;margin-bottom:10px">选一道，让 ' + esc(convName()) + ' 来回答</p><div class="dp-list">';
-  bank.forEach(function(it, i){
-    html += '<button type="button" class="dp-item" data-i="' + i + '"><span class="dp-q">' + esc(it.q) + '</span><span class="dp-n">' + it.opts.length + ' 个答案</span></button>';
-  });
-  html += '</div>';
+  html += '<div class="dc-field"><div class="dc-label">问题</div>' +
+      '<textarea id="dcQ" class="dc-q" rows="2" maxlength="120" placeholder="想问 ta 什么？例如：周末想去哪儿？"></textarea></div>' +
+    '<div class="dc-field"><div class="dc-label">答案（至少两个）</div><div id="dcOpts"></div>' +
+      '<button type="button" class="di-addopt" id="dcAddOpt">＋ 添加答案</button></div>' +
+    '<div class="dc-field"><div class="dc-label">对方回复时间</div><div class="dc-times" id="dcTimes">' +
+      TIMES.map(function(x, i){
+        return '<button type="button" class="dc-time' + (x[0] === delay ? " on" : "") + '" data-s="' + x[0] + '">' + x[1] + '</button>';
+      }).join("") +
+    '</div></div>' +
+    '<button type="button" class="primary" id="dcSend" style="width:100%;margin-top:14px">发给 ' + esc(target) + '</button>';
   showSheet(html);
-  document.querySelectorAll("#sheetBody .dp-item").forEach(function(b){
+
+  function paintOpts(){
+    var box = $("dcOpts");
+    if(!box) return;
+    box.innerHTML = opts.map(function(v, i){
+      return '<div class="di-opt-row"><span class="dc-k">' + choiceOptLabel(i) + '</span>' +
+        '<input class="di-opt" data-oi="' + i + '" maxlength="24" value="' + esc(v) + '" placeholder="答案 ' + (i + 1) + '">' +
+        (opts.length > 2 ? '<button type="button" class="di-x" data-delopt="' + i + '" aria-label="删除这个答案">×</button>' : '') +
+        '</div>';
+    }).join("");
+    box.querySelectorAll("input").forEach(function(inp){
+      inp.oninput = function(){ opts[+inp.dataset.oi] = inp.value; };
+    });
+    box.querySelectorAll("[data-delopt]").forEach(function(b){
+      b.onclick = function(){ opts.splice(+b.dataset.delopt, 1); paintOpts(); };
+    });
+  }
+  paintOpts();
+
+  $("dcAddOpt").onclick = function(){
+    if(opts.length >= 6){ toast("最多 6 个答案"); return; }
+    opts.push("");
+    paintOpts();
+    var box = $("dcOpts");
+    var last = box.querySelector('.di-opt[data-oi="' + (opts.length - 1) + '"]');
+    if(last) last.focus();
+  };
+  $("dcTimes").querySelectorAll(".dc-time").forEach(function(b){
     b.onclick = function(){
-      var it = bank[+b.dataset.i];
-      hideSheet();
-      sendDecide(it);
+      delay = +b.dataset.s;
+      $("dcTimes").querySelectorAll(".dc-time").forEach(function(x){ x.classList.remove("on"); });
+      b.classList.add("on");
     };
   });
+  var rec = $("dcRecent");
+  if(rec){
+    rec.querySelectorAll(".dc-recent-chip").forEach(function(b){
+      b.onclick = function(){
+        var it = bank[+b.dataset.r];
+        if(!it) return;
+        $("dcQ").value = it.q;
+        opts = (it.opts || []).map(function(x){ return String(x); });
+        if(opts.length < 2) opts = opts.concat(["", ""]).slice(0, 2);
+        paintOpts();
+      };
+    });
+  }
+  $("dcSend").onclick = function(){
+    var q = String($("dcQ").value || "").trim();
+    if(!q){ toast("先写一个问题吧"); return; }
+    var list = opts.map(function(x){ return String(x).trim(); }).filter(function(x){ return x !== ""; });
+    if(list.length < 2){ toast("至少要有两个答案"); return; }
+    saveDecideBank({ q:q, opts:list });
+    hideSheet();
+    sendDecide({ q:q, opts:list }, delay);
+  };
 }
 
 /* ================= 消息渲染 ================= */
@@ -6375,7 +6461,7 @@ document.body.dataset.bshape = cfg.bubbleShape || "standard";
   var sp = document.getElementById("splash");
   if(!sp) return;
   var lastVer = load("cheese.splash.v", "");
-  var curVer  = window.APP_VER || "2026.11.19-tarot2";
+  var curVer  = window.APP_VER || "2026.11.19-decide3";
   var show = !lastVer || lastVer !== curVer;
   if(!show){ sp.style.display = "none"; return; }
   /* 跳过按钮 */
