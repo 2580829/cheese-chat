@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.19-convkey1";
+  var V = "2026.11.19-tarot1";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -1057,6 +1057,57 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
 .sd-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .sd-btns button{border:none;border-radius:12px;padding:10px 0;font-size:12.5px;font-weight:600;background:#FFF0F5;color:#8B4A5D}
 .sd-btns button.main{grid-column:span 2;background:linear-gradient(135deg,#FFD9E8,#FFC0D4);font-size:13.5px;padding:12px 0;box-shadow:0 5px 14px rgba(232,127,164,.25)}
+
+/* ============ 塔罗牌 主题 & 组件 ============ */
+.hm-app[data-go="page-tarot"] .ic{background:linear-gradient(135deg,#6B4A7C,#B39DDB);color:#fff}
+.tarot-scroll{padding-top:12px}
+.tarot-daily-wrap{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+.tarot-daily-card{border-radius:18px;background:linear-gradient(140deg,#2D1F3D 0%,#4A3560 40%,#6B4A7C 100%);padding:20px 16px;position:relative;overflow:hidden;box-shadow:0 10px 28px rgba(75,50,100,.32)}
+.tarot-daily-card::before{content:"";position:absolute;inset:-40%;background:radial-gradient(circle at 70% 30%,rgba(255,233,214,.18),transparent 55%)}
+.tdc-face{position:relative;display:flex;align-items:center;gap:12px;color:#FDF7FF}
+.tdc-ic{font-size:36px;filter:drop-shadow(0 0 8px rgba(255,233,214,.4))}
+.tdc-t{font-size:15px;font-weight:700;letter-spacing:.1em}
+.tdc-s{font-size:11px;opacity:.7;margin-top:3px}
+.tarot-daily-btn{margin-top:0}
+
+/* 3D 卡片翻牌区 */
+.tarot-deck-area{display:flex;flex-direction:column;align-items:center;gap:16px;padding:8px 0 4px}
+.tarot-card-3d{perspective:900px}
+.tarot-card-inner{position:relative;width:190px;height:280px;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,.2,.2,1)}
+.tarot-card-inner.flipped{transform:rotateY(180deg)}
+.tarot-card-back,.tarot-card-face{position:absolute;inset:0;border-radius:16px;backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.tarot-card-back{background:linear-gradient(140deg,#2D1F3D,#6B4A7C);border:2px solid rgba(255,233,214,.3);box-shadow:0 12px 36px rgba(75,50,100,.35)}
+.tarot-card-back::before{content:"";position:absolute;inset:12px;border-radius:10px;border:1px dashed rgba(255,233,214,.35)}
+.tcb-pattern{font-size:42px;color:rgba(255,233,214,.55);font-family:serif;letter-spacing:.1em}
+.tarot-card-face{transform:rotateY(180deg);background:linear-gradient(160deg,#FFFDFC,#FFF0F5);border:2px solid rgba(107,74,124,.22);box-shadow:0 12px 36px rgba(75,50,100,.2);padding:20px;text-align:center}
+.tcf-ic{font-size:54px;line-height:1;margin-bottom:10px}
+.tcf-name{font-size:17px;font-weight:700;color:#4A3560;letter-spacing:.04em}
+.tcf-sub{font-size:11px;color:#A07785;margin-top:4px}
+
+.tarot-card-inner.shuffling{animation:tarotShake .55s ease-in-out 3}
+@keyframes tarotShake{0%,100%{transform:rotateY(0) translateX(0)}25%{transform:rotateY(12deg) translateX(-12px)}50%{transform:rotateY(-8deg) translateX(10px)}75%{transform:rotateY(6deg) translateX(-6px)}}
+
+.tarot-controls{display:flex;gap:10px;margin-top:6px}
+.tbtn{padding:10px 18px;font-size:13px}
+.tbtn.primary{background:linear-gradient(135deg,#6B4A7C,#B39DDB);color:#fff;border-color:transparent;box-shadow:0 6px 16px rgba(107,74,124,.32);font-weight:600}
+
+/* 解析卡 */
+.tarot-reading{margin-top:18px;background:rgba(255,252,249,.9);border:1px solid rgba(107,74,124,.15);border-radius:16px;padding:14px 16px;box-shadow:0 6px 20px rgba(107,74,124,.08)}
+.tr-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.tr-head h3{margin:0;font-size:17px;color:#4A3560;font-weight:700;letter-spacing:.03em}
+.tr-pos{font-size:11px;padding:3px 10px;border-radius:20px;background:#FFF0F5;color:#8B4A5D;font-weight:600;letter-spacing:.06em}
+.tr-pos[data-pos="down"]{background:#F0E8F5;color:#6B4A7C}
+.tr-meaning{margin-bottom:10px}
+.tr-label{font-size:10.5px;color:#A07785;letter-spacing:.12em;margin-bottom:4px;text-transform:uppercase}
+.tr-meaning p{margin:0;font-size:13px;color:#4A3560;line-height:1.7}
+
+/* ============ 聊天主题预设 ============ */
+.theme-picker{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.theme-chip{width:42px;height:42px;border-radius:12px;border:2px solid transparent;cursor:pointer;position:relative;transition:transform .2s,border-color .2s;box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.theme-chip:active{transform:scale(.92)}
+.theme-chip.on{border-color:#E8698F;box-shadow:0 0 0 3px rgba(232,105,143,.2)}
+.theme-chip .tc-name{position:absolute;bottom:-16px;left:50%;transform:translateX(-50%);font-size:9.5px;color:#A07785;white-space:nowrap}
+.theme-chip.tc-none{background:repeating-linear-gradient(45deg,#FFF8F8,#FFF8F8 6px,#FFE8EC 6px,#FFE8EC 12px)}
 </style>
 </head>
 <body>
@@ -1111,6 +1162,7 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
             <button class="hm-app sm" data-act="gift"><span class="ic">🎁</span>礼物</button>
             <button class="hm-app sm" data-act="shop"><span class="ic">🏬</span>商城</button>
             <button class="hm-app sm" data-act="grow"><span class="ic">🌱</span>养成</button>
+            <button class="hm-app sm" data-go="page-tarot"><span class="ic">🌙</span>塔罗</button>
           </div>
         </div>
         <div class="hm-apps-pager" id="hmAppsPager"><span class="dot on"></span><span class="dot"></span></div>
@@ -1446,6 +1498,63 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
       </div>
     </section>
 
+    <!-- 塔罗牌 -->
+    <section class="page" id="page-tarot">
+      <div class="page-head">
+        <h1>月下塔罗</h1>
+        <p>安静地问自己一个问题，然后翻开一张</p>
+      </div>
+      <div class="scroll tarot-scroll">
+        <div class="tarot-daily-wrap">
+          <div class="tarot-daily-card" id="tarotDailyCard">
+            <div class="tdc-face">
+              <span class="tdc-ic">🌙</span>
+              <div class="tdc-t">今日塔罗</div>
+              <div class="tdc-s" id="tarotDailyMeta">每天一张，到点自动更新</div>
+            </div>
+          </div>
+          <button class="ghost-btn tarot-daily-btn" id="tarotDailyDraw">翻开今日那张</button>
+        </div>
+
+        <div class="section-label">随便抽一张</div>
+        <div class="tarot-deck-area">
+          <div class="tarot-card-3d">
+            <div class="tarot-card-inner" id="tarotCardInner">
+              <div class="tarot-card-back" id="tarotCardBack">
+                <div class="tcb-pattern">✦</div>
+              </div>
+              <div class="tarot-card-face" id="tarotCardFace">
+                <div class="tcf-ic" id="tcfIc">✦</div>
+                <div class="tcf-name" id="tcfName">尚未翻开</div>
+                <div class="tcf-sub" id="tcfSub">点击下方按钮开始抽牌</div>
+              </div>
+            </div>
+          </div>
+          <div class="tarot-controls">
+            <button class="ghost-btn tbtn" id="tarotShuffle">🔀 洗牌</button>
+            <button class="ghost-btn tbtn primary" id="tarotDraw">🃏 抽一张</button>
+          </div>
+        </div>
+
+        <div class="tarot-reading" id="tarotReading" style="display:none">
+          <div class="tr-head">
+            <h3 id="trName">—</h3>
+            <span class="tr-pos" id="trPos" data-pos="up">正位</span>
+          </div>
+          <div class="tr-meaning">
+            <div class="tr-label">牌意</div>
+            <p id="trMeaning"></p>
+          </div>
+          <div class="tr-meaning">
+            <div class="tr-label">今日指引</div>
+            <p id="trTip"></p>
+          </div>
+        </div>
+
+        <p class="hint" style="margin-top:14px">塔罗是心里的镜子，它帮你看见自己已经知道的答案。</p>
+      </div>
+    </section>
+
   </div>
 
   <nav class="tabbar">
@@ -1453,6 +1562,7 @@ body[data-bshape="square"] .row.me .msg{border-radius:8px 8px 2px 8px}
     <button class="tab-item" data-page="page-chat"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 11.5a8.5 8.5 0 0 1-12 7.8L4 21l1.7-4.6A8.5 8.5 0 1 1 20.5 11.5z"/><path d="M8.6 11.6h.01M12 11.6h.01M15.4 11.6h.01"/></svg></span>传讯</button>
     <button class="tab-item" data-page="page-lib"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3.5" width="12" height="15" rx="3"/><path d="M4.8 7.2v9.6a2.5 2.5 0 0 0 2.5 2.5H15"/><path d="M10.5 8.5h5"/></svg></span>字卡</button>
     <button class="tab-item" data-page="page-diary"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h10.5a2 2 0 0 1 2 2v15H8a2 2 0 0 1-2-2V3.5z"/><path d="M6 3.5a2 2 0 0 0-2 2v12"/><path d="M10 8.5h5M10 12h3.5"/></svg></span>手账</button>
+    <button class="tab-item" data-page="page-tarot"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h10v17H7z"/><path d="M7 3.5 4 21"/><path d="M17 3.5 20 21"/><path d="M12 7v2M12 11v5"/></svg></span>塔罗</button>
     <button class="tab-item" data-page="page-me"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.4" r="3.5"/><path d="M5.2 20a6.8 6.8 0 0 1 13.6 0"/></svg></span>我的</button>
   </nav>
 </div>
@@ -1716,7 +1826,7 @@ function settingsSnapshot(){
     "proactiveOn","proactiveInterval","proactiveChance","quoteChance","partnerRpChance",
     "proactiveCallChance","partnerPokeChance","jealousy","petName","pokes","pokeSymMe","pokeSymTa",
     "pokeSymMeCustom","pokeSymTaCustom","spiritSeeded","conv","friends","groups","gifts",
-    "groupAvatars","chatBg","appBg","convBgs","autoGiftOn","pinned","muted","checkin","moments","decide","decideSeeded"];
+    "groupAvatars","chatBg","chatTheme","appBg","convBgs","autoGiftOn","pinned","muted","checkin","moments","decide","decideSeeded"];
   var o = {};
   for(var i = 0; i < keep.length; i++){
     var k = keep[i];
@@ -4936,6 +5046,7 @@ function goPage(id){
   if(id === "page-home") renderHome();
   if(id === "page-lib") renderLib();
   if(id === "page-diary") renderDiary();
+  if(id === "page-tarot") renderTarot();
   if(id === "page-me"){ renderSettings(); renderDecideSettings(); renderFavs(); renderStats(); renderBubbles(); renderFonts(); }
   syncTypingUI();
   syncChatChrome();
@@ -4946,7 +5057,7 @@ document.querySelectorAll(".tab-item").forEach(function(t){
 
 /* ================= 左右滑动切页 ================= */
 (function(){
-  var order = ["page-home","page-chat","page-lib","page-diary","page-me"];
+  var order = ["page-home","page-chat","page-lib","page-diary","page-tarot","page-me"];
   var box = document.querySelector(".pages");
   if(!box) return;
   var sx = 0, sy = 0, st = 0, tracking = false, horizontal = false, suppress = false;
@@ -5857,15 +5968,16 @@ function applyCfg(){
   /* 整体背景 */
   var bg = cfg.appBg || "";
   document.querySelector(".bg").style.cssText = bg ? "background-image:url('" + bg + "');background-size:cover;background-position:center;background-attachment:fixed" : "";
-  /* 聊天页背景：当前会话优先，其次全局兜底 */
+  /* 聊天页背景：当前会话图片优先，其次全局图片，最后是预设主题渐变 */
   var chatBgEl = document.getElementById("chat");
   if(chatBgEl){
     var curBg = (cfg.convBgs && cfg.convBgs[chatKey()]) || cfg.chatBg || "";
-    chatBgEl.style.backgroundImage = curBg ? "url('" + curBg + "')" : "";
+    var themeCss = curBg ? "" : (themeById(cfg.chatTheme || "rose").css || "");
+    var useBg = curBg ? "url('" + curBg + "')" : themeCss;
+    chatBgEl.style.backgroundImage = useBg;
     chatBgEl.style.backgroundSize = curBg ? "cover" : "";
     chatBgEl.style.backgroundPosition = curBg ? "center" : "";
     chatBgEl.style.backgroundAttachment = curBg ? "local" : "";
-    /* 同时用 CSS variable 防止 CSS 背景层叠加 */
     chatBgEl.style.setProperty("--cur-conv-bg", curBg ? "url('" + curBg + "')" : "");
   }
   syncChatChrome();
@@ -6117,7 +6229,7 @@ document.body.dataset.bshape = cfg.bubbleShape || "standard";
   var sp = document.getElementById("splash");
   if(!sp) return;
   var lastVer = load("cheese.splash.v", "");
-  var curVer  = window.APP_VER || "2026.11.19-convkey1";
+  var curVer  = window.APP_VER || "2026.11.19-tarot1";
   var show = !lastVer || lastVer !== curVer;
   if(!show){ sp.style.display = "none"; return; }
   /* 跳过按钮 */
@@ -7288,6 +7400,159 @@ setTimeout(taAutoMoment, 60000);
 setTimeout(taAutoGift, 90000);
 
 openGiftShop = function(){ openShop("gifts"); };
+
+/* ============ 聊天主题预设 ============ */
+var CHAT_THEMES = [
+  { id:"none", n:"默认", css:"" },
+  { id:"rose",    n:"粉樱",    css:"linear-gradient(160deg,#FFF0F5 0%,#FFE3F0 40%,#FFC9DE 100%)" },
+  { id:"cream",   n:"奶霜",    css:"linear-gradient(160deg,#FFFBF5 0%,#FFE9D6 50%,#F9C8A0 100%)" },
+  { id:"aurora",  n:"极光",    css:"linear-gradient(160deg,#E0C9F5 0%,#B39DDB 45%,#F9B8D0 100%)" },
+  { id:"ocean",   n:"海雾",    css:"linear-gradient(160deg,#E8F4F8 0%,#B8D4E3 55%,#C4B5E0 100%)" },
+  { id:"night",   n:"夜色",    css:"linear-gradient(160deg,#2D1F3D 0%,#4A3560 50%,#6B4A7C 100%)" },
+  { id:"sun",     n:"黄昏",    css:"linear-gradient(160deg,#FFF3D6 0%,#FFD9A0 50%,#F9A89C 100%)" },
+  { id:"mint",    n:"薄雪",    css:"linear-gradient(160deg,#F0FFF4 0%,#C8E6C9 50%,#FFE3F0 100%)" },
+  { id:"starry",  n:"星砂",    css:"radial-gradient(circle at 20% 10%,#FFF5E1 0%,#FFE9D6 25%,#E0C9F5 70%,#B39DDB 100%)" }
+];
+if(cfg.chatTheme == null) cfg.chatTheme = "rose";
+function themeById(id){ for(var i=0;i<CHAT_THEMES.length;i++) if(CHAT_THEMES[i].id === id) return CHAT_THEMES[i]; return CHAT_THEMES[0]; }
+function pickChatThemeSheet(){
+  showSheet('<div class="sheet-title">聊天主题</div>' +
+    '<p class="hint">预设渐变主题 · 也可以在「挂件」里给每个会话单独换一张图片背景</p>' +
+    '<div class="theme-picker" id="themePicker">' +
+      CHAT_THEMES.map(function(t){
+        var cls = "theme-chip" + (cfg.chatTheme === t.id ? " on" : "") + (t.id === "none" ? " tc-none" : "");
+        var bg = t.id === "none" ? "" : 'style="background:' + t.css + '"';
+        return '<button type="button" class="' + cls + '" data-t="' + t.id + '"' + bg + '><span class="tc-name">' + t.n + '</span></button>';
+      }).join("") +
+    '</div>');
+  document.getElementById("themePicker").querySelectorAll(".theme-chip").forEach(function(b){
+    b.onclick = function(){ cfg.chatTheme = b.dataset.t; saveCfg(); applyCfg(); pickChatThemeSheet(); };
+  });
+}
+
+/* ============ 塔罗牌 78 张 ============ */
+var TAROT_DECK = [
+  /* 大阿卡那 0-21 */
+  {n:"愚者",u:"新的起点 · 冒险 · 纯真",d:"轻率 · 天真 · 迷失",tip:"今天是把心里那颗不敢落下的棋子推出去的日子。别怕走偏，路走出来就对了。",ic:"🃏"},
+  {n:"魔术师",u:"创造 · 工具在手 · 自信发挥",d:"自我怀疑 · 技能未精 · 操纵",tip:"你想做成的事，今天资源够了。只需要把手举起来。",ic:"🎩"},
+  {n:"女祭司",u:"直觉 · 静默观察 · 内在指引",d:"秘密 · 抗拒聆听 · 信息阻塞",tip:"别急着给答案，先安静地听自己呼吸三下。",ic:"🌙"},
+  {n:"女皇",u:"滋养 · 丰盛 · 母性之爱",d:"依赖 · 过度保护 · 创造力停滞",tip:"给世界一勺温柔，世界会回你整个春天。",ic:"🌹"},
+  {n:"皇帝",u:"秩序 · 责任 · 稳固框架",d:"僵硬 · 独裁 · 不知变通",tip:"该说不的时候说不，该担的事别撒手。",ic:"👑"},
+  {n:"教皇",u:"传统 · 信念 · 师长指引",d:"教条 · 盲从 · 质疑权威",tip:"信什么不重要，重要的是为什么信。",ic:"📜"},
+  {n:"恋人",u:"选择 · 连结 · 价值观相合",d:"迟疑 · 失衡 · 不和谐",tip:"你真正想选的那个，心里其实已经知道了。",ic:"💕"},
+  {n:"战车",u:"掌控 · 意志 · 方向明确",d:"失控 · 急躁 · 南辕北辙",tip:"今天方向盘在你手里。握紧就对了。",ic:"🏇"},
+  {n:"力量",u:"温柔的坚持 · 内心强大",d:"自我怀疑 · 情绪失控",tip:"真正的力量，是轻声地把事情做好。",ic:"🦁"},
+  {n:"隐士",u:"内省 · 独处 · 寻光",d:"孤立 · 逃避 · 钻牛角尖",tip:"去一个安静的角落，十五分钟就够。",ic:"🕯"},
+  {n:"命运之轮",u:"流转 · 机会 · 必然变化",d:"抗拒变化 · 恐惧失控",tip:"转就转吧，下一格说不定是礼物。",ic:"🎡"},
+  {n:"正义",u:"公允 · 真相 · 因果",d:"不公 · 偏见 · 逃避责任",tip:"把秤摆正，自己也在秤的这一端。",ic:"⚖️"},
+  {n:"倒吊人",u:"暂停 · 换视角 · 牺牲",d:"无谓牺牲 · 停滞不前",tip:"换个方向倒挂再看世界，一切都不一样了。",ic:"🙃"},
+  {n:"死神",u:"结束 · 蜕变 · 清理",d:"抗拒告别 · 停滞 · 恐惧改变",tip:"一扇门关了，另一扇正在偷偷打开。",ic:"🌿"},
+  {n:"节制",u:"平衡 · 调和 · 耐心",d:"失衡 · 过度 · 冲突",tip:"两杯茶倒在一起，浓淡刚好就是今天的答案。",ic:"🍵"},
+  {n:"恶魔",u:"诱惑 · 执念 · 自我囚禁",d:"挣脱束缚 · 看见枷锁",tip:"那个困住你的东西，钥匙一直在你自己手里。",ic:"🔗"},
+  {n:"高塔",u:"突变 · 崩塌 · 真相炸裂",d:"避免突变 · 粉饰",tip:"塌就塌了，废墟上盖的房子会更结实。",ic:"⚡"},
+  {n:"星星",u:"希望 · 灵感 · 平静",d:"迷茫 · 失去信心",tip:"抬头看一眼天，今天那颗星是为你亮的。",ic:"✨"},
+  {n:"月亮",u:"幻象 · 潜意识 · 模糊地带",d:"看清真相 · 走出迷雾",tip:"别急着下判断，事情还在水面下流动。",ic:"🌕"},
+  {n:"太阳",u:"喜悦 · 成功 · 活力",d:"暂时低潮 · 过度乐观",tip:"今天的阳光值得专门出门晒一会儿。",ic:"☀️"},
+  {n:"审判",u:"唤醒 · 检视 · 原谅自己",d:"自我审判 · 无法释怀",tip:"翻篇吧，旧的判决书可以撕掉了。",ic:"📯"},
+  {n:"世界",u:"圆满 · 完成 · 新循环",d:"未完成 · 缺乏闭合",tip:"这一章合上的时候，别忘了给自己一个拥抱。",ic:"🌍"},
+  /* 权杖 Wands 14 */
+  {n:"权杖一",u:"灵感迸发 · 新火花",d:"拖延启动",tip:"脑子里那个点子够响了，动手吧。",ic:"🔥"},
+  {n:"权杖二",u:"规划 · 站高处远看",d:"想得太远 · 犹豫",tip:"先搭个沙盘，再决定要不要开船。",ic:"🗺"},
+  {n:"权杖三",u:"拓展 · 好消息到来",d:"推进受阻",tip:"消息在路上，别把它催死了。",ic:"⛵"},
+  {n:"权杖四",u:"安定 · 庆典 · 归处",d:"不稳 · 家庭失和",tip:"今天适合做一顿认真的饭，给自己或给别人。",ic:"🏮"},
+  {n:"权杖五",u:"竞争 · 意见冲突",d:"避免内耗",tip:"吵完之后记得问一句——我们在争什么？",ic:"⚔️"},
+  {n:"权杖六",u:"胜利 · 认可 · 凯旋",d:"骄傲自满",tip:"今天可以把胸挺起来一下，但别忘了是托着你的人。",ic:"🏆"},
+  {n:"权杖七",u:"坚守立场 · 不退让",d:"孤军奋战",tip:"扛不住的时候，想想你在为谁扛。",ic:"🛡"},
+  {n:"权杖八",u:"快速推进 · 消息飞传",d:"信息轰炸",tip:"节奏很快，深呼吸再点那个群。",ic:"💨"},
+  {n:"权杖九",u:"疲惫的守护 · 最后一程",d:"过度警觉",tip:"别硬撑，靠一下墙也不是输。",ic:"🌙"},
+  {n:"权杖十",u:"扛着很多 · 责任过载",d:"放下一些",tip:"你带的东西太多了，今天挑一样真的可以丢。",ic:"🎒"},
+  {n:"权杖侍从",u:"好奇试探 · 新消息",d:"轻佻 · 三分钟热度",tip:"耳朵竖起来，今天有小尾巴冒头。",ic:"🐦"},
+  {n:"权杖骑士",u:"热情行动 · 敢冲",d:"莽撞 · 不顾后果",tip:"出门前先系一下鞋带，不是每个坑都想跳。",ic:"🐎"},
+  {n:"权杖王后",u:"温暖领导 · 直觉驱动",d:"情绪化 · 专横",tip:"你身上的火，值得分享给身边需要的人。",ic:"🌻"},
+  {n:"权杖国王",u:"远见领导 · 掌舵",d:"专断 · 急躁",tip:"今天你来当那根稳得住的柱子。",ic:"👑"},
+  /* 圣杯 Cups 14 */
+  {n:"圣杯一",u:"新的感觉 · 情感涌来",d:"情感压抑",tip:"心里冒泡了，让它冒吧。",ic:"💧"},
+  {n:"圣杯二",u:"互相吸引 · 一拍即合",d:"不平等 · 误解",tip:"那个让你心跳漏半拍的人，今天可以多说一句。",ic:"🕊"},
+  {n:"圣杯三",u:"庆祝 · 友情 · 小聚",d:"过度社交",tip:"约一下那几个老朋友，不用多理由。",ic:"🍻"},
+  {n:"圣杯四",u:"沉思 · 无聊 · 新机会被忽略",d:"看清新机会",tip:"你腻了，但机会还在敲门。",ic:"🌄"},
+  {n:"圣杯五",u:"失落 · 遗憾 · 看清失去",d:"接受失去 · 向前看",tip:"三只洒了，还有两只满满的。",ic:"🥀"},
+  {n:"圣杯六",u:"回忆 · 童年 · 旧友",d:"沉溺过去",tip:"翻一翻老照片，然后继续往前走。",ic:"📷"},
+  {n:"圣杯七",u:"选择很多 · 幻想",d:"落地 · 现实",tip:"梦里什么都有，挑最想抓的那一个。",ic:"🌈"},
+  {n:"圣杯八",u:"离开 · 寻找更深的意义",d:"犹豫离去",tip:"你知道哪里不对，那就转身。",ic:"🌊"},
+  {n:"圣杯九",u:"愿望达成 · 物质满足",d:"贪心 · 虚假满足",tip:"摸摸肚子，吃饱了就别再夹。",ic:"🎁"},
+  {n:"圣杯十",u:"家庭和谐 · 情感圆满",d:"家庭失和",tip:"今晚早点回家吃饭，有人在等。",ic:"🏡"},
+  {n:"圣杯侍从",u:"敏感好奇 · 有新消息",d:"情绪化 · 不成熟",tip:"直觉今天超准，信它。",ic:"🐟"},
+  {n:"圣杯骑士",u:"浪漫 · 追求 · 诗意",d:"幻想 · 不切实际",tip:"给喜欢的人写一句认真的话。",ic:"🌹"},
+  {n:"圣杯王后",u:"温柔体贴 · 情感稳定",d:"情绪依赖 · 忽略自己",tip:"先把自己的杯子倒满，再去给别人斟。",ic:"🌙"},
+  {n:"圣杯国王",u:"情感成熟 · 宽厚",d:"情绪压抑 · 操纵",tip:"你沉得住气的样子，本身就是温柔。",ic:"🌊"},
+  /* 宝剑 Swords 14 */
+  {n:"宝剑一",u:"清晰洞见 · 突破迷雾",d:"混乱 · 想法打结",tip:"今天那个纠结了很久的问题，答案突然会亮一下。",ic:"⚔️"},
+  {n:"宝剑二",u:"两难抉择 · 暂时挂起",d:"打破僵局",tip:"先坐下来，然后再站。",ic:"⚖️"},
+  {n:"宝剑三",u:"心痛 · 真相扎人",d:"疗愈 · 说出痛",tip:"疼就说疼，别装没事。",ic:"💔"},
+  {n:"宝剑四",u:"休息 · 喘息 · 恢复",d:"过度休息",tip:"放下工作去躺半小时，世界不会塌。",ic:"🛌"},
+  {n:"宝剑五",u:"冲突 · 赢了输了都输",d:"和解",tip:"那个架不值得，下次别再翻同样的页。",ic:"🥊"},
+  {n:"宝剑六",u:"渡过难关 · 向更平静的水",d:"放不下",tip:"上船吧，对岸有光。",ic:"⛴"},
+  {n:"宝剑七",u:"智取 · 保留一手",d:"坦诚 · 说出真实",tip:"今天可以玩点聪明的，但别玩自己。",ic:"🕵"},
+  {n:"宝剑八",u:"被绑住 · 看不见出口",d:"挣脱限制",tip:"蒙眼布一扯就掉，你只是忘了伸手。",ic:"🪢"},
+  {n:"宝剑九",u:"焦虑 · 噩梦 · 恐惧",d:"走出焦虑",tip:"最黑的时刻，深呼吸三次它就会松一点。",ic:"🌃"},
+  {n:"宝剑十",u:"最低点 · 彻底结束",d:"重生希望",tip:"谷底就是天花板，接下来只有往上。",ic:"🥀"},
+  {n:"宝剑侍从",u:"警觉 · 收集情报",d:"八卦 · 传递",tip:"耳朵张开，嘴闭上。",ic:"🕊"},
+  {n:"宝剑骑士",u:"果决冲向前方",d:"鲁莽 · 不顾后果",tip:"冲之前先瞄一下方向。",ic:"🐎"},
+  {n:"宝剑王后",u:"理性清晰 · 一视同仁",d:"冷漠 · 苛刻",tip:"你冷静的样子很帅，但今天可以加一点温度。",ic:"👑"},
+  {n:"宝剑国王",u:"权威理性 · 原则稳",d:"专制 · 僵化",tip:"规则是定给事情的，不是定给人的。",ic:"⚔️"},
+  /* 钱币 Pentacles 14 */
+  {n:"钱币一",u:"新机会 · 实实在在的开始",d:"错失机会",tip:"今天掉下来的那枚硬币，捡起来就是种子。",ic:"🪙"},
+  {n:"钱币二",u:"平衡多项事务 · 灵活",d:"手忙脚乱",tip:"两手都拿着东西，今天先放一样下来。",ic:"⚖️"},
+  {n:"钱币三",u:"团队合作 · 技能精进",d:"独断",tip:"找人搭把手，比自己扛快得多。",ic:"🏗"},
+  {n:"钱币四",u:"保守积蓄 · 稳定",d:"吝啬 · 害怕失去",tip:"握得太紧东西会碎，今天适当放一点。",ic:"💰"},
+  {n:"钱币五",u:"匮乏期 · 但门就在后面",d:"走过去那扇门",tip:"抬头，亮的那扇就在雪地里。",ic:"❄️"},
+  {n:"钱币六",u:"给予 · 分享 · 平衡",d:"不平等",tip:"给出去和收回来，今天可以同时发生。",ic:"🤝"},
+  {n:"钱币七",u:"耐心等待 · 长视",d:"不耐烦",tip:"种下的菜还没熟，别去掀它的叶子。",ic:"🌱"},
+  {n:"钱币八",u:"专注技艺 · 精益求精",d:"敷衍了事",tip:"把一件事做到能让自己点头，比做十件还重要。",ic:"🔨"},
+  {n:"钱币九",u:"独立舒适 · 享受成果",d:"孤独 · 外表风光内心空",tip:"今天可以认真宠自己一下。",ic:"🦚"},
+  {n:"钱币十",u:"家业丰厚 · 传承",d:"为钱所困",tip:"家比钱重要。",ic:"🏛"},
+  {n:"钱币侍从",u:"学习新技能 · 踏实起步",d:"拖延学习",tip:"报那个你想了很久的课吧。",ic:"📚"},
+  {n:"钱币骑士",u:"稳扎稳打 · 慢但是对",d:"固执 · 慢到错过",tip:"你走得稳，这就够了。",ic:"🐢"},
+  {n:"钱币王后",u:"踏实滋养 · 照顾实际",d:"忽略自己",tip:"今天做一顿认真的饭，认真吃。",ic:"🍲"},
+  {n:"钱币国王",u:"富足 · 稳健 · 守成",d:"贪婪 · 物质至上",tip:"把钱当仆人，别让它成主人。",ic:"🏰"}
+];
+function tarotTodayKey(){ var d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+function tarotHash(s){ var h=0; for(var i=0;i<s.length;i++){ h=((h<<5)-h+s.charCodeAt(i))|0; } return Math.abs(h); }
+function pickDailyTarot(){ var key=tarotTodayKey(); var pos=tarotHash(key+":pos")%2===0?"up":"down"; var idx=tarotHash(key+":card")%TAROT_DECK.length; return {card:TAROT_DECK[idx],pos:pos}; }
+function pickRandomTarot(){ var idx=Math.floor(Math.random()*TAROT_DECK.length); var pos=Math.random()<0.5?"up":"down"; return {card:TAROT_DECK[idx],pos:pos}; }
+function renderTarotCard(div,result){
+  var c=result.card,pos=result.pos;
+  document.getElementById("tcfIc").textContent=c.ic;
+  document.getElementById("tcfName").textContent=c.n+(pos==="down"?" · 逆位":"");
+  document.getElementById("tcfSub").textContent=(pos==="up"?c.u:(c.d||c.u)).split(" · ")[0];
+  var inner=document.getElementById("tarotCardInner"); inner.classList.remove("flipped"); void inner.offsetWidth; inner.classList.add("flipped");
+  document.getElementById("trName").textContent=c.n;
+  var tp=document.getElementById("trPos"); tp.dataset.pos=pos; tp.textContent=pos==="up"?"正位":"逆位";
+  document.getElementById("trMeaning").textContent=pos==="up"?c.u:(c.d||c.u);
+  document.getElementById("trTip").textContent=c.tip;
+  document.getElementById("tarotReading").style.display="";
+}
+function renderTarotDaily(){
+  var r=pickDailyTarot();
+  var meta=document.getElementById("tarotDailyMeta");
+  meta.textContent=r.card.n+(r.pos==="down"?" · 逆位":" · 正位");
+}
+function shuffleTarot(){ var inner=document.getElementById("tarotCardInner"); inner.classList.add("shuffling"); setTimeout(function(){ inner.classList.remove("shuffling"); },1700); }
+function drawTarot(which){
+  if(which==="daily"){ var r=pickDailyTarot(); renderTarotCard(null,r); renderTarotDaily(); }
+  else{ var inner=document.getElementById("tarotCardInner"); inner.classList.remove("flipped"); void inner.offsetWidth; setTimeout(function(){ renderTarotCard(null,pickRandomTarot()); },250); }
+}
+function renderTarot(){
+  if(!document.getElementById("tarotDraw")) return;
+  renderTarotDaily();
+}
+document.addEventListener("DOMContentLoaded",function(){
+  var d=document.getElementById("tarotDraw"),s=document.getElementById("tarotShuffle"),dd=document.getElementById("tarotDailyDraw");
+  if(d) d.onclick=function(){ drawTarot("random"); };
+  if(s) s.onclick=shuffleTarot;
+  if(dd) dd.onclick=function(){ drawTarot("daily"); };
+});
+
 })();
 </script>
 </body>
