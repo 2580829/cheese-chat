@@ -19,7 +19,7 @@
 <script>
 /* 版本自更新：旧缓存 / 旧 SW 都会在这里被强制纠正 */
 (function(){
-  var V = "2026.11.13-decide2";
+  var V = "2026.11.19-convkey1";
   window.APP_VER = V;
   /* 1) 地址栏版本号始终对齐当前代码，换版本 = 换缓存键 */
   try{
@@ -1858,14 +1858,57 @@ function groupOpts(gid){
   if(!ok) cfg.conv = { t:"friend", id:"main" };
 })();
 function convKey(c){
+  if(!c) return KEY.chat;
   if(c.t === "friend" && c.id === "main") return KEY.chat;
-  return "cheese.chat." + c.id + ".v1";
+  var p = c.t === "group" ? "g" : "f";
+  return "cheese.chat." + p + ":" + c.id + ".v1";
 }
+/* 把旧格式 "cheese.chat.<id>.v1" 迁移到带 g:/f: 前缀的新键，避免群和好友 id 相同时串记录 */
+(function migrateConvKeysOnce(){
+  try{
+    if(localStorage.getItem("cheese.migrate.convkeys.v2") === "1") return;
+    var groups = Array.isArray(cfg.groups) ? cfg.groups : [];
+    var friends = Array.isArray(cfg.friends) ? cfg.friends : [];
+    var toGroup = {}, toFriend = {};
+    groups.forEach(function(g){ if(g && g.id) toGroup[g.id] = g; });
+    friends.forEach(function(f){ if(f && f.id) toFriend[f.id] = f; });
+    for(var i = 0; i < localStorage.length; i++){
+      var k = localStorage.key(i);
+      if(!k) continue;
+      var m = k.match(/^cheese\.chat\.([^.:]+)\.v1$/);
+      if(!m) continue;             /* 已是 g: / f: 前缀，或者根本不是旧格式 */
+      var id = m[1];
+      var newKey = null;
+      if(toGroup[id]) newKey = convKey({ t:"group", id:id });
+      else if(toFriend[id] && id !== "main") newKey = convKey({ t:"friend", id:id });
+      if(!newKey){                 /* 既不是现存群也不是现存好友 —— 大概率是孤儿数据，直接删 */
+        localStorage.removeItem(k);
+        continue;
+      }
+      if(newKey !== k){
+        var val = localStorage.getItem(k);
+        if(val != null && !localStorage.getItem(newKey)){
+          localStorage.setItem(newKey, val);
+        }
+        localStorage.removeItem(k);
+      }
+    }
+    localStorage.setItem("cheese.migrate.convkeys.v2", "1");
+  }catch(e){ console.warn("[convKey 迁移] ", e); }
+})();
 function chatKey(){ return convKey(cfg.conv); }
 function convName(){ var g = activeGroup(); return g ? g.name : (friendById(cfg.conv.id) || mainFriend()).name; }
 function senderFriend(mid){
-  if(isGroup()) return friendById(mid) || friendById(activeGroup().members[0]) || mainFriend();
-  if(mid){ var f = friendById(mid); if(f) return f; }
+  var g = activeGroup();
+  if(isGroup()){
+    var f = friendById(mid);
+    if(f) return f;
+    /* 群成员已被移除但消息还在：回退到中性文案，不要冒充群里其他活人 */
+    if(mid){ return { id:mid, name:"前成员", avatar:"", __orphan:true }; }
+    if(g && g.members && g.members.length) return friendById(g.members[0]) || mainFriend();
+    return mainFriend();
+  }
+  if(mid){ var ff = friendById(mid); if(ff) return ff; }
   return friendById(cfg.conv.id) || mainFriend();
 }
 function senderName(mid){ return senderFriend(mid).name; }
@@ -5683,7 +5726,7 @@ function openGroupSettings(){
   };
   $("gsLeave").onclick = function(){
     cfg.groups = cfg.groups.filter(function(x){ return x.id !== g.id; });
-    try{ localStorage.removeItem("cheese.chat." + g.id + ".v1"); }catch(e){}
+    try{ localStorage.removeItem(convKey({ t:"group", id:g.id })); }catch(e){}
     cfg.conv = { t:"friend", id:"main" };
     saveCfg();
     chat = loadChatClean();
@@ -5723,7 +5766,7 @@ function openFriendMgmt(){
       cfg.groups = cfg.groups.filter(function(g){
         g.members = g.members.filter(function(m){ return m !== id; });
         if(g.members.length >= 2) return true;
-        try{ localStorage.removeItem("cheese.chat." + g.id + ".v1"); }catch(e){}
+        try{ localStorage.removeItem(convKey({ t:"group", id:g.id })); }catch(e){}
         return false;
       });
       if(cfg.conv.t === "friend" && cfg.conv.id === id) cfg.conv = { t:"friend", id:"main" };
@@ -6074,7 +6117,7 @@ document.body.dataset.bshape = cfg.bubbleShape || "standard";
   var sp = document.getElementById("splash");
   if(!sp) return;
   var lastVer = load("cheese.splash.v", "");
-  var curVer  = window.APP_VER || "2026.11.13-decide2";
+  var curVer  = window.APP_VER || "2026.11.19-convkey1";
   var show = !lastVer || lastVer !== curVer;
   if(!show){ sp.style.display = "none"; return; }
   /* 跳过按钮 */
